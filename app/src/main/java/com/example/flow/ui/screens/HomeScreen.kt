@@ -13,6 +13,7 @@ import com.example.flow.ui.components.home_screen.TapToStartPrompt
 import com.example.flow.ui.components.util.PreviewColumn
 
 
+// TODO move components into `screens.home_screen.components`
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
