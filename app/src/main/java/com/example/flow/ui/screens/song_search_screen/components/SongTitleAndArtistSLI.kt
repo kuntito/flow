@@ -14,7 +14,7 @@ import com.example.flow.ui.theme.tsHush
 import com.example.flow.ui.theme.tsOrion
 
 @Composable
-fun SongTitleAndArtistName(
+fun SongTitleAndArtistSLI(
     modifier: Modifier = Modifier,
     songTitle: String,
     artistStr: String,
@@ -38,9 +38,9 @@ fun SongTitleAndArtistName(
 
 @Preview
 @Composable
-private fun SongTitleAndArtistNamePreview() {
+private fun SongTitleAndArtistSLIPreview() {
     PreviewColumn {
-        SongTitleAndArtistName(
+        SongTitleAndArtistSLI(
             songTitle = "Nail in the Coffin",
             artistStr = "Rosie Darling (feat. Boy in Space)",
         )

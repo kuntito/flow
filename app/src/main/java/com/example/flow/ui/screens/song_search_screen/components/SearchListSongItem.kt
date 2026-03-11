@@ -37,7 +37,7 @@ fun SearchListSongItem(
             Spacer(modifier = Modifier.width(16.dp))
             AlbumArtSongListItem()
             Spacer(modifier = Modifier.width(16.dp))
-            SongTitleAndArtistName(
+            SongTitleAndArtistSLI(
                 songTitle = songTitle,
                 artistStr = artistStr,
                 modifier = Modifier
