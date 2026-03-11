@@ -18,8 +18,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 /**
  * provides the blinking effect on a composable.
  * it continuously increases and reduces opacity.
- *
- * component becomes completely visible when pressed.
  * */
 @Composable
 fun Modifier.blinkable(
@@ -37,15 +35,6 @@ fun Modifier.blinkable(
     )
 
     return this
-        .pointerInput(Unit) {
-            detectTapGestures (
-                onPress = {
-                    isBeingPressed = true
-                    tryAwaitRelease()
-                    isBeingPressed = false
-                }
-            )
-        }
         .alpha(
             if (isBeingPressed) 1f else alphaFloat
         )

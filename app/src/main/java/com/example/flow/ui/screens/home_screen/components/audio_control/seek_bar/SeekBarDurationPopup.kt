@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.example.flow.ui.components.util.PreviewColumn
+import com.example.flow.ui.theme.colorIsco
 
 private fun formatMsToMinSec(ms: Int): String {
     val totalSeconds = ms / 1000
@@ -47,7 +48,7 @@ fun SeekBarDurationPopup(
     ) {
         Text(
             text = timeText,
-            color = Color.White,
+            color = colorIsco,
             fontSize = 24.sp
         )
     }

@@ -87,7 +87,7 @@ private fun SongPlayingPreview() {
                 PlaybackRepeatModes.NoRepeat,
             )
         }
-        val toggleRepeat: () -> Unit = {
+        val toggleRepeatMode: () -> Unit = {
             repeatMode = when(repeatMode) {
                 PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
                 PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
@@ -108,7 +108,7 @@ private fun SongPlayingPreview() {
             onNextClick = {},
             onPrevClick = {},
             repeatMode = repeatMode,
-            toggleRepeatMode = toggleRepeat,
+            toggleRepeatMode = toggleRepeatMode,
             playProgress = playProgress,
             onSeekTo = onSeekTo
         )
