@@ -1,6 +1,7 @@
 package com.example.flow
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flow.data.models.Song
@@ -50,6 +51,20 @@ class FlowViewModel(
         )
     }
 
+    init {
+        viewModelScope.launch {
+            songPlayer.onPlaybackComplete.collect { lastPlayedSong ->
+                if (_repeatMode.value == PlaybackRepeatModes.RepeatOne) {
+                    onPlay(
+                        song = lastPlayedSong,
+                        forceRestart = true,
+                    )
+                } else if (_repeatMode.value == PlaybackRepeatModes.NoRepeat) {
+                    onNextClick()
+                }
+            }
+        }
+    }
 
     private var nextSongJob: Job? = null
     fun onNextClick() {
@@ -86,6 +101,13 @@ class FlowViewModel(
         songPlayer.seekTo(progress)
     }
 
+    fun toggleRepeatMode() {
+        _repeatMode.value = when(_repeatMode.value) {
+            PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
+            PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
+        }
+    }
+
     val playbackActions = PlaybackActions(
         // `play` in this context is called from the play/pause button on the UI
         // you don't want to force restart on playing.
@@ -99,7 +121,7 @@ class FlowViewModel(
         seekTo = ::onSeekTo,
         nextSong = ::onNextClick,
         prevSong = {},
-        toggleRepeatMode = {},
+        toggleRepeatMode = ::toggleRepeatMode,
     )
 
     private val _flowPlaybackState = MutableStateFlow<FlowPlaybackState>(

@@ -44,7 +44,8 @@ class SongPlayer(
     appContext: Context,
 ) {
 
-    private val _onPlaybackComplete = MutableSharedFlow<Unit>()
+    // this flow is triggered when a song finishes playing, it emits the last played song.
+    private val _onPlaybackComplete = MutableSharedFlow<Song>()
     val onPlaybackComplete = _onPlaybackComplete.asSharedFlow()
 
     private var wasPlayingBeforeFocusLoss = false
@@ -86,7 +87,9 @@ class SongPlayer(
                     )
 
                     scope.launch {
-                        _onPlaybackComplete.emit(Unit)
+                        _playerState.value.loadedSong?.let { loadedSong ->
+                            _onPlaybackComplete.emit(loadedSong)
+                        }
                     }
                 }
             }
