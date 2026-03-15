@@ -12,22 +12,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.R
+import com.example.flow.data.models.Song
+import com.example.flow.data.models.dummySong
+import com.example.flow.player.PlaybackUiState
+import com.example.flow.player.dummyPlaybackActions
+import com.example.flow.player.dummyPlaybackUiState
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.PreviewColumn
 
 @Composable
 fun PrevPlayPauseNextButtons(
     modifier: Modifier = Modifier,
-    onPrevClick: () -> Unit,
-    onNextClick: () -> Unit,
-    onPlay: () -> Unit,
-    onPause: () -> Unit,
-    isPlaying: Boolean,
+    playbackUiState: PlaybackUiState,
 ) {
     // play/pause icon is visually left-heavy
     // spacers experimentally adjusted to compensate
     val leftSpacer = 28
     val rightSpacer = 24
+
+    val currentSong = playbackUiState.currentSong
+    val isPlaying = playbackUiState.isPlaying
+    val playbackActions = playbackUiState.playbackActions
 
     Row(
         modifier = modifier
@@ -35,18 +40,22 @@ fun PrevPlayPauseNextButtons(
     ) {
         AppIconButton(
             iconRes = R.drawable.ic_prev,
-            onClick = onPrevClick,
+            onClick = playbackActions.prevSong,
         )
         Spacer(modifier = Modifier.width(leftSpacer.dp))
         PlayPauseButton(
             isPlaying = isPlaying,
-            onPause = onPause,
-            onPlay = onPlay,
+            onPause = playbackActions.pause,
+            onPlay = {
+                playbackActions.play(
+                    currentSong
+                )
+            },
         )
         Spacer(modifier = Modifier.width(rightSpacer.dp))
         AppIconButton(
             iconRes = R.drawable.ic_next,
-            onClick = onNextClick,
+            onClick = playbackActions.nextSong,
         )
     }
 }
@@ -58,20 +67,31 @@ private fun PrevPlayPauseNextButtonsPreview() {
         var isPlaying by remember {
             mutableStateOf(false)
         }
-        val onPlay = {
+        val onPlay: (Song) -> Unit = {
             isPlaying = true
         }
         val onPause = {
             isPlaying = false
         }
 
+        val currentSong = dummySong
+        val playbackActions = dummyPlaybackActions
+            .copy(
+                play = {
+                    onPlay(currentSong)
+                },
+                pause = onPause,
+            )
+
+        val playbackUiState = dummyPlaybackUiState
+            .copy(
+                currentSong = currentSong,
+                isPlaying = isPlaying,
+                playbackActions = playbackActions,
+            )
 
         PrevPlayPauseNextButtons(
-            onPrevClick = {},
-            onNextClick = {},
-            onPlay = onPlay,
-            onPause = onPause,
-            isPlaying = isPlaying,
+            playbackUiState = playbackUiState,
         )
     }
 }

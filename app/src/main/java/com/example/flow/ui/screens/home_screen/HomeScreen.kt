@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.home_screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,6 +9,9 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,8 +21,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.flow.FlowViewModel
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.dummySong
+import com.example.flow.flowDebugTag
+import com.example.flow.player.PlaybackUiState
+import com.example.flow.player.dummyPlaybackActions
+import com.example.flow.player.dummyPlaybackUiState
 import com.example.flow.ui.components.general.AppTextButton
 import com.example.flow.ui.components.home_screen.FlowTopAppBar
 import com.example.flow.ui.components.home_screen.TapToStartPrompt
@@ -31,6 +40,19 @@ import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 
+@Composable
+fun HomeScreenRoot(
+    flowViewModel: FlowViewModel,
+) {
+    val flowPlaybackState by flowViewModel.flowPlaybackState.collectAsState()
+    val playbackRepeatMode by flowViewModel.playbackRepeatMode.collectAsState()
+    HomeScreen(
+        startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
+        flowPlaybackState = flowPlaybackState,
+        onFlowPlaybackErrorAcknowledged = flowViewModel.onFlowPlaybackErrorAcknowledged,
+        playbackRepeatMode = playbackRepeatMode,
+    )
+}
 
 @Composable
 fun HomeScreen(
@@ -38,16 +60,7 @@ fun HomeScreen(
     startPlaybackFlow: () -> Unit,
     flowPlaybackState: FlowPlaybackState,
     onFlowPlaybackErrorAcknowledged: () -> Unit,
-    currentSong: Song,
-    onPlay: () -> Unit,
-    onPause: () -> Unit,
-    onNextClick: () -> Unit,
-    onPrevClick: () -> Unit,
-    onSeekTo: (Float) -> Unit,
-    playProgress: Float,
-    repeatMode: PlaybackRepeatModes,
-    toggleRepeatMode: () -> Unit,
-    isPlaying: Boolean,
+    playbackRepeatMode: PlaybackRepeatModes,
 ) {
     Scaffold(
         topBar = {
@@ -75,7 +88,6 @@ fun HomeScreen(
                         duration = SnackbarDuration.Short,
                     )
                 }
-                onFlowPlaybackErrorAcknowledged()
             }
             Box(
                 modifier = Modifier
@@ -87,21 +99,17 @@ fun HomeScreen(
                             onStartPlayback = startPlaybackFlow,
                         )
                     }
-                    FlowPlaybackState.LoadingAudioFlow -> {
+                    FlowPlaybackState.LoadingInitialFlow -> {
                         AudioFlowLoadingIndicator()
                     }
-                    is FlowPlaybackState.LoadComplete -> {
+                    is FlowPlaybackState.FlowStarted -> {
+                        val playbackUiState = when(flowPlaybackState) {
+                            is FlowPlaybackState.FlowStarted.LoadComplete -> flowPlaybackState.playbackUiState
+                            is FlowPlaybackState.FlowStarted.LoadingNextSong -> PlaybackUiState.onNextSong()
+                        }
                         SongPlaying(
-                            currentSong = currentSong,
-                            isPlaying = isPlaying,
-                            onPlay = onPlay,
-                            onPause = onPause,
-                            onNextClick = onNextClick,
-                            onPrevClick = onPrevClick,
-                            repeatMode = repeatMode,
-                            toggleRepeatMode = toggleRepeatMode,
-                            playProgress = playProgress,
-                            onSeekTo = onSeekTo,
+                            playbackUiState = playbackUiState,
+                            playbackRepeatMode = playbackRepeatMode,
                             modifier = Modifier
                                 .align(
                                     Alignment.Center
@@ -110,6 +118,7 @@ fun HomeScreen(
                     }
                     FlowPlaybackState.Error -> {
                         displayErrorSnackBar()
+                        onFlowPlaybackErrorAcknowledged()
                     }
                 }
             }
@@ -129,85 +138,109 @@ fun HomeScreen(
 @Preview
 @Composable
 private fun HomeScreenPreview() {
+    val size = 200
+    val albumArtUrl = "https://picsum.photos/$size/$size"
+    val currentSong = dummySong
+        .copy(
+            albumArtUrl = albumArtUrl,
+        )
+
+    var isPlaying by remember {
+        mutableStateOf(false)
+    }
+    val onPlay: (Song) -> Unit = {
+        isPlaying = true
+    }
+    val onPause = {
+        isPlaying = false
+    }
+    var playbackRepeatMode by remember {
+        mutableStateOf(
+            PlaybackRepeatModes.NoRepeat,
+        )
+    }
+    val toggleRepeatMode: () -> Unit = {
+        playbackRepeatMode = when(playbackRepeatMode) {
+            PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
+            PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
+        }
+    }
+
+    var playProgress by remember {
+        mutableFloatStateOf(0.3f)
+    }
+    val onSeekTo: (Float) -> Unit = {
+        playProgress = it
+    }
+
+    val playbackActions = dummyPlaybackActions
+        .copy(
+            play = {
+                onPlay(currentSong)
+            },
+            pause = onPause,
+            seekTo = onSeekTo,
+            toggleRepeatMode = toggleRepeatMode,
+        )
+
+    var flowPlaybackState: FlowPlaybackState by remember{
+        mutableStateOf(FlowPlaybackState.Idle)
+    }
+
+    val onFlowPlaybackErrorAcknowledged = {
+        flowPlaybackState = FlowPlaybackState.Idle
+    }
+
+    val playbackUiState by remember {
+        derivedStateOf {
+            dummyPlaybackUiState
+                .copy(
+                    currentSong = currentSong,
+                    isPlaying = isPlaying,
+                    playProgress = playProgress,
+                    playbackActions = playbackActions,
+                )
+        }
+    }
+
+    LaunchedEffect(playbackUiState) {
+        if (flowPlaybackState is FlowPlaybackState.FlowStarted.LoadComplete) {
+            flowPlaybackState = FlowPlaybackState.FlowStarted.LoadComplete(
+                playbackUiState = playbackUiState
+            )
+        }
+    }
+
+    val onToggleFlowState = {
+        when (flowPlaybackState) {
+            FlowPlaybackState.Idle -> {
+                flowPlaybackState = FlowPlaybackState.LoadingInitialFlow
+            }
+            FlowPlaybackState.LoadingInitialFlow -> {
+                flowPlaybackState = FlowPlaybackState.FlowStarted.LoadComplete(
+                    playbackUiState = playbackUiState
+                )
+            }
+            is FlowPlaybackState.FlowStarted.LoadComplete -> {
+                flowPlaybackState = FlowPlaybackState.FlowStarted.LoadingNextSong
+            }
+            FlowPlaybackState.FlowStarted.LoadingNextSong -> {
+                flowPlaybackState = FlowPlaybackState.Error
+            }
+            FlowPlaybackState.Error -> {}
+        }
+    }
+
     PreviewColumn {
-        val currentSong = dummySong
-        val flowPlaybackLoadCompleteState = FlowPlaybackState
-            .LoadComplete(
-                currentSong = currentSong
-            )
-
-        var flowPlaybackState by remember {
-            mutableStateOf<FlowPlaybackState>(
-                flowPlaybackLoadCompleteState
-            )
-        }
-
         AppTextButton(
-            text = "toggle flow states"
-        ) {
-            when (flowPlaybackState) {
-                FlowPlaybackState.Idle -> {
-                    flowPlaybackState = FlowPlaybackState
-                        .LoadingAudioFlow
-                }
-                FlowPlaybackState.LoadingAudioFlow -> {
-                    flowPlaybackState = flowPlaybackLoadCompleteState
-                }
-                is FlowPlaybackState.LoadComplete -> {
-                    flowPlaybackState = FlowPlaybackState
-                        .Error
-                }
-                FlowPlaybackState.Error -> {}
-            }
-        }
-
-        var isPlaying by remember {
-            mutableStateOf(false)
-        }
-        val onPlay = {
-            isPlaying = true
-        }
-        val onPause = {
-            isPlaying = false
-        }
-        var repeatMode by remember {
-            mutableStateOf(
-                PlaybackRepeatModes.NoRepeat,
-            )
-        }
-        val toggleRepeatMode: () -> Unit = {
-            repeatMode = when(repeatMode) {
-                PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
-                PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
-            }
-        }
-
-        var playProgress by remember {
-            mutableFloatStateOf(0f)
-        }
-        val onSeekTo: (Float) -> Unit = {
-            playProgress = it
-        }
-
-        val onFlowPlaybackErrorAcknowledged = {
-            flowPlaybackState = FlowPlaybackState
-                .Idle
-        }
-
+            text = "toggle flow states",
+            onClick = onToggleFlowState
+        )
         HomeScreen(
             startPlaybackFlow = {},
             flowPlaybackState = flowPlaybackState,
             onFlowPlaybackErrorAcknowledged = onFlowPlaybackErrorAcknowledged,
-            currentSong = currentSong,
-            isPlaying = isPlaying,
-            onPlay = onPlay,
-            onPause = onPause,
-            onNextClick = {},
-            onPrevClick = {},
-            repeatMode = repeatMode,
-            toggleRepeatMode = toggleRepeatMode,
-            playProgress = playProgress,
-            onSeekTo = onSeekTo,
+            playbackRepeatMode = playbackRepeatMode,
         )
     }
 }

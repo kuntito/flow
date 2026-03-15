@@ -30,8 +30,9 @@ suspend fun <T> safeApiCall(
     } catch (e: Exception) {
         Log.d(
             flowDebugTag,
-            "api call failed, call description: ${apiCallInfo.fnDesc}" +
-                    "\n" + "errorDetails: $e"
+            "api call failed, call description: ${apiCallInfo.fnDesc}" + "\n" +
+                    "errorDetails: $e, " + "\n" +
+                    "stackTrace: ${e.stackTraceToString()}"
         )
         null
     }

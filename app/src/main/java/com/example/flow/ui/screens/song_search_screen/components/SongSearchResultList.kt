@@ -31,7 +31,6 @@ fun SongSearchResultList(
             SearchListSongItem(
                 songTitle = song.title,
                 artistStr = song.artistStr,
-                albumArtFilePath = song.albumArtFilePath,
                 onClick = {},
             )
         }

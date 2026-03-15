@@ -52,9 +52,11 @@ fun SongTitleAndArtistSP(
 @Composable
 private fun SongTitleAndArtistSPPreview() {
     PreviewColumn {
+        val songTitle = "HBP (Remix)"
+        val artistStr = "Llona (feat. Bella Shmurda)"
         SongTitleAndArtistSP(
-            songTitle = "HBP (Remix)",
-            artistStr = "Llona (feat. Bella Shmurda)",
+            songTitle = songTitle,
+            artistStr = artistStr,
         )
     }
 }

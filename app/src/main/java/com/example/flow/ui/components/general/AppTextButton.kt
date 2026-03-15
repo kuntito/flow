@@ -41,7 +41,9 @@ fun AppTextButton(
                     horizontal = 8.dp,
                 )
                 .then(
-                    if (isBlinking) Modifier.blinkable() else Modifier
+                    if (isBlinking)
+                        Modifier.blinkable()
+                    else Modifier
                 )
             ,
         )

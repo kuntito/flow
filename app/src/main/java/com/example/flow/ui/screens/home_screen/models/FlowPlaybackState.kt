@@ -1,15 +1,18 @@
 package com.example.flow.ui.screens.home_screen.models
 
-import com.example.flow.data.models.Song
+import com.example.flow.player.PlaybackUiState
 
 sealed class FlowPlaybackState {
     object Idle: FlowPlaybackState()
 
-    object LoadingAudioFlow: FlowPlaybackState()
+    object LoadingInitialFlow: FlowPlaybackState()
 
-    data class LoadComplete(
-        val currentSong: Song
-    ): FlowPlaybackState()
+    sealed class FlowStarted: FlowPlaybackState() {
+        data class LoadComplete(
+            val playbackUiState: PlaybackUiState
+        ): FlowStarted()
+        object LoadingNextSong: FlowStarted()
+    }
 
     object Error: FlowPlaybackState()
 }

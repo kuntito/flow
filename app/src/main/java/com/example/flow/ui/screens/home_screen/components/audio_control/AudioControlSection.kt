@@ -14,25 +14,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.dummySong
+import com.example.flow.player.PlaybackUiState
+import com.example.flow.player.dummyPlaybackActions
+import com.example.flow.player.dummyPlaybackUiState
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.home_screen.components.audio_control.seek_bar.SeekBar
 
-// TODO add playback actions? `onPause, onNext...`
 @Composable
 fun AudioControlSection(
     modifier: Modifier = Modifier,
     width: Float = 256f,
-    currentSong: Song,
-    onSeekTo: (Float) -> Unit,
-    onPlay: () -> Unit,
-    onPause: () -> Unit,
-    onNextClick: () -> Unit,
-    onPrevClick: () -> Unit,
-    playProgress: Float,
-    isPlaying: Boolean,
+    playbackUiState: PlaybackUiState,
     repeatMode: PlaybackRepeatModes,
-    toggleRepeatMode: () -> Unit,
 ) {
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -40,9 +35,9 @@ fun AudioControlSection(
     ) {
         SeekBar(
             width = width * 1.07f, // looks better this way
-            progress = playProgress,
-            durationMs = currentSong.durationMillis,
-            onSeekTo = onSeekTo,
+            progress = playbackUiState.playProgress,
+            durationMs = playbackUiState.currentSong.durationMillis,
+            onSeekTo = playbackUiState.playbackActions.seekTo,
         )
         Spacer(
             modifier = Modifier
@@ -50,13 +45,8 @@ fun AudioControlSection(
         )
         AudioControlButtons(
             width = width,
-            onPlay = onPlay,
-            onPause = onPause,
-            onNextClick = onNextClick,
-            onPrevClick = onPrevClick,
-            toggleRepeatMode = toggleRepeatMode,
+            playbackUiState = playbackUiState,
             repeatMode = repeatMode,
-            isPlaying = isPlaying,
         )
     }
 }
@@ -69,7 +59,7 @@ private fun AudioControlSectionPreview() {
         var isPlaying by remember {
             mutableStateOf(false)
         }
-        val onPlay = {
+        val onPlay: (Song) -> Unit = {
             isPlaying = true
         }
         val onPause = {
@@ -94,17 +84,27 @@ private fun AudioControlSectionPreview() {
             playProgress = it
         }
 
+        val playbackActions = dummyPlaybackActions
+            .copy(
+                play = {
+                    onPlay(currentSong)
+                },
+                pause = onPause,
+                seekTo = onSeekTo,
+                toggleRepeatMode = toggleRepeat,
+            )
+
+        val playbackUiState = dummyPlaybackUiState
+            .copy(
+                currentSong = currentSong,
+                isPlaying = isPlaying,
+                playProgress = playProgress,
+                playbackActions = playbackActions
+            )
+
         AudioControlSection(
-            currentSong = currentSong,
-            isPlaying = isPlaying,
-            onPlay = onPlay,
-            onPause = onPause,
-            onNextClick = {},
-            onPrevClick = {},
+            playbackUiState = playbackUiState,
             repeatMode = repeatMode,
-            toggleRepeatMode = toggleRepeat,
-            playProgress = playProgress,
-            onSeekTo = onSeekTo
         )
     }
 }

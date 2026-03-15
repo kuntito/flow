@@ -14,19 +14,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.flow.data.models.Song
+import com.example.flow.player.PlaybackUiState
+import com.example.flow.player.dummyPlaybackActions
+import com.example.flow.player.dummyPlaybackUiState
 import com.example.flow.ui.components.util.PreviewColumn
 
 @Composable
 fun AudioControlButtons(
     modifier: Modifier = Modifier,
     width: Float,
+    playbackUiState: PlaybackUiState,
     repeatMode: PlaybackRepeatModes,
-    toggleRepeatMode: () -> Unit,
-    onPlay: () -> Unit,
-    onPause: () -> Unit,
-    onPrevClick: () -> Unit,
-    onNextClick: () -> Unit,
-    isPlaying: Boolean,
 ) {
     val repeatButtonSize = 18
     Row(
@@ -37,15 +36,11 @@ fun AudioControlButtons(
     ) {
         Spacer(modifier = Modifier.size(repeatButtonSize.dp))
         PrevPlayPauseNextButtons(
-            onPrevClick = onPrevClick,
-            onNextClick = onNextClick,
-            onPlay = onPlay,
-            onPause = onPause,
-            isPlaying = isPlaying,
+            playbackUiState = playbackUiState,
         )
         SongRepeatButton(
             repeatMode = repeatMode,
-            toggleRepeatMode = toggleRepeatMode,
+            toggleRepeatMode = playbackUiState.playbackActions.toggleRepeatMode,
             size = repeatButtonSize,
         )
     }
@@ -58,7 +53,7 @@ private fun AudioControlButtonPreview() {
         var isPlaying by remember {
             mutableStateOf(false)
         }
-        val onPlay = {
+        val onPlay: (Song) -> Unit = { _ ->
             isPlaying = true
         }
         val onPause = {
@@ -76,15 +71,23 @@ private fun AudioControlButtonPreview() {
             }
         }
 
+        val playbackActions = dummyPlaybackActions
+            .copy(
+                toggleRepeatMode = toggleRepeat,
+                play = onPlay,
+                pause = onPause
+            )
+
+        val playbackUiState = dummyPlaybackUiState
+            .copy(
+                isPlaying = isPlaying,
+                playbackActions = playbackActions,
+            )
+
         AudioControlButtons(
             width = 256f,
-            onPlay = onPlay,
-            onPause = onPause,
-            onNextClick = {},
-            onPrevClick = {},
-            toggleRepeatMode = toggleRepeat,
+            playbackUiState = playbackUiState,
             repeatMode = repeatMode,
-            isPlaying = isPlaying,
         )
     }
 }

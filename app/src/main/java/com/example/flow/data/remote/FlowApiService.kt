@@ -23,7 +23,7 @@ interface FlowApiService {
 class FlowApiDataSource(
     private val api: FlowApiService
 ) {
-    suspend fun safeGetNextSong() = safeApiCall(
+    suspend fun safeFetchNextSong() = safeApiCall(
         ApiCallInfo(
             "`getNextSong` returns the next song from queue.",
             fn = {

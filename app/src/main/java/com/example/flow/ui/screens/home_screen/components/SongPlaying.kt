@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -14,6 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.dummySong
+import com.example.flow.player.PlaybackUiState
+import com.example.flow.player.dummyPlaybackActions
+import com.example.flow.player.dummyPlaybackUiState
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.home_screen.components.audio_control.AlbumArtSP
 import com.example.flow.ui.screens.home_screen.components.audio_control.AudioControlSection
@@ -22,16 +26,8 @@ import com.example.flow.ui.screens.home_screen.components.audio_control.Playback
 @Composable
 fun SongPlaying(
     modifier: Modifier = Modifier,
-    currentSong: Song,
-    onPlay: () -> Unit,
-    onPause: () -> Unit,
-    onNextClick: () -> Unit,
-    onPrevClick: () -> Unit,
-    onSeekTo: (Float) -> Unit,
-    playProgress: Float,
-    repeatMode: PlaybackRepeatModes,
-    toggleRepeatMode: () -> Unit,
-    isPlaying: Boolean,
+    playbackUiState: PlaybackUiState,
+    playbackRepeatMode: PlaybackRepeatModes,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -40,32 +36,25 @@ fun SongPlaying(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            AlbumArtSP()
+            AlbumArtSP(
+                albumArtUrl = playbackUiState.currentSong.albumArtUrl
+            )
             Spacer(
                 modifier = Modifier
                     .height(10.dp)
             )
             SongTitleAndArtistSP(
-                songTitle = currentSong.title,
-                artistStr = currentSong.artistStr,
+                songTitle = playbackUiState.currentSong.title,
+                artistStr = playbackUiState.currentSong.artistStr,
             )
         }
         Spacer(modifier = Modifier
             .height(48.dp))
         AudioControlSection(
-            currentSong = currentSong,
-            onPlay = onPlay,
-            onPause = onPause,
-            onNextClick = onNextClick,
-            onPrevClick = onPrevClick,
-            onSeekTo = onSeekTo,
-            playProgress = playProgress,
-            toggleRepeatMode = toggleRepeatMode,
-            repeatMode = repeatMode,
-            isPlaying = isPlaying,
+            playbackUiState = playbackUiState,
+            repeatMode = playbackRepeatMode,
         )
     }
-
 }
 
 @Preview
@@ -76,41 +65,52 @@ private fun SongPlayingPreview() {
         var isPlaying by remember {
             mutableStateOf(false)
         }
-        val onPlay = {
+        val onPlay: (Song) -> Unit = {
             isPlaying = true
         }
         val onPause = {
             isPlaying = false
         }
-        var repeatMode by remember {
+        var playbackRepeatMode by remember {
             mutableStateOf(
                 PlaybackRepeatModes.NoRepeat,
             )
         }
         val toggleRepeatMode: () -> Unit = {
-            repeatMode = when(repeatMode) {
+            playbackRepeatMode = when(playbackRepeatMode) {
                 PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
                 PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
             }
         }
 
         var playProgress by remember {
-            mutableStateOf(0f)
+            mutableFloatStateOf(0f)
         }
         val onSeekTo: (Float) -> Unit = {
             playProgress = it
         }
+
+        val playbackActions = dummyPlaybackActions
+            .copy(
+                play = {
+                    onPlay(currentSong)
+                },
+                pause = onPause,
+                seekTo = onSeekTo,
+                toggleRepeatMode = toggleRepeatMode,
+            )
+
+        val playbackUiState = dummyPlaybackUiState
+            .copy(
+                currentSong = currentSong,
+                isPlaying = isPlaying,
+                playProgress = playProgress,
+                playbackActions = playbackActions,
+            )
+
         SongPlaying(
-            currentSong = currentSong,
-            isPlaying = isPlaying,
-            onPlay = onPlay,
-            onPause = onPause,
-            onNextClick = {},
-            onPrevClick = {},
-            repeatMode = repeatMode,
-            toggleRepeatMode = toggleRepeatMode,
-            playProgress = playProgress,
-            onSeekTo = onSeekTo
+            playbackUiState = playbackUiState,
+            playbackRepeatMode = playbackRepeatMode,
         )
     }
 }
