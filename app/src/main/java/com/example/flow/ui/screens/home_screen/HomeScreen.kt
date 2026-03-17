@@ -1,6 +1,7 @@
 package com.example.flow.ui.screens.home_screen
 
-import android.util.Log
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,11 +21,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.flow.FlowViewModel
+import com.example.flow.R
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.dummySong
-import com.example.flow.flowDebugTag
 import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.dummyPlaybackActions
 import com.example.flow.player.dummyPlaybackUiState
@@ -46,11 +48,13 @@ fun HomeScreenRoot(
 ) {
     val flowPlaybackState by flowViewModel.flowPlaybackState.collectAsState()
     val playbackRepeatMode by flowViewModel.playbackRepeatMode.collectAsState()
+    val albumArtBitmap by flowViewModel.albumArtBitmap.collectAsState()
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
         flowPlaybackState = flowPlaybackState,
         onFlowPlaybackErrorAcknowledged = flowViewModel.onFlowPlaybackErrorAcknowledged,
         playbackRepeatMode = playbackRepeatMode,
+        albumArtBitmap = albumArtBitmap,
     )
 }
 
@@ -61,6 +65,7 @@ fun HomeScreen(
     flowPlaybackState: FlowPlaybackState,
     onFlowPlaybackErrorAcknowledged: () -> Unit,
     playbackRepeatMode: PlaybackRepeatModes,
+    albumArtBitmap: Bitmap?,
 ) {
     Scaffold(
         topBar = {
@@ -110,6 +115,7 @@ fun HomeScreen(
                         SongPlaying(
                             playbackUiState = playbackUiState,
                             playbackRepeatMode = playbackRepeatMode,
+                            albumArtBitmap = albumArtBitmap,
                             modifier = Modifier
                                 .align(
                                     Alignment.Center
@@ -231,6 +237,12 @@ private fun HomeScreenPreview() {
         }
     }
 
+    val albumArtBitmap = BitmapFactory.decodeResource(
+        LocalContext.current.resources,
+        R.drawable.album_art_placeholder
+    )
+
+
     PreviewColumn {
         AppTextButton(
             text = "toggle flow states",
@@ -241,6 +253,7 @@ private fun HomeScreenPreview() {
             flowPlaybackState = flowPlaybackState,
             onFlowPlaybackErrorAcknowledged = onFlowPlaybackErrorAcknowledged,
             playbackRepeatMode = playbackRepeatMode,
+            albumArtBitmap = albumArtBitmap,
         )
     }
 }

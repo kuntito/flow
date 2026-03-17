@@ -1,5 +1,7 @@
 package com.example.flow.ui.screens.home_screen.components
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -11,8 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.flow.R
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.dummySong
 import com.example.flow.player.PlaybackUiState
@@ -28,6 +32,7 @@ fun SongPlaying(
     modifier: Modifier = Modifier,
     playbackUiState: PlaybackUiState,
     playbackRepeatMode: PlaybackRepeatModes,
+    albumArtBitmap: Bitmap?,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -37,7 +42,7 @@ fun SongPlaying(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AlbumArtSP(
-                albumArtUrl = playbackUiState.currentSong.albumArtUrl
+               albumArtBitmap = albumArtBitmap,
             )
             Spacer(
                 modifier = Modifier
@@ -108,9 +113,16 @@ private fun SongPlayingPreview() {
                 playbackActions = playbackActions,
             )
 
+        val albumArtBitmap = BitmapFactory.decodeResource(
+            LocalContext.current.resources,
+            R.drawable.album_art_placeholder
+        )
+
+
         SongPlaying(
             playbackUiState = playbackUiState,
             playbackRepeatMode = playbackRepeatMode,
+            albumArtBitmap = albumArtBitmap,
         )
     }
 }

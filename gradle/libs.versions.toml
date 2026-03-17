@@ -15,6 +15,7 @@ media3 = "1.5.1"
 navigation = "2.8.0-alpha08"
 kotlinxSerialization = "1.6.3"
 coil = "2.6.0"
+media = "1.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +50,9 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 # image loading
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
+# for music player in notification panel
+androidx-media = { group = "androidx.media", name = "media", version.ref = "media" }
 
 
 [plugins]

@@ -75,6 +75,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
-    // image loading
+    // loading image from url
     implementation(libs.coil.compose)
+
+    // for music player in notification panel
+    implementation(libs.androidx.media)
 }

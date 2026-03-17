@@ -20,7 +20,6 @@ fun SearchListSongItem(
     modifier: Modifier = Modifier,
     songTitle: String,
     artistStr: String,
-    albumArtFilePath: String?,
     onClick: () -> Unit,
 ) {
     ClickableSurface(
@@ -59,7 +58,6 @@ private fun SearchListSongItemPreview() {
         SearchListSongItem(
             songTitle = "Without Me",
             artistStr = "Halsey",
-            albumArtFilePath = null,
             onClick = {},
         )
     }

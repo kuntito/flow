@@ -1,12 +1,16 @@
 package com.example.flow
 
 import android.app.Application
-import android.util.Log
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
+import com.example.flow.player.NotificationPlayerVmBridge
 import com.example.flow.player.PlaybackActions
 import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.SongPlayer
@@ -50,6 +54,24 @@ class FlowViewModel(
             }
         )
     }
+    private val _albumArtBitmap = MutableStateFlow<Bitmap?>(null)
+    val albumArtBitmap: StateFlow<Bitmap?> = _albumArtBitmap.asStateFlow()
+
+    private val notificationBridge = NotificationPlayerVmBridge(
+        appContext = appContext,
+        playerState = playerState,
+        onPause = ::onPause,
+        onPlay = { song ->
+            onPlay(
+                song = song,
+                forceRestart = false
+            )
+        },
+        onNextSong = ::onNextClick,
+        coroutineScope = viewModelScope,
+        albumArtBitmap = albumArtBitmap
+    )
+
 
     init {
         viewModelScope.launch {
@@ -64,6 +86,8 @@ class FlowViewModel(
                 }
             }
         }
+
+        notificationBridge.start()
     }
 
     private var nextSongJob: Job? = null
@@ -82,6 +106,14 @@ class FlowViewModel(
         }
     }
 
+    /**
+     * grabs the next song from API.
+     *
+     * if successful, it triggers the download of album art
+     * and returns the next song.
+     *
+     * if something goes wrong, returns null.
+     */
     suspend fun fetchNextSong(): Song? {
         val getNextSongResponse = flowDS.safeFetchNextSong()
         return if (getNextSongResponse?.songWithUrl == null) {
@@ -89,7 +121,52 @@ class FlowViewModel(
             null
         } else {
             val nextSong = getNextSongResponse.songWithUrl.toSong()
+
+            _albumArtBitmap.value = null
+            loadAlbumArtCurrentSong(nextSong.albumArtUrl)
+
             nextSong
+        }
+    }
+
+
+    /**
+     * downloads album art, converts it to a bitmap, and returns bitmap.
+     *
+     * if something goes wrong, it returns null.
+     */
+    private suspend fun fetchAlbumArtBitmap(
+        aaUrl: String?
+    ): Bitmap? {
+        aaUrl ?: return null
+
+        val imageReq = ImageRequest.Builder(appContext)
+            .data(aaUrl)
+            .allowHardware(false)
+            .build()
+
+        val reqDrawable = (
+                appContext
+                    .imageLoader
+                    .execute(
+                        request = imageReq
+                    )
+                ).drawable
+        val maybeBitmapDrawable = reqDrawable as? BitmapDrawable
+        return maybeBitmapDrawable?.bitmap
+    }
+
+    private var loadAlbumArtJob: Job? = null
+
+    /**
+     * fetches the album art,
+     * converts it to a bitmap, then updates the global flow, `_albumArtBitmap`
+     */
+    private fun loadAlbumArtCurrentSong(aaUrl: String?) {
+        loadAlbumArtJob?.cancel()
+        loadAlbumArtJob = viewModelScope.launch {
+            val bitmap = fetchAlbumArtBitmap(aaUrl)
+            _albumArtBitmap.value = bitmap
         }
     }
 
@@ -180,5 +257,6 @@ class FlowViewModel(
     override fun onCleared() {
         super.onCleared()
         songPlayer.release()
+        notificationBridge.stop()
     }
 }
