@@ -28,12 +28,14 @@ class NotificationPlayerVmBridge(
     private val onPause: () -> Unit,
     private val onPlay: (song: Song) -> Unit,
     private val onNextSong: () -> Unit,
+    private val onPrevSong: () -> Unit,
+    private val onSeekTo: (progress: Float) -> Unit,
     private val coroutineScope: CoroutineScope,
 ) {
     private val notificationPlayerBroadcastReceiver = object: BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
+        override fun onReceive(p0: Context?, intent: Intent?) {
             val actions = MusicPlayerNotificationPane.Actions
-            when (p1?.action) {
+            when (intent?.action) {
                 actions.ACTION_PAUSE_PLAY_SONG -> {
                     if (playerState.value.isPlaying) {
                         onPause()
@@ -43,13 +45,24 @@ class NotificationPlayerVmBridge(
                         }
                     }
                 }
-                actions.ACTION_NEXT_SONG -> {
-                    onNextSong()
+                actions.ACTION_NEXT_SONG -> onNextSong
+                actions.ACTION_PREVIOUS_SONG -> onPrevSong
+                actions.ACTION_SEEK_TO -> {
+                    handleSeekTo(intent)
                 }
-                actions.ACTION_PREVIOUS_SONG -> {}
-                actions.ACTION_SEEK_TO -> {}
             }
         }
+    }
+
+    fun handleSeekTo(intent: Intent) {
+        val pos = intent.getLongExtra(
+            MusicPlayerNotificationPane.Extras.EXTRA_SEEK_POSITION_LONG,
+            0L
+        )
+        val durationMs = playerState.value.durationMs
+        val progress = pos.toFloat() / durationMs.toFloat()
+
+        onSeekTo(progress)
     }
 
     fun start () {

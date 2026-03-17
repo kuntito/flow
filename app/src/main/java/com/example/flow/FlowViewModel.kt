@@ -68,6 +68,8 @@ class FlowViewModel(
             )
         },
         onNextSong = ::onNextClick,
+        onPrevSong = ::onPrevClick,
+        onSeekTo = ::onSeekTo,
         coroutineScope = viewModelScope,
         albumArtBitmap = albumArtBitmap
     )
@@ -170,6 +172,8 @@ class FlowViewModel(
         }
     }
 
+    fun onPrevClick() {}
+
     fun onPause() {
         songPlayer.pause()
     }
@@ -197,7 +201,7 @@ class FlowViewModel(
         pause = ::onPause,
         seekTo = ::onSeekTo,
         nextSong = ::onNextClick,
-        prevSong = {},
+        prevSong = ::onPrevClick,
         toggleRepeatMode = ::toggleRepeatMode,
     )
 
