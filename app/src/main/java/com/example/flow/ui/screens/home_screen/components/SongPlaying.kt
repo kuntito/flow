@@ -46,7 +46,7 @@ fun SongPlaying(
             )
             Spacer(
                 modifier = Modifier
-                    .height(10.dp)
+                    .height(32.dp)
             )
             SongTitleAndArtistSP(
                 songTitle = playbackUiState.currentSong.title,

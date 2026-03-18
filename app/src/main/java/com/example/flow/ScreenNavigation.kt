@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.flow.ui.screens.home_screen.HomeScreenRoot
+import com.example.flow.ui.screens.song_search_screen.SongSearchScreenRoot
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -23,7 +24,20 @@ fun ScreenNavigation(
     ) {
         composable<AppScreens.HomeScreen>{
             HomeScreenRoot(
-                flowViewModel = flowViewModel
+                flowViewModel = flowViewModel,
+                goToSongSearchScreen = {
+                    navController.navigate(
+                        AppScreens.SongSearchScreen
+                    )
+                }
+            )
+        }
+        composable<AppScreens.SongSearchScreen>{
+            SongSearchScreenRoot(
+                flowViewModel = flowViewModel,
+                goToPreviousScreen = {
+                    navController.popBackStack()
+                }
             )
         }
     }

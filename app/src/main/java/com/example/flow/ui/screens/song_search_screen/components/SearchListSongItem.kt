@@ -20,6 +20,7 @@ fun SearchListSongItem(
     modifier: Modifier = Modifier,
     songTitle: String,
     artistStr: String,
+    albumArtUrl: String,
     onClick: () -> Unit,
 ) {
     ClickableSurface(
@@ -34,7 +35,9 @@ fun SearchListSongItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Spacer(modifier = Modifier.width(16.dp))
-            AlbumArtSongListItem()
+            AlbumArtSongListItem(
+                albumArtUrl = albumArtUrl,
+            )
             Spacer(modifier = Modifier.width(16.dp))
             SongTitleAndArtistSLI(
                 songTitle = songTitle,
@@ -55,9 +58,13 @@ fun SearchListSongItem(
 @Composable
 private fun SearchListSongItemPreview() {
     PreviewColumn {
+        val size = 200
+        val albumArtUrl = "https://picsum.photos/$size/$size"
+
         SearchListSongItem(
             songTitle = "Without Me",
             artistStr = "Halsey",
+            albumArtUrl = albumArtUrl,
             onClick = {},
         )
     }

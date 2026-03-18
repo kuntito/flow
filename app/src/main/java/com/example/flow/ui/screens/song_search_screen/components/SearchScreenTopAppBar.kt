@@ -17,14 +17,15 @@ import com.example.flow.ui.components.util.PreviewColumn
 @Composable
 fun SearchScreenTopAppBar(
     modifier: Modifier = Modifier,
+    onSongSearch: (String) -> Unit,
+    onBackButtonClick: () -> Unit,
 ) {
-    val onBackButtonClick: () -> Unit = {}
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
 //            .border(width = 1.dp, color = Color.Yellow)
-            .height(64.dp)
+            .height(72.dp)
         ,
     ) {
         Spacer(modifier = Modifier.width(8.dp))
@@ -33,7 +34,11 @@ fun SearchScreenTopAppBar(
             onClick = onBackButtonClick,
         )
         Spacer(modifier = Modifier.width(10.dp))
-        SearchScreenSearchBar()
+        SearchScreenSearchBar(
+            onSongSearch = onSongSearch,
+            modifier = Modifier
+                .weight(1f)
+        )
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
@@ -42,6 +47,9 @@ fun SearchScreenTopAppBar(
 @Composable
 private fun SearchScreenTopAppBarPreview() {
     PreviewColumn {
-        SearchScreenTopAppBar()
+        SearchScreenTopAppBar(
+            onSongSearch = {},
+            onBackButtonClick = {},
+        )
     }
 }

@@ -9,14 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.flow.data.models.Song
-import com.example.flow.data.models.dummySongList
+import com.example.flow.data.remote.response_models.SongSearchItem
+import com.example.flow.data.remote.response_models.dummySearchResults
 import com.example.flow.ui.components.util.PreviewColumn
 
 @Composable
 fun SongSearchResultList(
     modifier: Modifier = Modifier,
-    songList: List<Song>,
+    songSearchItems: List<SongSearchItem>,
 ) {
     LazyColumn(
         modifier = modifier
@@ -27,10 +27,11 @@ fun SongSearchResultList(
             Spacer(modifier = Modifier
                 .height(16.dp))
         }
-        itemsIndexed(songList) { index, song ->
+        itemsIndexed(songSearchItems) { index, song ->
             SearchListSongItem(
                 songTitle = song.title,
                 artistStr = song.artistStr,
+                albumArtUrl = song.albumArtUrl,
                 onClick = {},
             )
         }
@@ -46,7 +47,7 @@ fun SongSearchResultList(
 private fun SongSearchResultListPreview() {
     PreviewColumn {
         SongSearchResultList(
-            songList = dummySongList
+            songSearchItems = dummySearchResults,
         )
     }
 }

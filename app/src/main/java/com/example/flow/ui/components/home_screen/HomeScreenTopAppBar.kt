@@ -22,6 +22,7 @@ import com.example.flow.ui.theme.colorTelli
 @Composable
 fun FlowTopAppBar(
     modifier: Modifier = Modifier,
+    onSearchIconClick: () -> Unit,
 ) {
     val iconSize = 24
     Row(
@@ -51,7 +52,9 @@ fun FlowTopAppBar(
         AppIconButton(
             iconRes = R.drawable.ic_search,
             size = iconSize,
-        ) { }
+        ) {
+            onSearchIconClick()
+        }
     }
 }
 
@@ -59,6 +62,8 @@ fun FlowTopAppBar(
 @Composable
 private fun FlowTopAppBarPreview() {
     PreviewColumn {
-        FlowTopAppBar()
+        FlowTopAppBar(
+            onSearchIconClick = {},
+        )
     }
 }

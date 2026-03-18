@@ -8,6 +8,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,7 +17,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.flow.data.models.dummySongList
+import com.example.flow.FlowViewModel
+import com.example.flow.data.remote.response_models.dummySearchResults
 import com.example.flow.ui.components.general.AppTextButton
 import com.example.flow.ui.components.util.AppSnackBar
 import com.example.flow.ui.components.util.PreviewColumn
@@ -28,16 +30,41 @@ import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 
+@Composable
+fun SongSearchScreenRoot(
+    flowViewModel: FlowViewModel,
+    goToPreviousScreen: () -> Unit,
+) {
+    val songSearchState by flowViewModel.songSearchState.collectAsState()
+    val onSongSearchErrorAcknowledged = flowViewModel::onSongSearchErrorAcknowledged
+    val onSongSearch = flowViewModel::searchForSong
+    val resetSongSearchState = flowViewModel::resetSongSearchState
+
+    SongSearchScreen(
+        songSearchState = songSearchState,
+        onSongSearch = onSongSearch,
+        onSongSearchErrorAcknowledged = onSongSearchErrorAcknowledged,
+        onBackButtonClick = {
+            resetSongSearchState()
+            goToPreviousScreen()
+        },
+    )
+}
 
 @Composable
 fun SongSearchScreen(
     modifier: Modifier = Modifier,
     songSearchState: SongSearchState,
-    onSearchErrorAcknowledged: () -> Unit,
+    onSongSearch: (String) -> Unit,
+    onSongSearchErrorAcknowledged: () -> Unit,
+    onBackButtonClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
-            SearchScreenTopAppBar()
+            SearchScreenTopAppBar(
+                onSongSearch = onSongSearch,
+                onBackButtonClick = onBackButtonClick,
+            )
         },
     ) { innerPadding ->
         Box(
@@ -57,7 +84,7 @@ fun SongSearchScreen(
                         duration = SnackbarDuration.Short,
                     )
                 }
-                onSearchErrorAcknowledged()
+                onSongSearchErrorAcknowledged()
             }
             Box(
                 modifier = Modifier
@@ -70,7 +97,7 @@ fun SongSearchScreen(
                     }
                     is SongSearchState.FinishedWithResults -> {
                         SongSearchResultList(
-                            songList = songSearchState.songSearchResults
+                            songSearchItems = songSearchState.songSearchResults
                         )
                     }
                     SongSearchState.FinishedNoResult -> {
@@ -78,6 +105,7 @@ fun SongSearchScreen(
                     }
                     SongSearchState.Error -> {
                         displayErrorSnackBar()
+                        onSongSearchErrorAcknowledged()
                     }
                 }
             }
@@ -112,7 +140,7 @@ private fun SearchScreenPreview() {
                 }
                 SongSearchState.Searching -> {
                     songSearchState = SongSearchState.FinishedWithResults(
-                        songSearchResults = dummySongList
+                        songSearchResults = dummySearchResults,
                     )
                 }
                 is SongSearchState.FinishedWithResults -> {
@@ -128,9 +156,11 @@ private fun SearchScreenPreview() {
         }
         SongSearchScreen(
             songSearchState = songSearchState,
-            onSearchErrorAcknowledged = {
+            onSongSearch = {},
+            onSongSearchErrorAcknowledged = {
                 songSearchState = SongSearchState.Idle
             },
+            onBackButtonClick = {},
         )
     }
 }

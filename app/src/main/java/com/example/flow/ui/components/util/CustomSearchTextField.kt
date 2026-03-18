@@ -66,7 +66,7 @@ import kotlinx.coroutines.flow.onEach
 @OptIn(FlowPreview::class)
 class CustomTextFieldState(
     private val keyboard: SoftwareKeyboardController?,
-    private val coroutineScope: CoroutineScope,
+    coroutineScope: CoroutineScope,
     private val onQueryChange: (String) -> Unit,
     initText: String = "",
 ) {

@@ -3,6 +3,7 @@ package com.example.flow
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import coil.imageLoader
@@ -16,6 +17,7 @@ import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.SongPlayer
 import com.example.flow.ui.screens.home_screen.components.audio_control.PlaybackRepeatModes
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
+import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -208,6 +210,7 @@ class FlowViewModel(
     private val _flowPlaybackState = MutableStateFlow<FlowPlaybackState>(
         FlowPlaybackState.Idle
     )
+
     val flowPlaybackState: StateFlow<FlowPlaybackState> = combine(
         _flowPlaybackState,
         playerState,
@@ -256,6 +259,46 @@ class FlowViewModel(
                 )
             }
         }
+    }
+
+    private val _songSearchState = MutableStateFlow<SongSearchState>(
+        SongSearchState.Idle
+    )
+    val songSearchState: StateFlow<SongSearchState> = _songSearchState.asStateFlow()
+
+    private var songSearchJob: Job? = null
+    fun searchForSong(query: String) {
+        if (query.trim().isEmpty()) {
+            _songSearchState.value = SongSearchState.Idle
+            return
+        }
+
+        songSearchJob?.cancel()
+        songSearchJob = viewModelScope.launch {
+            _songSearchState.value = SongSearchState.Searching
+
+            val songSearchResponse = flowDS.safeSearchSong(query)
+            val songSearchResults = songSearchResponse?.searchResults
+
+            if (songSearchResults == null) {
+                _songSearchState.value = SongSearchState.Error
+            } else if (songSearchResults.isEmpty()) {
+                _songSearchState.value = SongSearchState.FinishedNoResult
+            } else {
+                _songSearchState.value = SongSearchState.FinishedWithResults(
+                    songSearchResults = songSearchResults
+                )
+            }
+
+        }
+    }
+
+    fun onSongSearchErrorAcknowledged() {
+        _songSearchState.value = SongSearchState.Idle
+    }
+
+    fun resetSongSearchState() {
+        _songSearchState.value = SongSearchState.Idle
     }
 
     override fun onCleared() {

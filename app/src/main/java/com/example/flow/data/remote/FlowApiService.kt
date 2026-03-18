@@ -3,12 +3,20 @@ package com.example.flow.data.remote
 import com.example.flow.data.remote.helpers.ApiCallInfo
 import com.example.flow.data.remote.helpers.safeApiCall
 import com.example.flow.data.remote.response_models.GetNextSongResponse
+import com.example.flow.data.remote.response_models.SearchSongResponse
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 
 interface FlowApiService {
     @GET("api/flow/next-song")
     suspend fun getNextSong(): GetNextSongResponse
+
+    @GET("api/flow/search")
+    suspend fun searchSong(
+        @Query("q")
+        query:String
+    ): SearchSongResponse
 }
 
 /**
@@ -29,6 +37,15 @@ class FlowApiDataSource(
             fn = {
                 api.getNextSong()
             }
+        )
+    )
+
+    suspend fun safeSearchSong(query: String) = safeApiCall(
+        ApiCallInfo(
+            "`searchSong` returns the songs that match the given query",
+            fn = {
+                api.searchSong(query = query)
+            },
         )
     )
 }

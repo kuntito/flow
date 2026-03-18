@@ -41,10 +41,12 @@ import com.example.flow.ui.screens.home_screen.components.audio_control.Playback
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalResources
 
 @Composable
 fun HomeScreenRoot(
     flowViewModel: FlowViewModel,
+    goToSongSearchScreen: () -> Unit,
 ) {
     val flowPlaybackState by flowViewModel.flowPlaybackState.collectAsState()
     val playbackRepeatMode by flowViewModel.playbackRepeatMode.collectAsState()
@@ -55,6 +57,7 @@ fun HomeScreenRoot(
         onFlowPlaybackErrorAcknowledged = flowViewModel.onFlowPlaybackErrorAcknowledged,
         playbackRepeatMode = playbackRepeatMode,
         albumArtBitmap = albumArtBitmap,
+        goToSongSearchScreen = goToSongSearchScreen,
     )
 }
 
@@ -66,10 +69,13 @@ fun HomeScreen(
     onFlowPlaybackErrorAcknowledged: () -> Unit,
     playbackRepeatMode: PlaybackRepeatModes,
     albumArtBitmap: Bitmap?,
+    goToSongSearchScreen: () -> Unit,
 ) {
     Scaffold(
         topBar = {
-            FlowTopAppBar()
+            FlowTopAppBar(
+                onSearchIconClick = goToSongSearchScreen,
+            )
         },
         modifier = modifier
             .fillMaxSize()
@@ -238,7 +244,7 @@ private fun HomeScreenPreview() {
     }
 
     val albumArtBitmap = BitmapFactory.decodeResource(
-        LocalContext.current.resources,
+        LocalResources.current,
         R.drawable.album_art_placeholder
     )
 
@@ -254,6 +260,7 @@ private fun HomeScreenPreview() {
             onFlowPlaybackErrorAcknowledged = onFlowPlaybackErrorAcknowledged,
             playbackRepeatMode = playbackRepeatMode,
             albumArtBitmap = albumArtBitmap,
+            goToSongSearchScreen = {},
         )
     }
 }
