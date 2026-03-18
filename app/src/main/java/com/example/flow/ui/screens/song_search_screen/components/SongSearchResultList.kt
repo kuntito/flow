@@ -17,6 +17,7 @@ import com.example.flow.ui.components.util.PreviewColumn
 fun SongSearchResultList(
     modifier: Modifier = Modifier,
     songSearchItems: List<SongSearchItem>,
+    onPlaySongSearchItem: (Int) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
@@ -32,7 +33,10 @@ fun SongSearchResultList(
                 songTitle = song.title,
                 artistStr = song.artistStr,
                 albumArtUrl = song.albumArtUrl,
-                onClick = {},
+                onShowDropdown = {},
+                onPlaySong = {
+                    onPlaySongSearchItem(song.id)
+                },
             )
         }
         item {
@@ -48,6 +52,7 @@ private fun SongSearchResultListPreview() {
     PreviewColumn {
         SongSearchResultList(
             songSearchItems = dummySearchResults,
+            onPlaySongSearchItem = {},
         )
     }
 }

@@ -3,7 +3,6 @@ package com.example.flow
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import coil.imageLoader
@@ -95,12 +94,22 @@ class FlowViewModel(
     }
 
     private var nextSongJob: Job? = null
-    fun onNextClick() {
+
+    /**
+     * plays the next song in the flow.
+     *
+     * the default behavior is to let the API handle next song.
+     * however, if [songId] is passed,
+     * that specific song becomes the next song.
+     */
+    fun onNextClick(
+        songId: Int? = null
+    ) {
         if (nextSongJob?.isActive == true) return
         nextSongJob = viewModelScope.launch {
             _flowPlaybackState.value = FlowPlaybackState.FlowStarted.LoadingNextSong
             onPause()
-            val nextSong = fetchNextSong()
+            val nextSong = fetchNextSong(songId = songId)
             nextSong?.let { ns ->
                 onPlay(
                     song = ns,
@@ -113,18 +122,27 @@ class FlowViewModel(
     /**
      * grabs the next song from API.
      *
+     * if [songId] is null, the API picks the next song.
+     * if [songId] is provided, it fetches that specific song.
+     *
      * if successful, it triggers the download of album art
-     * and returns the next song.
+     * and returns the fetched song.
      *
      * if something goes wrong, returns null.
      */
-    suspend fun fetchNextSong(): Song? {
-        val getNextSongResponse = flowDS.safeFetchNextSong()
-        return if (getNextSongResponse?.songWithUrl == null) {
+    suspend fun fetchNextSong(songId: Int?): Song? {
+        val apiResponse = if (songId == null) {
+            flowDS.safeFetchNextSong()
+        } else {
+            flowDS.safeGetSongById(songId)
+        }
+
+        val songWithUrl = apiResponse?.songWithUrl
+        return if (songWithUrl == null) {
             _flowPlaybackState.value = FlowPlaybackState.Error
             null
         } else {
-            val nextSong = getNextSongResponse.songWithUrl.toSong()
+            val nextSong = songWithUrl.toSong()
 
             _albumArtBitmap.value = null
             loadAlbumArtCurrentSong(nextSong.albumArtUrl)
@@ -245,19 +263,33 @@ class FlowViewModel(
     }
 
     private var startFlowJob: Job? = null
-    fun onStartPlaybackFlow() {
+    /**
+     * flow triggers a stream of songs based on recency.
+     *
+     * this stream is handled by the API.
+     * however, user can start the flow with a specific song by passing [songId]
+     */
+    fun onStartPlaybackFlow(songId: Int? = null) {
         if (startFlowJob?.isActive == true) return
 
         startFlowJob = viewModelScope.launch {
             _flowPlaybackState.value = FlowPlaybackState.LoadingInitialFlow
 
-            val firstSong = fetchNextSong()
+            val firstSong = fetchNextSong(songId)
             firstSong?.let {
                 onPlay(
                     song = firstSong,
                     forceRestart = true,
                 )
             }
+        }
+    }
+
+    fun onPlaySongFromSearch(songId: Int) {
+        if (_flowPlaybackState.value == FlowPlaybackState.Idle) {
+            onStartPlaybackFlow(songId)
+        } else {
+            onNextClick(songId)
         }
     }
 

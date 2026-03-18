@@ -39,15 +39,21 @@ fun SongSearchScreenRoot(
     val onSongSearchErrorAcknowledged = flowViewModel::onSongSearchErrorAcknowledged
     val onSongSearch = flowViewModel::searchForSong
     val resetSongSearchState = flowViewModel::resetSongSearchState
+    val onBackButtonClick = {
+        resetSongSearchState()
+        goToPreviousScreen()
+    }
+    val onPlaySongSearchItem: (Int) -> Unit = { songId ->
+        flowViewModel.onPlaySongFromSearch(songId)
+        onBackButtonClick()
+    }
 
     SongSearchScreen(
         songSearchState = songSearchState,
         onSongSearch = onSongSearch,
         onSongSearchErrorAcknowledged = onSongSearchErrorAcknowledged,
-        onBackButtonClick = {
-            resetSongSearchState()
-            goToPreviousScreen()
-        },
+        onBackButtonClick = onBackButtonClick,
+        onPlaySongSearchItem = onPlaySongSearchItem,
     )
 }
 
@@ -58,6 +64,7 @@ fun SongSearchScreen(
     onSongSearch: (String) -> Unit,
     onSongSearchErrorAcknowledged: () -> Unit,
     onBackButtonClick: () -> Unit,
+    onPlaySongSearchItem: (Int) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -97,7 +104,8 @@ fun SongSearchScreen(
                     }
                     is SongSearchState.FinishedWithResults -> {
                         SongSearchResultList(
-                            songSearchItems = songSearchState.songSearchResults
+                            songSearchItems = songSearchState.songSearchResults,
+                            onPlaySongSearchItem = onPlaySongSearchItem,
                         )
                     }
                     SongSearchState.FinishedNoResult -> {
@@ -161,6 +169,7 @@ private fun SearchScreenPreview() {
                 songSearchState = SongSearchState.Idle
             },
             onBackButtonClick = {},
+            onPlaySongSearchItem = {},
         )
     }
 }

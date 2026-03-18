@@ -1,6 +1,6 @@
 package com.example.flow.ui.components.util
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.Surface
@@ -37,6 +37,7 @@ fun ClickableSurface(
     rippleRadius: Float? = null,
     isClickable: Boolean = true,
     onClick: () -> Unit,
+    onDoubleClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     var isSurfaceClicked by remember { mutableStateOf(false) }
@@ -58,17 +59,17 @@ fun ClickableSurface(
         color = Color.Transparent,
         content = content,
         modifier = modifier
-            .clickable(
+            .combinedClickable(
                 enabled = isClickable,
                 interactionSource = interactionSource,
                 indication = ripple(
                     color = rippleColor,
                     radius = rippleRadius?.dp ?: Dp.Unspecified,
                     bounded = isRippleBounded,
-                ) // Change the ripple color here
-            ) {
-                onClick()
-            }
+                ), // Change the ripple color here
+                onClick = onClick,
+                onDoubleClick = { onDoubleClick?.invoke() }
+            )
             .alpha(if (isSurfaceClicked) 0.5f else 1f)
         ,
     )

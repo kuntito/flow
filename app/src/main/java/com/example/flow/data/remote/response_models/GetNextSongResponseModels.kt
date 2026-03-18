@@ -15,6 +15,6 @@ data class SongWithUrl(
 
 data class GetNextSongResponse(
     val success: Boolean,
-    val songWithUrl: SongWithUrl? = null,
+    override val songWithUrl: SongWithUrl? = null,
     val debug: Map<String, String>? = null,
-)
+): SongWithUrlResponse

@@ -3,9 +3,11 @@ package com.example.flow.data.remote
 import com.example.flow.data.remote.helpers.ApiCallInfo
 import com.example.flow.data.remote.helpers.safeApiCall
 import com.example.flow.data.remote.response_models.GetNextSongResponse
+import com.example.flow.data.remote.response_models.GetSongByIdResponse
 import com.example.flow.data.remote.response_models.SearchSongResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
+import retrofit2.http.Path
 
 
 interface FlowApiService {
@@ -17,6 +19,12 @@ interface FlowApiService {
         @Query("q")
         query:String
     ): SearchSongResponse
+
+    @GET("api/flow/song/{songId}")
+    suspend fun getSongById(
+        @Path("songId")
+        songId: Int
+    ): GetSongByIdResponse
 }
 
 /**
@@ -46,6 +54,15 @@ class FlowApiDataSource(
             fn = {
                 api.searchSong(query = query)
             },
+        )
+    )
+
+    suspend fun safeGetSongById(songId: Int) = safeApiCall(
+        ApiCallInfo(
+            "fetches song by id",
+            fn = {
+                api.getSongById(songId)
+            }
         )
     )
 }

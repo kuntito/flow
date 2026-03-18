@@ -10,8 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.flow.R
-import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.ClickableSurface
 import com.example.flow.ui.components.util.PreviewColumn
 
@@ -21,10 +19,12 @@ fun SearchListSongItem(
     songTitle: String,
     artistStr: String,
     albumArtUrl: String,
-    onClick: () -> Unit,
+    onShowDropdown: () -> Unit,
+    onPlaySong: () -> Unit,
 ) {
     ClickableSurface(
-        onClick = onClick,
+        onClick = onShowDropdown,
+        onDoubleClick = onPlaySong,
         isRippleBounded = true,
         modifier = modifier
             .height(48.dp)
@@ -46,10 +46,6 @@ fun SearchListSongItem(
                     .weight(1f)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            AppIconButton(
-                iconRes = R.drawable.ic_more_vert
-            ) { }
-            Spacer(modifier = Modifier.width(4.dp))
         }
     }
 }
@@ -65,7 +61,8 @@ private fun SearchListSongItemPreview() {
             songTitle = "Without Me",
             artistStr = "Halsey",
             albumArtUrl = albumArtUrl,
-            onClick = {},
+            onShowDropdown = {},
+            onPlaySong = {},
         )
     }
 }
