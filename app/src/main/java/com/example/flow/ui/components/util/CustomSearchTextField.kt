@@ -42,7 +42,9 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 /**
@@ -85,7 +87,9 @@ class CustomTextFieldState(
     init {
         _textFieldValue
             .debounce(300)
-            .onEach { onQueryChange(it.text) }
+            .map { it.text }
+            .distinctUntilChanged()
+            .onEach { onQueryChange(it) }
             .launchIn(coroutineScope)
     }
 

@@ -18,6 +18,8 @@ fun SongSearchResultList(
     modifier: Modifier = Modifier,
     songSearchItems: List<SongSearchItem>,
     onPlaySongSearchItem: (Int) -> Unit,
+    onPlaySongNext: (Int) -> Unit,
+    onPlaySongLater: (Int) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
@@ -30,13 +32,16 @@ fun SongSearchResultList(
         }
         itemsIndexed(songSearchItems) { index, song ->
             SearchListSongItem(
-                songTitle = song.title,
-                artistStr = song.artistStr,
-                albumArtUrl = song.albumArtUrl,
-                onShowDropdown = {},
+                song = song,
                 onPlaySong = {
                     onPlaySongSearchItem(song.id)
                 },
+                playSongNext = {
+                    onPlaySongNext(song.id)
+                },
+                playSongLater = {
+                    onPlaySongLater(song.id)
+                }
             )
         }
         item {
@@ -53,6 +58,8 @@ private fun SongSearchResultListPreview() {
         SongSearchResultList(
             songSearchItems = dummySearchResults,
             onPlaySongSearchItem = {},
+            onPlaySongNext = {},
+            onPlaySongLater = {},
         )
     }
 }
