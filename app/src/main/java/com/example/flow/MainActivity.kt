@@ -16,6 +16,7 @@ import com.example.flow.data.remote.FlowApiClient
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.ui.theme.FlowTheme
 import com.example.flow.ui.theme.colorKDB
+import com.example.flow.ui.theme.colorSane
 
 const val flowDebugTag = "flow_tag"
 class MainActivity : ComponentActivity() {
@@ -36,7 +37,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge(
             navigationBarStyle = SystemBarStyle.dark(
                 colorKDB.toArgb()
-            )
+            ),
+            statusBarStyle = SystemBarStyle.dark(
+                colorSane.toArgb()
+            ),
         )
         setContent {
             FlowTheme {

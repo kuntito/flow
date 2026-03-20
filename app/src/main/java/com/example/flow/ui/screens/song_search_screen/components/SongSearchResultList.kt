@@ -31,7 +31,7 @@ fun SongSearchResultList(
                 .height(16.dp))
         }
         itemsIndexed(songSearchItems) { index, song ->
-            SearchListSongItem(
+            SearchResultsSLI(
                 song = song,
                 onPlaySong = {
                     onPlaySongSearchItem(song.id)

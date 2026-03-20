@@ -28,7 +28,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun SearchListSongItem(
+fun SearchResultsSLI(
     modifier: Modifier = Modifier,
     song: SongSearchItem,
     onPlaySong: () -> Unit,
@@ -115,7 +115,7 @@ fun SearchListSongItem(
 
 @Preview
 @Composable
-private fun SearchListSongItemPreview() {
+private fun SearchResultsSLIPreview() {
     val size = 200
     val albumArtUrl = "https://picsum.photos/$size/$size"
     val song = dummySongSearchItem
@@ -124,13 +124,13 @@ private fun SearchListSongItemPreview() {
         )
     PreviewColumn {
 
-        SearchListSongItem(
+        SearchResultsSLI(
             song = song,
             onPlaySong = {},
             playSongNext = {},
             playSongLater = {},
         )
-        SearchListSongItem(
+        SearchResultsSLI(
             song = song,
             onPlaySong = {},
             playSongNext = {},
