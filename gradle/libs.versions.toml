@@ -16,6 +16,7 @@ navigation = "2.8.0-alpha08"
 kotlinxSerialization = "1.6.3"
 coil = "2.6.0"
 media = "1.7.0"
+reorderable = "3.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,6 +54,9 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 
 # for music player in notification panel
 androidx-media = { group = "androidx.media", name = "media", version.ref = "media" }
+
+# drag and drop within a lazy list
+reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
 
 
 [plugins]

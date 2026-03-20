@@ -80,4 +80,7 @@ dependencies {
 
     // for music player in notification panel
     implementation(libs.androidx.media)
+
+    // drag and drop reordering
+    implementation(libs.reorderable)
 }
