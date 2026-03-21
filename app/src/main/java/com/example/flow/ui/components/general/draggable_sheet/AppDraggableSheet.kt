@@ -1,6 +1,7 @@
 package com.example.flow.ui.components.general.draggable_sheet
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -71,6 +72,12 @@ fun AppDraggableSheet(
                 )
             },
         )
+
+    BackHandler(
+        appDraggableSheetState.isExpanded
+    ) {
+        appDraggableSheetState.collapse()
+    }
 
     val sheetHeaderCornerRadius = 16
     Column(
