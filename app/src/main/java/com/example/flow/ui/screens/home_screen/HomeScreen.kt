@@ -42,6 +42,9 @@ import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalResources
+import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
+import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
+import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
 
 @Composable
 fun HomeScreenRoot(
@@ -51,6 +54,13 @@ fun HomeScreenRoot(
     val flowPlaybackState by flowViewModel.flowPlaybackState.collectAsState()
     val playbackRepeatMode by flowViewModel.playbackRepeatMode.collectAsState()
     val albumArtBitmap by flowViewModel.albumArtBitmap.collectAsState()
+
+
+    val playNextSongItems by flowViewModel.playNextSongQueue.collectAsState()
+    val onMoveSongInQueue = flowViewModel::swapSongPlayNextQueue
+    // TODO what do you want to do when you click a song from the play next queue
+    val onPlayNextSongItemClick: (Int) -> Unit = {}
+
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
         flowPlaybackState = flowPlaybackState,
@@ -58,6 +68,9 @@ fun HomeScreenRoot(
         playbackRepeatMode = playbackRepeatMode,
         albumArtBitmap = albumArtBitmap,
         goToSongSearchScreen = goToSongSearchScreen,
+        playNextSongItems = playNextSongItems,
+        onMoveSongInQueue = onMoveSongInQueue,
+        onPlayNextSongItemClick = onPlayNextSongItemClick,
     )
 }
 
@@ -70,6 +83,9 @@ fun HomeScreen(
     playbackRepeatMode: PlaybackRepeatModes,
     albumArtBitmap: Bitmap?,
     goToSongSearchScreen: () -> Unit,
+    playNextSongItems: List<PlayNextSongItem>,
+    onMoveSongInQueue: (Int, Int) -> Unit,
+    onPlayNextSongItemClick: (Int) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -118,14 +134,13 @@ fun HomeScreen(
                             is FlowPlaybackState.FlowStarted.LoadComplete -> flowPlaybackState.playbackUiState
                             is FlowPlaybackState.FlowStarted.LoadingNextSong -> PlaybackUiState.onNextSong()
                         }
-                        SongPlaying(
+                        SongPlayingWithPlayNextSheet(
                             playbackUiState = playbackUiState,
                             playbackRepeatMode = playbackRepeatMode,
                             albumArtBitmap = albumArtBitmap,
-                            modifier = Modifier
-                                .align(
-                                    Alignment.Center
-                                )
+                            playNextSongItems = playNextSongItems,
+                            onMoveSongInQueue = onMoveSongInQueue,
+                            onPlayNextSongItemClick = onPlayNextSongItemClick,
                         )
                     }
                     FlowPlaybackState.Error -> {
@@ -248,6 +263,21 @@ private fun HomeScreenPreview() {
         R.drawable.album_art_placeholder
     )
 
+    val x = (1..3).map{
+        dummyPlayNextSongItem.copy(
+            id = it,
+            title = "song $it",
+            artistStr = "artist $it",
+        )
+    }
+    var playNextSongItems by remember { mutableStateOf(x) }
+    val onMoveSongInQueue: (Int, Int) -> Unit = { fromIdx, toIdx ->
+        playNextSongItems = playNextSongItems.toMutableList().apply {
+            add(toIdx, removeAt(fromIdx))
+        }
+    }
+    val onPlayNextSongItemClick: (Int) -> Unit = {}
+
 
     PreviewColumn {
         AppTextButton(
@@ -261,6 +291,9 @@ private fun HomeScreenPreview() {
             playbackRepeatMode = playbackRepeatMode,
             albumArtBitmap = albumArtBitmap,
             goToSongSearchScreen = {},
+            playNextSongItems = playNextSongItems,
+            onMoveSongInQueue = onMoveSongInQueue,
+            onPlayNextSongItemClick = onPlayNextSongItemClick,
         )
     }
 }

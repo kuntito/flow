@@ -39,6 +39,11 @@ interface FlowApiService {
 class FlowApiDataSource(
     private val api: FlowApiService
 ) {
+    /**
+     * fetch next song from API.
+     *
+     * returns `null` if  something goes wrong.
+     */
     suspend fun safeFetchNextSong() = safeApiCall(
         ApiCallInfo(
             "`getNextSong` returns the next song from queue.",

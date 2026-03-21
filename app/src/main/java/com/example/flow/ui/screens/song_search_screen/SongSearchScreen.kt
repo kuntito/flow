@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.flow.FlowViewModel
+import com.example.flow.data.remote.response_models.SongSearchItem
 import com.example.flow.data.remote.response_models.dummySearchResults
 import com.example.flow.ui.components.general.AppTextButton
 import com.example.flow.ui.components.util.AppSnackBar
@@ -30,6 +31,10 @@ import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 
+// TODO impl, if i go to search screen, type query that yields results.
+//  and press the back button, i go to home screen.
+//  the next time i go to the search screen, for a split second, i see
+//  the previous search results
 @Composable
 fun SongSearchScreenRoot(
     flowViewModel: FlowViewModel,
@@ -47,9 +52,10 @@ fun SongSearchScreenRoot(
         flowViewModel.onPlaySongFromSearch(songId)
         onBackButtonClick()
     }
-    // TODO
-    val onPlaySongNext: (Int) -> Unit = {}
-    val onPlaySongLater: (Int) -> Unit = {}
+
+    val onPlaySongNext: (SongSearchItem) -> Unit = flowViewModel::playSongNext
+    val onPlaySongLater: (SongSearchItem) -> Unit = flowViewModel::playSongLater
+    val playNextSongExists by flowViewModel.playNextSongExists.collectAsState()
 
     SongSearchScreen(
         songSearchState = songSearchState,
@@ -59,6 +65,7 @@ fun SongSearchScreenRoot(
         onPlaySongSearchItem = onPlaySongSearchItem,
         onPlaySongNext = onPlaySongNext,
         onPlaySongLater = onPlaySongLater,
+        playNextSongExists = playNextSongExists,
     )
 }
 
@@ -70,8 +77,9 @@ fun SongSearchScreen(
     onSongSearchErrorAcknowledged: () -> Unit,
     onBackButtonClick: () -> Unit,
     onPlaySongSearchItem: (Int) -> Unit,
-    onPlaySongNext: (Int) -> Unit,
-    onPlaySongLater: (Int) -> Unit,
+    onPlaySongNext: (SongSearchItem) -> Unit,
+    onPlaySongLater: (SongSearchItem) -> Unit,
+    playNextSongExists: Boolean,
 ) {
     Scaffold(
         topBar = {
@@ -115,6 +123,7 @@ fun SongSearchScreen(
                             onPlaySongSearchItem = onPlaySongSearchItem,
                             onPlaySongNext = onPlaySongNext,
                             onPlaySongLater = onPlaySongLater,
+                            playNextSongExists = playNextSongExists,
                         )
                     }
                     SongSearchState.FinishedNoResult -> {
@@ -171,6 +180,8 @@ private fun SearchScreenPreview() {
                 }
             }
         }
+        val playNextSongExists = true
+
         SongSearchScreen(
             songSearchState = songSearchState,
             onSongSearch = {},
@@ -181,6 +192,7 @@ private fun SearchScreenPreview() {
             onPlaySongSearchItem = {},
             onPlaySongNext = {},
             onPlaySongLater = {},
+            playNextSongExists = playNextSongExists,
         )
     }
 }

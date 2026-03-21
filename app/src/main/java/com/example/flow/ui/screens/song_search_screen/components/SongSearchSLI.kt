@@ -28,12 +28,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun SearchResultsSLI(
+fun SongSearchSLI(
     modifier: Modifier = Modifier,
     song: SongSearchItem,
     onPlaySong: () -> Unit,
     playSongNext: () -> Unit,
     playSongLater: () -> Unit,
+    playNextSongExists: Boolean,
 ) {
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
@@ -43,21 +44,30 @@ fun SearchResultsSLI(
         isDropdownMenuVisible = false
     }
 
+    var dropDownOptions by remember { mutableStateOf(
+        emptyList<DropdownMenuOption>()
+    )}
     val showDropdownMenu: () -> Unit = {
+        dropDownOptions = buildList {
+            if (playNextSongExists) {
+                add(
+                    DropdownMenuOption(
+                        label = "play later",
+                        onClick = playSongLater,
+                    )
+                )
+            }
+            add(
+                DropdownMenuOption(
+                    label = "play next",
+                    onClick = playSongNext
+                )
+            )
+        }
         isDropdownMenuVisible = true
     }
 
-    // TODO implement `playLater` only available if there's a next song in queue.
-    val dropDownOptions = listOf(
-        DropdownMenuOption(
-            label = "play next",
-            onClick = playSongNext
-        ),
-        DropdownMenuOption(
-            label = "play later",
-            onClick = playSongLater,
-        )
-    )
+
 
     ClickableSurface(
         onClick = showDropdownMenu,
@@ -115,27 +125,32 @@ fun SearchResultsSLI(
 
 @Preview
 @Composable
-private fun SearchResultsSLIPreview() {
+private fun SongSearchSLIPreview() {
     val size = 200
     val albumArtUrl = "https://picsum.photos/$size/$size"
     val song = dummySongSearchItem
         .copy(
             albumArtUrl = albumArtUrl,
         )
+
+    var playNextSongExists by remember { mutableStateOf(false) }
+    val playSongNext = {
+        playNextSongExists = true
+    }
     PreviewColumn {
-
-        SearchResultsSLI(
+        SongSearchSLI(
+            song = song,
+            onPlaySong = {},
+            playSongNext = playSongNext,
+            playSongLater = {},
+            playNextSongExists = playNextSongExists
+        )
+        SongSearchSLI(
             song = song,
             onPlaySong = {},
             playSongNext = {},
             playSongLater = {},
+            playNextSongExists = playNextSongExists,
         )
-        SearchResultsSLI(
-            song = song,
-            onPlaySong = {},
-            playSongNext = {},
-            playSongLater = {},
-        )
-
     }
 }

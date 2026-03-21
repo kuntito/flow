@@ -18,8 +18,9 @@ fun SongSearchResultList(
     modifier: Modifier = Modifier,
     songSearchItems: List<SongSearchItem>,
     onPlaySongSearchItem: (Int) -> Unit,
-    onPlaySongNext: (Int) -> Unit,
-    onPlaySongLater: (Int) -> Unit,
+    onPlaySongNext: (SongSearchItem) -> Unit,
+    onPlaySongLater: (SongSearchItem) -> Unit,
+    playNextSongExists: Boolean,
 ) {
     LazyColumn(
         modifier = modifier
@@ -31,17 +32,18 @@ fun SongSearchResultList(
                 .height(16.dp))
         }
         itemsIndexed(songSearchItems) { index, song ->
-            SearchResultsSLI(
+            SongSearchSLI(
                 song = song,
                 onPlaySong = {
                     onPlaySongSearchItem(song.id)
                 },
                 playSongNext = {
-                    onPlaySongNext(song.id)
+                    onPlaySongNext(song)
                 },
                 playSongLater = {
-                    onPlaySongLater(song.id)
-                }
+                    onPlaySongLater(song)
+                },
+                playNextSongExists = playNextSongExists,
             )
         }
         item {
@@ -54,12 +56,14 @@ fun SongSearchResultList(
 @Preview
 @Composable
 private fun SongSearchResultListPreview() {
+    val playNextSongExists = true
     PreviewColumn {
         SongSearchResultList(
             songSearchItems = dummySearchResults,
             onPlaySongSearchItem = {},
             onPlaySongNext = {},
             onPlaySongLater = {},
+            playNextSongExists = playNextSongExists,
         )
     }
 }
