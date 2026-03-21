@@ -123,6 +123,8 @@ class CustomTextFieldState(
 
     fun clearText() {
         _textFieldValue.value = TextFieldValue("")
+        // if keyboard is hidden, i assume user wants to type.
+        keyboard?.show()
     }
 
 }

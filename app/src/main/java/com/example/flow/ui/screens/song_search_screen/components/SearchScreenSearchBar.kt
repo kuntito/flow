@@ -28,7 +28,7 @@ fun SearchScreenSearchBar(
     CustomSearchTextField(
         textFieldState = searchFieldState,
         containerColor = colorAguero,
-        cursorColor = colorIsco,
+        cursorColor = colorTelli,
         leadingIconColor = colorIsco,
         trailingIconColor = colorTelli,
         modifier = modifier
