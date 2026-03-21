@@ -35,7 +35,7 @@ fun SongPlayingWithPlayNextSheet(
     albumArtBitmap: Bitmap?,
     playNextSongItems: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
-    onPlayNextSongItemClick: (Int) -> Unit,
+    onPlaySongPNQ: (Int) -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -56,7 +56,7 @@ fun SongPlayingWithPlayNextSheet(
             PlayNextQueueSheet(
                 songQueue = playNextSongItems,
                 onMoveSongInQueue = onMoveSongInQueue,
-                onPlayNextSongItemClick = onPlayNextSongItemClick,
+                onPlaySongPNQ = onPlaySongPNQ,
             )
         }
     }
@@ -130,7 +130,7 @@ private fun SongPlayingWithPlayNextSheetPreview() {
             add(toIdx, removeAt(fromIdx))
         }
     }
-    val onPlayNextSongItemClick: (Int) -> Unit = {}
+    val onPlaySongPNQ: (Int) -> Unit = {}
 
     PreviewColumn {
         SongPlayingWithPlayNextSheet(
@@ -139,7 +139,7 @@ private fun SongPlayingWithPlayNextSheetPreview() {
             albumArtBitmap = albumArtBitmap,
             playNextSongItems = playNextSongItems,
             onMoveSongInQueue = onMoveSongInQueue,
-            onPlayNextSongItemClick = onPlayNextSongItemClick,
+            onPlaySongPNQ = onPlaySongPNQ,
         )
     }
 }

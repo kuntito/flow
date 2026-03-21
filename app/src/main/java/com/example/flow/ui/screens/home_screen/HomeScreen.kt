@@ -21,7 +21,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.flow.FlowViewModel
 import com.example.flow.R
@@ -36,7 +35,6 @@ import com.example.flow.ui.components.home_screen.TapToStartPrompt
 import com.example.flow.ui.components.util.AppSnackBar
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.home_screen.components.AudioFlowLoadingIndicator
-import com.example.flow.ui.screens.home_screen.components.SongPlaying
 import com.example.flow.ui.screens.home_screen.components.audio_control.PlaybackRepeatModes
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.theme.colorDebit
@@ -56,10 +54,9 @@ fun HomeScreenRoot(
     val albumArtBitmap by flowViewModel.albumArtBitmap.collectAsState()
 
 
-    val playNextSongItems by flowViewModel.playNextSongQueue.collectAsState()
+    val playNextQueueItems by flowViewModel.playNextSongQueue.collectAsState()
     val onMoveSongInQueue = flowViewModel::swapSongPlayNextQueue
-    // TODO what do you want to do when you click a song from the play next queue
-    val onPlayNextSongItemClick: (Int) -> Unit = {}
+    val onPlaySongPNQ: (Int) -> Unit = flowViewModel::onPlaySongPNQ
 
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
@@ -68,9 +65,9 @@ fun HomeScreenRoot(
         playbackRepeatMode = playbackRepeatMode,
         albumArtBitmap = albumArtBitmap,
         goToSongSearchScreen = goToSongSearchScreen,
-        playNextSongItems = playNextSongItems,
+        playNextSongItems = playNextQueueItems,
         onMoveSongInQueue = onMoveSongInQueue,
-        onPlayNextSongItemClick = onPlayNextSongItemClick,
+        onPlaySongPNQ = onPlaySongPNQ,
     )
 }
 
@@ -85,7 +82,7 @@ fun HomeScreen(
     goToSongSearchScreen: () -> Unit,
     playNextSongItems: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
-    onPlayNextSongItemClick: (Int) -> Unit,
+    onPlaySongPNQ: (Int) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -140,7 +137,7 @@ fun HomeScreen(
                             albumArtBitmap = albumArtBitmap,
                             playNextSongItems = playNextSongItems,
                             onMoveSongInQueue = onMoveSongInQueue,
-                            onPlayNextSongItemClick = onPlayNextSongItemClick,
+                            onPlaySongPNQ = onPlaySongPNQ,
                         )
                     }
                     FlowPlaybackState.Error -> {
@@ -276,7 +273,7 @@ private fun HomeScreenPreview() {
             add(toIdx, removeAt(fromIdx))
         }
     }
-    val onPlayNextSongItemClick: (Int) -> Unit = {}
+    val onPlaySongPNQ: (Int) -> Unit = {}
 
 
     PreviewColumn {
@@ -293,7 +290,7 @@ private fun HomeScreenPreview() {
             goToSongSearchScreen = {},
             playNextSongItems = playNextSongItems,
             onMoveSongInQueue = onMoveSongInQueue,
-            onPlayNextSongItemClick = onPlayNextSongItemClick,
+            onPlaySongPNQ = onPlaySongPNQ,
         )
     }
 }

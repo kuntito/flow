@@ -22,8 +22,6 @@ import com.example.flow.ui.screens.home_screen.components.play_next_queue.models
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -74,7 +72,7 @@ class FlowViewModel(
                 forceRestart = false
             )
         },
-        onNextSong = ::onNextClick,
+        onNextSong = ::handleNextSongPlay,
         onPrevSong = ::onPrevClick,
         onSeekTo = ::onSeekTo,
         coroutineScope = viewModelScope,
@@ -91,7 +89,7 @@ class FlowViewModel(
                         forceRestart = true,
                     )
                 } else if (_repeatMode.value == PlaybackRepeatModes.NoRepeat) {
-                    onNextClick()
+                    handleNextSongPlay()
                 }
             }
         }
@@ -102,20 +100,19 @@ class FlowViewModel(
     private var nextSongJob: Job? = null
 
     /**
-     * plays the next song in the flow.
+     * the next song is usually determined by the flow API.
      *
-     * the default behavior is to let the API handle next song.
-     * however, if [songId] is passed,
-     * that specific song becomes the next song.
+     * sometimes, user specifies a song with [prioritySongId]
+     * this overrides the flow API route.
      */
-    fun onNextClick(
-        songId: Int? = null
+    fun handleNextSongPlay(
+        prioritySongId: Int? = null
     ) {
         if (nextSongJob?.isActive == true) return
         nextSongJob = viewModelScope.launch {
             _flowPlaybackState.value = FlowPlaybackState.FlowStarted.LoadingNextSong
             onPause()
-            val nextSong = fetchNextSong(prioritySongId = songId)
+            val nextSong = fetchNextSong(prioritySongId = prioritySongId)
             nextSong?.let { ns ->
                 onPlay(
                     song = ns,
@@ -126,12 +123,10 @@ class FlowViewModel(
     }
 
     /**
-     * fetches the next song from API.
-     *
-     * converts it to a domain model.
-     * triggers the download of the song's album art.
-     *
+     * fetches the next song from API, converts it to a domain model,
      * returns the song domain model.
+     *
+     * it also triggers the album art download.
      *
      * if something goes wrong, it returns null
      * and sets flow playback error state.
@@ -248,7 +243,7 @@ class FlowViewModel(
         },
         pause = ::onPause,
         seekTo = ::onSeekTo,
-        nextSong = ::onNextClick,
+        nextSong = ::handleNextSongPlay,
         prevSong = ::onPrevClick,
         toggleRepeatMode = ::toggleRepeatMode,
     )
@@ -319,7 +314,7 @@ class FlowViewModel(
         if (_flowPlaybackState.value == FlowPlaybackState.Idle) {
             onStartPlaybackFlow(songId)
         } else {
-            onNextClick(songId)
+            handleNextSongPlay(songId)
         }
     }
 
@@ -398,6 +393,27 @@ class FlowViewModel(
      */
     private fun getNextSongFromPlayNextQueue(): Int? {
         return playNextQueueManager.getNextSong()?.id
+    }
+
+    /**
+     * play song from play next queue.
+     */
+    fun onPlaySongPNQ(songIndexPNQ: Int) {
+        val maybePlayNextSongItem = playNextQueueManager
+            .cherryPickAndTrim(
+                itemIndex = songIndexPNQ
+            )
+        if (maybePlayNextSongItem == null) {
+            // ideally this should never be `null`,
+            // since `songIndexPNQ` is passed from the play next queue.
+            // and play next queue is exactly what's in `playNextQueueManager`.
+            // unless something changes,
+            // `maybePlayNextSongItem` should always have a value.
+            return
+        }
+        handleNextSongPlay(
+            prioritySongId = maybePlayNextSongItem.id
+        )
     }
 
     override fun onCleared() {

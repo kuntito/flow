@@ -2,7 +2,7 @@ package com.example.flow.ui.screens.home_screen.components.play_next_queue
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,7 +23,7 @@ fun PlayNextQueue(
     modifier: Modifier = Modifier,
     songQueue: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
-    onPlayNextSongItemClick: (Int) -> Unit,
+    onPlaySongPNQ: (Int) -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
 
@@ -43,10 +43,10 @@ fun PlayNextQueue(
         modifier = modifier
         ,
     ) {
-        items(
+        itemsIndexed(
             items = songQueue,
-            key = { song -> song.id }
-        ) { song ->
+            key = { index, song -> song.id }
+        ) { index, song ->
             ReorderableItem(
                 reorderableListState,
                 key = song.id
@@ -58,7 +58,7 @@ fun PlayNextQueue(
                         // holding the icon triggers the drag.
                         .draggableHandle(),
                     onClick = {
-                        onPlayNextSongItemClick(song.id)
+                        onPlaySongPNQ(index)
                     },
                 )
             }
@@ -75,12 +75,12 @@ private fun PlayNextQueuePreview() {
             add(toIdx, removeAt(fromIdx))
         }
     }
-    val onPlayNextSongItemClick: (Int) -> Unit = {}
+    val onPlaySongPNQ: (Int) -> Unit = {}
     PreviewColumn {
         PlayNextQueue(
             songQueue = songQueue,
             onMoveSongInQueue = onMoveSongInQueue,
-            onPlayNextSongItemClick = onPlayNextSongItemClick,
+            onPlaySongPNQ = onPlaySongPNQ,
         )
     }
 }

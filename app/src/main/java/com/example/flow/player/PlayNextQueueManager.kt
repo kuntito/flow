@@ -81,4 +81,19 @@ class PlayNextQueueManager(
             add(toIndex, removeAt(fromIndex))
         }
     }
+
+    /**
+     * it returns the [PlayNextSongItem] at the given index,
+     * and updates the play next queue to only items after the index.
+     *
+     * if the index doesn't exist, it returns null.
+     */
+    fun cherryPickAndTrim(itemIndex: Int): PlayNextSongItem? {
+        val queue = _songQueue.value
+        val maybeItem = queue.getOrNull(itemIndex)
+        maybeItem?.let {
+            _songQueue.value = queue.drop(itemIndex + 1)
+        }
+        return maybeItem
+    }
 }

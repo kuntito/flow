@@ -36,15 +36,12 @@ import com.example.flow.ui.theme.colorAguero
 @Composable
 fun AppDraggableSheet(
     modifier: Modifier = Modifier,
-    sheetCollapsedHeight: Int = 48,
+    sheetCollapsedHeight: Int,
+    sheetMaxHeight: Int,
+    appDraggableSheetState: AppDraggableSheetState,
     sheetActiveColor: Color = colorAguero,
     content: @Composable () -> Unit,
 ) {
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-    val appDraggableSheetState = rememberAppDraggableSheetState(
-        minHeight = sheetCollapsedHeight,
-        maxHeight = screenHeight,
-    )
 
     var isSheetHandlePressed by remember { mutableStateOf(false) }
     val onSheetHandlePress: (Boolean) -> Unit = { isPressed ->
@@ -91,7 +88,7 @@ fun AppDraggableSheet(
             .height(
                 lerp(
                     sheetCollapsedHeight.dp,
-                    screenHeight.dp,
+                    sheetMaxHeight.dp,
                     appDraggableSheetState.fractionOfSheetExpanded,
                 )
             )
@@ -118,6 +115,12 @@ fun AppDraggableSheet(
 @Preview
 @Composable
 private fun AppDraggableSheetPreview() {
+    val sheetCollapsedHeight = 48
+    val sheetMaxHeight = LocalConfiguration.current.screenHeightDp
+    val appDraggableSheetState = rememberAppDraggableSheetState(
+        minHeight = sheetCollapsedHeight,
+        maxHeight = sheetMaxHeight,
+    )
     PreviewColumn {
         Box(
             contentAlignment = Alignment.BottomCenter,
@@ -125,7 +128,11 @@ private fun AppDraggableSheetPreview() {
                 .fillMaxSize()
             ,
         ) {
-            AppDraggableSheet() {
+            AppDraggableSheet(
+                sheetCollapsedHeight = sheetCollapsedHeight,
+                sheetMaxHeight = sheetMaxHeight,
+                appDraggableSheetState = appDraggableSheetState,
+            ) {
                 // some random box representing sheet content
                 Box(
                     modifier = Modifier
