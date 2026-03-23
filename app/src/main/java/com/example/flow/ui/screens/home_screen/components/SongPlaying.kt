@@ -25,13 +25,13 @@ import com.example.flow.player.dummyPlaybackUiState
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.home_screen.components.audio_control.AlbumArtSP
 import com.example.flow.ui.screens.home_screen.components.audio_control.AudioControlSection
-import com.example.flow.ui.screens.home_screen.components.audio_control.PlaybackRepeatModes
+import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 
 @Composable
 fun SongPlaying(
     modifier: Modifier = Modifier,
     playbackUiState: PlaybackUiState,
-    playbackRepeatMode: PlaybackRepeatModes,
+    playbackRepeatMode: PlaybackRepeatMode,
     albumArtBitmap: Bitmap?,
 ) {
     Column(
@@ -76,15 +76,27 @@ private fun SongPlayingPreview() {
         val onPause = {
             isPlaying = false
         }
-        var playbackRepeatMode by remember {
+        var repeatMode: PlaybackRepeatMode by remember {
             mutableStateOf(
-                PlaybackRepeatModes.NoRepeat,
+                PlaybackRepeatMode.NoRepeat,
             )
         }
-        val toggleRepeatMode: () -> Unit = {
-            playbackRepeatMode = when(playbackRepeatMode) {
-                PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
-                PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
+
+        val toggleRepeat: () -> Unit = {
+            val curentRepeatMode = repeatMode
+            repeatMode = when(curentRepeatMode) {
+                PlaybackRepeatMode.NoRepeat -> PlaybackRepeatMode.RepeatWithCount(1)
+                is PlaybackRepeatMode.RepeatWithCount -> {
+                    val currCount = curentRepeatMode.repeatCount
+                    val newCount = currCount + 1
+
+                    val atMaxCount = currCount == PlaybackRepeatMode.RepeatWithCount.MAX_REPEAT_COUNT
+                    if (atMaxCount) {
+                        curentRepeatMode
+                    } else {
+                        PlaybackRepeatMode.RepeatWithCount(newCount)
+                    }
+                }
             }
         }
 
@@ -102,7 +114,7 @@ private fun SongPlayingPreview() {
                 },
                 pause = onPause,
                 seekTo = onSeekTo,
-                toggleRepeatMode = toggleRepeatMode,
+                toggleRepeatMode = toggleRepeat,
             )
 
         val playbackUiState = dummyPlaybackUiState
@@ -121,7 +133,7 @@ private fun SongPlayingPreview() {
 
         SongPlaying(
             playbackUiState = playbackUiState,
-            playbackRepeatMode = playbackRepeatMode,
+            playbackRepeatMode = repeatMode,
             albumArtBitmap = albumArtBitmap,
         )
     }

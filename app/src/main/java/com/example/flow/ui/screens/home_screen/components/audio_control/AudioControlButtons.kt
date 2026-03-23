@@ -1,6 +1,5 @@
 package com.example.flow.ui.screens.home_screen.components.audio_control
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,15 +18,16 @@ import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.dummyPlaybackActions
 import com.example.flow.player.dummyPlaybackUiState
 import com.example.flow.ui.components.util.PreviewColumn
+import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 
 @Composable
 fun AudioControlButtons(
     modifier: Modifier = Modifier,
     width: Float,
     playbackUiState: PlaybackUiState,
-    repeatMode: PlaybackRepeatModes,
+    repeatMode: PlaybackRepeatMode,
 ) {
-    val repeatButtonSize = 18
+    val repeatButtonSize = 24
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
@@ -59,15 +59,27 @@ private fun AudioControlButtonPreview() {
         val onPause = {
             isPlaying = false
         }
-        var repeatMode by remember {
+        var repeatMode: PlaybackRepeatMode by remember {
             mutableStateOf(
-                PlaybackRepeatModes.NoRepeat,
+                PlaybackRepeatMode.NoRepeat,
             )
         }
+
         val toggleRepeat: () -> Unit = {
-            repeatMode = when(repeatMode) {
-                PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
-                PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
+            val curentRepeatMode = repeatMode
+            repeatMode = when(curentRepeatMode) {
+                PlaybackRepeatMode.NoRepeat -> PlaybackRepeatMode.RepeatWithCount(1)
+                is PlaybackRepeatMode.RepeatWithCount -> {
+                    val currCount = curentRepeatMode.repeatCount
+                    val newCount = currCount + 1
+
+                    val atMaxCount = currCount == PlaybackRepeatMode.RepeatWithCount.MAX_REPEAT_COUNT
+                    if (atMaxCount) {
+                        curentRepeatMode
+                    } else {
+                        PlaybackRepeatMode.RepeatWithCount(newCount)
+                    }
+                }
             }
         }
 

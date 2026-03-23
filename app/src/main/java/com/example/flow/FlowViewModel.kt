@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import coil.imageLoader
 import coil.request.ImageRequest
+import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
@@ -17,9 +18,10 @@ import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
 import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.SongPlayer
-import com.example.flow.ui.screens.home_screen.components.audio_control.PlaybackRepeatModes
+import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.toPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
+import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,21 +31,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 class FlowViewModel(
     private val appContext: Application,
     private val flowDS: FlowApiDataSource,
 ): AndroidViewModel(appContext) {
+    private val eventChannel = Channel<AppEvent>()
+    val appEventsFlow = eventChannel.receiveAsFlow()
     private val songPlayer = SongPlayer(
         viewModelScope,
         appContext,
     )
     private val playerState = songPlayer.playerState
 
-    private val _repeatMode = MutableStateFlow(
-        PlaybackRepeatModes.NoRepeat
+    private val _repeatMode: MutableStateFlow<PlaybackRepeatMode> = MutableStateFlow(
+        PlaybackRepeatMode.NoRepeat
     )
-    val playbackRepeatMode: StateFlow<PlaybackRepeatModes> = _repeatMode.asStateFlow()
+    val playbackRepeatMode: StateFlow<PlaybackRepeatMode> = _repeatMode.asStateFlow()
 
     fun onPlay(
         song: Song,
@@ -83,12 +89,13 @@ class FlowViewModel(
     init {
         viewModelScope.launch {
             songPlayer.onPlaybackComplete.collect { lastPlayedSong ->
-                if (_repeatMode.value == PlaybackRepeatModes.RepeatOne) {
+                if (_repeatMode.value is PlaybackRepeatMode.RepeatWithCount) {
+                    decrementRepeatCount()
                     onPlay(
                         song = lastPlayedSong,
                         forceRestart = true,
                     )
-                } else if (_repeatMode.value == PlaybackRepeatModes.NoRepeat) {
+                } else if (_repeatMode.value == PlaybackRepeatMode.NoRepeat) {
                     handleNextSongPlay()
                 }
             }
@@ -226,9 +233,40 @@ class FlowViewModel(
     }
 
     fun toggleRepeatMode() {
-        _repeatMode.value = when(_repeatMode.value) {
-            PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
-            PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
+        val curRepeatMode = _repeatMode.value
+        _repeatMode.value = when(curRepeatMode) {
+            PlaybackRepeatMode.NoRepeat -> PlaybackRepeatMode.RepeatWithCount(1)
+            is PlaybackRepeatMode.RepeatWithCount -> {
+                val curRepeatCount = curRepeatMode.repeatCount
+                val newRepeatCount = curRepeatCount + 1
+
+                val atMaxRepeats = PlaybackRepeatMode.RepeatWithCount.MAX_REPEAT_COUNT == curRepeatCount
+
+                if (atMaxRepeats) {
+                    viewModelScope.launch {
+                        eventChannel.send(SongPlayingEvent.OnExceedMaxRepeats)
+                    }
+                    curRepeatMode
+                } else {
+                    PlaybackRepeatMode.RepeatWithCount(newRepeatCount)
+                }
+            }
+        }
+    }
+
+    fun decrementRepeatCount() {
+        val curRepeatMode = _repeatMode.value
+        if (curRepeatMode is PlaybackRepeatMode.RepeatWithCount) {
+            val curRepeatCount = curRepeatMode.repeatCount
+            val newRepeatCount = curRepeatCount - 1
+
+            _repeatMode.value = if (newRepeatCount <= 0) {
+                PlaybackRepeatMode.NoRepeat
+            } else {
+                PlaybackRepeatMode.RepeatWithCount(
+                    newRepeatCount
+                )
+            }
         }
     }
 

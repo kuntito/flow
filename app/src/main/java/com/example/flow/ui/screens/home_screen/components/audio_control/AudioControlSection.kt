@@ -19,13 +19,14 @@ import com.example.flow.player.dummyPlaybackActions
 import com.example.flow.player.dummyPlaybackUiState
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.home_screen.components.audio_control.seek_bar.SeekBar
+import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 
 @Composable
 fun AudioControlSection(
     modifier: Modifier = Modifier,
     width: Float = 256f,
     playbackUiState: PlaybackUiState,
-    repeatMode: PlaybackRepeatModes,
+    repeatMode: PlaybackRepeatMode,
 ) {
 
     Column(
@@ -65,15 +66,27 @@ private fun AudioControlSectionPreview() {
         val onPause = {
             isPlaying = false
         }
-        var repeatMode by remember {
+        var repeatMode: PlaybackRepeatMode by remember {
             mutableStateOf(
-                PlaybackRepeatModes.NoRepeat,
+                PlaybackRepeatMode.NoRepeat,
             )
         }
+
         val toggleRepeat: () -> Unit = {
-            repeatMode = when(repeatMode) {
-                PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
-                PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
+            val curentRepeatMode = repeatMode
+            repeatMode = when(curentRepeatMode) {
+                PlaybackRepeatMode.NoRepeat -> PlaybackRepeatMode.RepeatWithCount(1)
+                is PlaybackRepeatMode.RepeatWithCount -> {
+                    val currCount = curentRepeatMode.repeatCount
+                    val newCount = currCount + 1
+
+                    val atMaxCount = currCount == PlaybackRepeatMode.RepeatWithCount.MAX_REPEAT_COUNT
+                    if (atMaxCount) {
+                        curentRepeatMode
+                    } else {
+                        PlaybackRepeatMode.RepeatWithCount(newCount)
+                    }
+                }
             }
         }
 

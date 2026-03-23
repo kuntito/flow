@@ -35,14 +35,17 @@ import com.example.flow.ui.components.home_screen.TapToStartPrompt
 import com.example.flow.ui.components.util.AppSnackBar
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.home_screen.components.AudioFlowLoadingIndicator
-import com.example.flow.ui.screens.home_screen.components.audio_control.PlaybackRepeatModes
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalResources
+import com.example.flow.data.models.AppEvent
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
+import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun HomeScreenRoot(
@@ -58,6 +61,8 @@ fun HomeScreenRoot(
     val onMoveSongInQueue = flowViewModel::swapSongPlayNextQueue
     val onPlaySongPNQ: (Int) -> Unit = flowViewModel::onPlaySongPNQ
 
+    val appEventsFlow = flowViewModel.appEventsFlow
+
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
         flowPlaybackState = flowPlaybackState,
@@ -68,6 +73,7 @@ fun HomeScreenRoot(
         playNextSongItems = playNextQueueItems,
         onMoveSongInQueue = onMoveSongInQueue,
         onPlaySongPNQ = onPlaySongPNQ,
+        appEventsFlow = appEventsFlow,
     )
 }
 
@@ -77,12 +83,13 @@ fun HomeScreen(
     startPlaybackFlow: () -> Unit,
     flowPlaybackState: FlowPlaybackState,
     onFlowPlaybackErrorAcknowledged: () -> Unit,
-    playbackRepeatMode: PlaybackRepeatModes,
+    playbackRepeatMode: PlaybackRepeatMode,
     albumArtBitmap: Bitmap?,
     goToSongSearchScreen: () -> Unit,
     playNextSongItems: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
+    appEventsFlow: Flow<AppEvent>,
 ) {
     Scaffold(
         topBar = {
@@ -138,6 +145,7 @@ fun HomeScreen(
                             playNextSongItems = playNextSongItems,
                             onMoveSongInQueue = onMoveSongInQueue,
                             onPlaySongPNQ = onPlaySongPNQ,
+                            appEventsFlow = appEventsFlow,
                         )
                     }
                     FlowPlaybackState.Error -> {
@@ -178,15 +186,27 @@ private fun HomeScreenPreview() {
     val onPause = {
         isPlaying = false
     }
-    var playbackRepeatMode by remember {
+    var playbackRepeatMode: PlaybackRepeatMode by remember {
         mutableStateOf(
-            PlaybackRepeatModes.NoRepeat,
+            PlaybackRepeatMode.NoRepeat,
         )
     }
+
     val toggleRepeatMode: () -> Unit = {
-        playbackRepeatMode = when(playbackRepeatMode) {
-            PlaybackRepeatModes.NoRepeat -> PlaybackRepeatModes.RepeatOne
-            PlaybackRepeatModes.RepeatOne -> PlaybackRepeatModes.NoRepeat
+        val curentRepeatMode = playbackRepeatMode
+        playbackRepeatMode = when(curentRepeatMode) {
+            PlaybackRepeatMode.NoRepeat -> PlaybackRepeatMode.RepeatWithCount(1)
+            is PlaybackRepeatMode.RepeatWithCount -> {
+                val currCount = curentRepeatMode.repeatCount
+                val newCount = currCount + 1
+
+                val atMaxCount = currCount == PlaybackRepeatMode.RepeatWithCount.MAX_REPEAT_COUNT
+                if (atMaxCount) {
+                    curentRepeatMode
+                } else {
+                    PlaybackRepeatMode.RepeatWithCount(newCount)
+                }
+            }
         }
     }
 
@@ -274,7 +294,7 @@ private fun HomeScreenPreview() {
         }
     }
     val onPlaySongPNQ: (Int) -> Unit = {}
-
+    val appEventsFlow = emptyFlow<AppEvent>()
 
     PreviewColumn {
         AppTextButton(
@@ -291,6 +311,7 @@ private fun HomeScreenPreview() {
             playNextSongItems = playNextSongItems,
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
+            appEventsFlow = appEventsFlow,
         )
     }
 }
