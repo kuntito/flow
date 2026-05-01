@@ -1,18 +1,15 @@
 package com.example.flow
 
 import android.app.Application
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import coil.imageLoader
-import coil.request.ImageRequest
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.SongSearchItem
 import com.example.flow.data.remote.response_models.SongWithUrl
+import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.player.NotificationPlayerVmBridge
 import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
@@ -24,15 +21,15 @@ import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
 
 class FlowViewModel(
     private val appContext: Application,
@@ -54,6 +51,12 @@ class FlowViewModel(
     )
     val playbackRepeatMode = repeatSongManager.playbackRepeatMode
 
+    private val albumArtLoader = AlbumArtLoader(
+        appContext = appContext,
+        coroutineScope = viewModelScope,
+    )
+    val albumArtBitmap = albumArtLoader.albumArtBitmap
+
 
     fun onPlay(
         song: Song,
@@ -69,8 +72,6 @@ class FlowViewModel(
             }
         )
     }
-    private val _albumArtBitmap = MutableStateFlow<Bitmap?>(null)
-    val albumArtBitmap: StateFlow<Bitmap?> = _albumArtBitmap.asStateFlow()
 
     private val notificationBridge = NotificationPlayerVmBridge(
         appContext = appContext,
@@ -86,7 +87,7 @@ class FlowViewModel(
         onPrevSong = ::onPrevClick,
         onSeekTo = ::onSeekTo,
         coroutineScope = viewModelScope,
-        albumArtBitmap = albumArtBitmap
+        albumArtBitmap = albumArtLoader.albumArtBitmap
     )
 
 
@@ -152,8 +153,9 @@ class FlowViewModel(
         } else {
             val nextSong = songWithUrl.toSong()
 
-            _albumArtBitmap.value = null
-            loadAlbumArtCurrentSong(nextSong.albumArtUrl)
+            albumArtLoader.loadFromUrl(
+                nextSong.albumArtUrl
+            )
 
             nextSong
         }
@@ -184,46 +186,6 @@ class FlowViewModel(
         return flowDS.safeFetchNextSong()?.songWithUrl
     }
 
-
-    /**
-     * downloads album art, converts it to a bitmap, and returns bitmap.
-     *
-     * if something goes wrong, it returns null.
-     */
-    private suspend fun fetchAlbumArtBitmap(
-        aaUrl: String?
-    ): Bitmap? {
-        aaUrl ?: return null
-
-        val imageReq = ImageRequest.Builder(appContext)
-            .data(aaUrl)
-            .allowHardware(false)
-            .build()
-
-        val reqDrawable = (
-                appContext
-                    .imageLoader
-                    .execute(
-                        request = imageReq
-                    )
-                ).drawable
-        val maybeBitmapDrawable = reqDrawable as? BitmapDrawable
-        return maybeBitmapDrawable?.bitmap
-    }
-
-    private var loadAlbumArtJob: Job? = null
-
-    /**
-     * fetches the album art,
-     * converts it to a bitmap, then updates the global flow, `_albumArtBitmap`
-     */
-    private fun loadAlbumArtCurrentSong(aaUrl: String?) {
-        loadAlbumArtJob?.cancel()
-        loadAlbumArtJob = viewModelScope.launch {
-            val bitmap = fetchAlbumArtBitmap(aaUrl)
-            _albumArtBitmap.value = bitmap
-        }
-    }
 
     fun onPrevClick() {}
 
