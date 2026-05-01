@@ -8,8 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 object FlowApiClient {
-    // TODO replace with stable base url
-    private const val BASE_URL = "https://68fa-2-101-9-191.ngrok-free.app"
+    private const val BASE_URL = "https://flow-api-o6gg.onrender.com"
 
     // JSON parser with Kotlin support, apparently, JS has this in-built, so i didn't have to do it.
     private val moshi = Moshi
