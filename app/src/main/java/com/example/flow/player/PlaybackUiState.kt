@@ -10,7 +10,7 @@ data class PlaybackUiState(
     val playbackActions: PlaybackActions,
 ) {
     companion object {
-        fun onNextSong() = PlaybackUiState(
+        fun onNextSongLoading() = PlaybackUiState(
             currentSong = Song(
                 id = 0,
                 title = "",

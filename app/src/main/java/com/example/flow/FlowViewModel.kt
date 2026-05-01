@@ -141,7 +141,7 @@ class FlowViewModel(
     suspend fun fetchNextSong(
         prioritySongId: Int?
     ): Song? {
-        val songWithUrl = getNextSongUrl(prioritySongId)
+        val songWithUrl = resolveNextSongUrl(prioritySongId)
 
         return if (songWithUrl == null) {
             _flowPlaybackState.value = FlowPlaybackState.Error
@@ -166,7 +166,7 @@ class FlowViewModel(
      * if not, checks the play next queue, if that has songs, it fetches the first one.
      * if not, defaults to the API's next.
      */
-    suspend fun getNextSongUrl(
+    suspend fun resolveNextSongUrl(
         prioritySongId: Int?
     ): SongWithUrl? {
         if (prioritySongId != null) {

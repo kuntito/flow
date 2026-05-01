@@ -11,6 +11,7 @@ import com.example.flow.flowDebugTag
 import com.example.flow.ui.components.general.AppTextButton
 import com.example.flow.ui.components.util.PreviewColumn
 
+// TODO move this to screens.home_screen
 @Composable
 fun TapToStartPrompt(
     modifier: Modifier = Modifier,

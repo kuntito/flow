@@ -136,7 +136,7 @@ fun HomeScreen(
                     is FlowPlaybackState.FlowStarted -> {
                         val playbackUiState = when(flowPlaybackState) {
                             is FlowPlaybackState.FlowStarted.LoadComplete -> flowPlaybackState.playbackUiState
-                            is FlowPlaybackState.FlowStarted.LoadingNextSong -> PlaybackUiState.onNextSong()
+                            is FlowPlaybackState.FlowStarted.LoadingNextSong -> PlaybackUiState.onNextSongLoading()
                         }
                         SongPlayingWithPlayNextSheet(
                             playbackUiState = playbackUiState,

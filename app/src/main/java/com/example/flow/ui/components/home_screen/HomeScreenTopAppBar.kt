@@ -19,6 +19,7 @@ import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.theme.colorTelli
 
+// TODO move this to screens.home_screen
 @Composable
 fun FlowTopAppBar(
     modifier: Modifier = Modifier,
