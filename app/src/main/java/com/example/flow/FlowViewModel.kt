@@ -17,8 +17,8 @@ import com.example.flow.player.NotificationPlayerVmBridge
 import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
 import com.example.flow.player.PlaybackUiState
+import com.example.flow.player.RepeatSongManager
 import com.example.flow.player.SongPlayer
-import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.toPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
@@ -46,10 +46,14 @@ class FlowViewModel(
     )
     private val playerState = songPlayer.playerState
 
-    private val _repeatMode: MutableStateFlow<PlaybackRepeatMode> = MutableStateFlow(
-        PlaybackRepeatMode.NoRepeat
+    private val repeatSongManager = RepeatSongManager(
+        coroutineScope = viewModelScope,
+        onAttemptExceedMaxRepeats = {
+            eventChannel.send(SongPlayingEvent.OnExceedMaxRepeats)
+        }
     )
-    val playbackRepeatMode: StateFlow<PlaybackRepeatMode> = _repeatMode.asStateFlow()
+    val playbackRepeatMode = repeatSongManager.playbackRepeatMode
+
 
     fun onPlay(
         song: Song,
@@ -89,13 +93,12 @@ class FlowViewModel(
     init {
         viewModelScope.launch {
             songPlayer.onPlaybackComplete.collect { lastPlayedSong ->
-                if (_repeatMode.value is PlaybackRepeatMode.RepeatWithCount) {
-                    decrementRepeatCount()
+                if (repeatSongManager.consumeRepeatIfActive()) {
                     onPlay(
                         song = lastPlayedSong,
                         forceRestart = true,
                     )
-                } else if (_repeatMode.value == PlaybackRepeatMode.NoRepeat) {
+                } else {
                     handleNextSongPlay()
                 }
             }
@@ -232,43 +235,6 @@ class FlowViewModel(
         songPlayer.seekTo(progress)
     }
 
-    fun toggleRepeatMode() {
-        val curRepeatMode = _repeatMode.value
-        _repeatMode.value = when(curRepeatMode) {
-            PlaybackRepeatMode.NoRepeat -> PlaybackRepeatMode.RepeatWithCount(1)
-            is PlaybackRepeatMode.RepeatWithCount -> {
-                val curRepeatCount = curRepeatMode.repeatCount
-                val newRepeatCount = curRepeatCount + 1
-
-                val atMaxRepeats = PlaybackRepeatMode.RepeatWithCount.MAX_REPEAT_COUNT == curRepeatCount
-
-                if (atMaxRepeats) {
-                    viewModelScope.launch {
-                        eventChannel.send(SongPlayingEvent.OnExceedMaxRepeats)
-                    }
-                    curRepeatMode
-                } else {
-                    PlaybackRepeatMode.RepeatWithCount(newRepeatCount)
-                }
-            }
-        }
-    }
-
-    fun decrementRepeatCount() {
-        val curRepeatMode = _repeatMode.value
-        if (curRepeatMode is PlaybackRepeatMode.RepeatWithCount) {
-            val curRepeatCount = curRepeatMode.repeatCount
-            val newRepeatCount = curRepeatCount - 1
-
-            _repeatMode.value = if (newRepeatCount <= 0) {
-                PlaybackRepeatMode.NoRepeat
-            } else {
-                PlaybackRepeatMode.RepeatWithCount(
-                    newRepeatCount
-                )
-            }
-        }
-    }
 
     val playbackActions = PlaybackActions(
         // `play` in this context is called from the play/pause button on the UI
@@ -283,7 +249,7 @@ class FlowViewModel(
         seekTo = ::onSeekTo,
         nextSong = ::handleNextSongPlay,
         prevSong = ::onPrevClick,
-        toggleRepeatMode = ::toggleRepeatMode,
+        toggleRepeatMode = repeatSongManager::toggleRepeatMode,
     )
 
     private val _flowPlaybackState = MutableStateFlow<FlowPlaybackState>(
