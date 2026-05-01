@@ -10,6 +10,7 @@ import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.SongSearchItem
 import com.example.flow.data.remote.response_models.SongWithUrl
 import com.example.flow.helper_classes.AlbumArtLoader
+import com.example.flow.helper_classes.SongSearchManager
 import com.example.flow.player.NotificationPlayerVmBridge
 import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
@@ -19,13 +20,11 @@ import com.example.flow.player.SongPlayer
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.toPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
-import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -56,6 +55,15 @@ class FlowViewModel(
         coroutineScope = viewModelScope,
     )
     val albumArtBitmap = albumArtLoader.albumArtBitmap
+
+    private val songSearchManager = SongSearchManager(
+        flowDS = flowDS,
+        coroutineScope = viewModelScope,
+    )
+    val songSearchState = songSearchManager.songSearchState
+    val onSongSearchErrorAcknowledged = songSearchManager::onSongSearchErrorAcknowledged
+    val searchForSong = songSearchManager::searchForSong
+    val resetSongSearchState = songSearchManager::resetSongSearchState
 
 
     fun onPlay(
@@ -284,45 +292,6 @@ class FlowViewModel(
         }
     }
 
-    private val _songSearchState = MutableStateFlow<SongSearchState>(
-        SongSearchState.Idle
-    )
-    val songSearchState: StateFlow<SongSearchState> = _songSearchState.asStateFlow()
-
-    private var songSearchJob: Job? = null
-    fun searchForSong(query: String) {
-        if (query.trim().isEmpty()) {
-            _songSearchState.value = SongSearchState.Idle
-            return
-        }
-
-        songSearchJob?.cancel()
-        songSearchJob = viewModelScope.launch {
-            _songSearchState.value = SongSearchState.Searching
-
-            val songSearchResponse = flowDS.safeSearchSong(query)
-            val songSearchResults = songSearchResponse?.searchResults
-
-            if (songSearchResults == null) {
-                _songSearchState.value = SongSearchState.Error
-            } else if (songSearchResults.isEmpty()) {
-                _songSearchState.value = SongSearchState.FinishedNoResult
-            } else {
-                _songSearchState.value = SongSearchState.FinishedWithResults(
-                    songSearchResults = songSearchResults
-                )
-            }
-
-        }
-    }
-
-    fun onSongSearchErrorAcknowledged() {
-        _songSearchState.value = SongSearchState.Idle
-    }
-
-    fun resetSongSearchState() {
-        _songSearchState.value = SongSearchState.Idle
-    }
 
     private val playNextQueueManager = PlayNextQueueManager(
         coroutineScope = viewModelScope,

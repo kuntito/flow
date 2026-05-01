@@ -41,8 +41,8 @@ fun SongSearchScreenRoot(
     goToPreviousScreen: () -> Unit,
 ) {
     val songSearchState by flowViewModel.songSearchState.collectAsState()
-    val onSongSearchErrorAcknowledged = flowViewModel::onSongSearchErrorAcknowledged
-    val onSongSearch = flowViewModel::searchForSong
+    val onSongSearchErrorAcknowledged = flowViewModel.onSongSearchErrorAcknowledged
+    val onSongSearch = flowViewModel.searchForSong
     val resetSongSearchState = flowViewModel::resetSongSearchState
     val onBackButtonClick = {
         resetSongSearchState()

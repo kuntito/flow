@@ -27,6 +27,7 @@ import com.example.flow.ui.theme.colorAguero
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+// TODO impl, maxLines = 1, for song title and artistStr
 @Composable
 fun SongSearchSLI(
     modifier: Modifier = Modifier,
