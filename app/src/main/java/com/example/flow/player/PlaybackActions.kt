@@ -1,9 +1,7 @@
 package com.example.flow.player
 
-import com.example.flow.data.models.Song
-
 data class PlaybackActions (
-    val play: (Song) -> Unit,
+    val continuePlay: () -> Unit,
     val pause: () -> Unit,
     val seekTo: (Float) -> Unit,
     val nextSong: () -> Unit,
@@ -12,7 +10,7 @@ data class PlaybackActions (
 )
 
 val dummyPlaybackActions = PlaybackActions(
-    play = {},
+    continuePlay = {},
     pause = {},
     seekTo = {},
     nextSong = {},

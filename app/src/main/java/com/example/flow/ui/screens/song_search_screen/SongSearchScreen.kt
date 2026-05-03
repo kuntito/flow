@@ -53,8 +53,8 @@ fun SongSearchScreenRoot(
         onBackButtonClick()
     }
 
-    val onPlaySongNext: (SongSearchItem) -> Unit = flowViewModel::playSongNext
-    val onPlaySongLater: (SongSearchItem) -> Unit = flowViewModel::playSongLater
+    val onPlaySongNextFromSearch: (SongSearchItem) -> Unit = flowViewModel::playSongNextFromSearch
+    val onPlaySongLaterFromSearch: (SongSearchItem) -> Unit = flowViewModel::playSongLaterFromSearch
     val playNextSongExists by flowViewModel.playNextSongExists.collectAsState()
 
     SongSearchScreen(
@@ -63,8 +63,8 @@ fun SongSearchScreenRoot(
         onSongSearchErrorAcknowledged = onSongSearchErrorAcknowledged,
         onBackButtonClick = onBackButtonClick,
         onPlaySongSearchItem = onPlaySongSearchItem,
-        onPlaySongNext = onPlaySongNext,
-        onPlaySongLater = onPlaySongLater,
+        onPlaySongNext = onPlaySongNextFromSearch,
+        onPlaySongLater = onPlaySongLaterFromSearch,
         playNextSongExists = playNextSongExists,
     )
 }

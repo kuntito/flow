@@ -99,7 +99,7 @@ private fun AudioControlSectionPreview() {
 
         val playbackActions = dummyPlaybackActions
             .copy(
-                play = {
+                continuePlay = {
                     onPlay(currentSong)
                 },
                 pause = onPause,

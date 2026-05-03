@@ -1,6 +1,7 @@
 package com.example.flow.player
 
 
+import com.example.flow.data.models.Song
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,25 +35,25 @@ import kotlinx.coroutines.flow.stateIn
 class PlayNextQueueManager(
     coroutineScope: CoroutineScope,
 ) {
-    private val _songQueue = MutableStateFlow<List<PlayNextSongItem>>(emptyList())
-    val songQueue: StateFlow<List<PlayNextSongItem>> = _songQueue.asStateFlow()
+    private val _playNextQueue = MutableStateFlow<List<PlayNextSongItem>>(emptyList())
+    val songQueue: StateFlow<List<PlayNextSongItem>> = _playNextQueue.asStateFlow()
 
-    val hasNext: StateFlow<Boolean> = _songQueue
+    val hasNextSong: StateFlow<Boolean> = _playNextQueue
         .map { it.isNotEmpty() }
         .stateIn(
             coroutineScope,
             SharingStarted.Eagerly,
-            _songQueue.value.isNotEmpty()
+            _playNextQueue.value.isNotEmpty()
         )
 
 
     fun getNextSong(): PlayNextSongItem? {
-        _songQueue.value.let { queue ->
+        _playNextQueue.value.let { queue ->
             if (queue.isEmpty()) return null
 
             val nextSong = queue.first()
 
-            _songQueue.value = queue.drop(1)
+            _playNextQueue.value = queue.drop(1)
 
             return nextSong
         }
@@ -62,37 +63,37 @@ class PlayNextQueueManager(
      * places song at the start of the queue
      */
     fun addNext(
-        playNextSongItem: PlayNextSongItem
+        songToPlayNext: PlayNextSongItem
     ) {
-        _songQueue.value = listOf(playNextSongItem) + _songQueue.value
+        _playNextQueue.value = listOf(songToPlayNext) + _playNextQueue.value
     }
 
     /**
      * places song at the end of the queue
      */
     fun addLater(
-        playNextSongItem: PlayNextSongItem
+        songToPlayLater: PlayNextSongItem
     ) {
-        _songQueue.value += playNextSongItem
+        _playNextQueue.value += songToPlayLater
     }
 
     fun swapSongs(fromIndex: Int, toIndex: Int) {
-        _songQueue.value = _songQueue.value.toMutableList().apply {
+        _playNextQueue.value = _playNextQueue.value.toMutableList().apply {
             add(toIndex, removeAt(fromIndex))
         }
     }
 
     /**
-     * it returns the [PlayNextSongItem] at the given index,
+     * it returns the [Song] at the given index,
      * and updates the play next queue to only items after the index.
      *
      * if the index doesn't exist, it returns null.
      */
     fun cherryPickAndTrim(itemIndex: Int): PlayNextSongItem? {
-        val queue = _songQueue.value
+        val queue = _playNextQueue.value
         val maybeItem = queue.getOrNull(itemIndex)
         maybeItem?.let {
-            _songQueue.value = queue.drop(itemIndex + 1)
+            _playNextQueue.value = queue.drop(itemIndex + 1)
         }
         return maybeItem
     }

@@ -45,7 +45,7 @@ fun SongPlayingWithPlayNextSheet(
     playbackUiState: PlaybackUiState,
     playbackRepeatMode: PlaybackRepeatMode,
     albumArtBitmap: Bitmap?,
-    playNextSongItems: List<PlayNextSongItem>,
+    playNextQueue: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     appEventsFlow: Flow<AppEvent>,
@@ -76,7 +76,7 @@ fun SongPlayingWithPlayNextSheet(
                 SongPlayingEvent.OnExceedMaxRepeats -> {
                     displayMaxRepeatsSnackBar()
                 }
-//                else -> {}
+                else -> {}
             }
         }
 
@@ -92,12 +92,12 @@ fun SongPlayingWithPlayNextSheet(
                     .align(Alignment.Center)
             )
             AnimatedVisibility(
-                visible = playNextSongItems.isNotEmpty(),
+                visible = playNextQueue.isNotEmpty(),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
             ) {
                 PlayNextQueueSheet(
-                    songQueue = playNextSongItems,
+                    songQueue = playNextQueue,
                     onMoveSongInQueue = onMoveSongInQueue,
                     onPlaySongPNQ = onPlaySongPNQ,
                 )
@@ -161,7 +161,7 @@ private fun SongPlayingWithPlayNextSheetPreview() {
 
     val playbackActions = dummyPlaybackActions
         .copy(
-            play = {
+            continuePlay = {
                 onPlay(currentSong)
             },
             pause = onPause,
@@ -203,7 +203,7 @@ private fun SongPlayingWithPlayNextSheetPreview() {
             playbackUiState = playbackUiState,
             playbackRepeatMode = playbackRepeatMode,
             albumArtBitmap = albumArtBitmap,
-            playNextSongItems = playNextSongItems,
+            playNextQueue = playNextSongItems,
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
             appEventsFlow = appEventsFlow,

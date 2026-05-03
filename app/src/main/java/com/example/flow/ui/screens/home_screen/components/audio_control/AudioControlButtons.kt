@@ -13,7 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.flow.data.models.Song
 import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.dummyPlaybackActions
 import com.example.flow.player.dummyPlaybackUiState
@@ -53,7 +52,7 @@ private fun AudioControlButtonPreview() {
         var isPlaying by remember {
             mutableStateOf(false)
         }
-        val onPlay: (Song) -> Unit = { _ ->
+        val continuePlay: () -> Unit = {
             isPlaying = true
         }
         val onPause = {
@@ -86,7 +85,7 @@ private fun AudioControlButtonPreview() {
         val playbackActions = dummyPlaybackActions
             .copy(
                 toggleRepeatMode = toggleRepeat,
-                play = onPlay,
+                continuePlay = continuePlay,
                 pause = onPause
             )
 

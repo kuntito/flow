@@ -109,7 +109,7 @@ private fun SongPlayingPreview() {
 
         val playbackActions = dummyPlaybackActions
             .copy(
-                play = {
+                continuePlay = {
                     onPlay(currentSong)
                 },
                 pause = onPause,

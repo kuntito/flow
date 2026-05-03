@@ -47,9 +47,7 @@ fun PrevPlayPauseNextButtons(
             isPlaying = isPlaying,
             onPause = playbackActions.pause,
             onPlay = {
-                playbackActions.play(
-                    currentSong
-                )
+                playbackActions.continuePlay()
             },
         )
         Spacer(modifier = Modifier.width(rightSpacer.dp))
@@ -77,7 +75,7 @@ private fun PrevPlayPauseNextButtonsPreview() {
         val currentSong = dummySong
         val playbackActions = dummyPlaybackActions
             .copy(
-                play = {
+                continuePlay = {
                     onPlay(currentSong)
                 },
                 pause = onPause,

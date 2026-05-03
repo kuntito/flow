@@ -7,7 +7,7 @@ data class Song(
     val title: String,
     val artistStr: String,
     val durationMillis: Int,
-    val albumArtUrl: String? = null,
+    val albumArtUrl: String,
     val songUrl: String,
 )
 
@@ -20,153 +20,119 @@ fun SongWithUrl.toSong() = Song(
     songUrl = songUrl,
 )
 
-val dummySong = Song(
+private val template = Song(
+    id = 0,
+    title = "",
+    artistStr = "",
+    durationMillis = 150000,
+    albumArtUrl = "",
+    songUrl = "",
+)
+val dummySong = template.copy(
     id = 0,
     title = "Monica Lewinsky",
     artistStr = "SAINt JHN",
-    durationMillis = 150000,
-    songUrl = "",
 )
 
 val dummySongList = listOf(
-    Song(
+    template.copy(
         id = 0,
         title = "Monica Lewinsky",
         artistStr = "SAINt JHN",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 1,
         title = "Switched Up",
         artistStr = "Nasty C",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 2,
         title = "Storage",
         artistStr = "Conor Maynard",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 3,
         title = "Understand",
         artistStr = "Omah Lay",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 4,
         title = "Waka Jeje",
         artistStr = "BNXN (feat. Majeeed)",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 5,
         title = "Naira Marley",
         artistStr = "Zinoleesky",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 6,
         title = "Champion",
         artistStr = "Elina",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 7,
         title = "Again",
         artistStr = "Sasha Sloan",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 8,
         title = "smiling when i die",
         artistStr = "Sasha Sloan",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 9,
         title = "Dealer",
         artistStr = "Ayo Maff (feat. FireboyDML)",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 10,
         title = "365 Days",
         artistStr = "Tml Vibez",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 11,
         title = "Design",
         artistStr = "Olivetheboy",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 12,
         title = "Rara",
         artistStr = "Tml Vibez",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 13,
         title = "Fall Back",
         artistStr = "Lithe",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 14,
         title = "Can't Breathe",
         artistStr = "Llona",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 15,
         title = "23",
         artistStr = "Burna Boy",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 16,
         title = "HBP (Remix)",
         artistStr = "Llona (feat. Bella Shmurda)",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 17,
         title = "Trees",
         artistStr = "Olivetheboy",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 18,
         title = "Worst Luck",
         artistStr = "6LACK",
-        durationMillis = 150000,
-        songUrl = "",
     ),
-    Song(
+    template.copy(
         id = 19,
         title = "Dreams",
         artistStr = "NF",
-        durationMillis = 150000,
-        songUrl = "",
     ),
 )

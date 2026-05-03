@@ -41,8 +41,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalResources
 import com.example.flow.data.models.AppEvent
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
-import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
+import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -57,7 +57,7 @@ fun HomeScreenRoot(
     val albumArtBitmap by flowViewModel.albumArtBitmap.collectAsState()
 
 
-    val playNextQueueItems by flowViewModel.playNextSongQueue.collectAsState()
+    val playNextQueue by flowViewModel.playNextSongQueue.collectAsState()
     val onMoveSongInQueue = flowViewModel::swapSongPlayNextQueue
     val onPlaySongPNQ: (Int) -> Unit = flowViewModel::onPlaySongPNQ
 
@@ -70,7 +70,7 @@ fun HomeScreenRoot(
         playbackRepeatMode = playbackRepeatMode,
         albumArtBitmap = albumArtBitmap,
         goToSongSearchScreen = goToSongSearchScreen,
-        playNextSongItems = playNextQueueItems,
+        playNextQueue = playNextQueue,
         onMoveSongInQueue = onMoveSongInQueue,
         onPlaySongPNQ = onPlaySongPNQ,
         appEventsFlow = appEventsFlow,
@@ -86,7 +86,7 @@ fun HomeScreen(
     playbackRepeatMode: PlaybackRepeatMode,
     albumArtBitmap: Bitmap?,
     goToSongSearchScreen: () -> Unit,
-    playNextSongItems: List<PlayNextSongItem>,
+    playNextQueue: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     appEventsFlow: Flow<AppEvent>,
@@ -142,7 +142,7 @@ fun HomeScreen(
                             playbackUiState = playbackUiState,
                             playbackRepeatMode = playbackRepeatMode,
                             albumArtBitmap = albumArtBitmap,
-                            playNextSongItems = playNextSongItems,
+                            playNextQueue = playNextQueue,
                             onMoveSongInQueue = onMoveSongInQueue,
                             onPlaySongPNQ = onPlaySongPNQ,
                             appEventsFlow = appEventsFlow,
@@ -219,7 +219,7 @@ private fun HomeScreenPreview() {
 
     val playbackActions = dummyPlaybackActions
         .copy(
-            play = {
+            continuePlay = {
                 onPlay(currentSong)
             },
             pause = onPause,
@@ -308,7 +308,7 @@ private fun HomeScreenPreview() {
             playbackRepeatMode = playbackRepeatMode,
             albumArtBitmap = albumArtBitmap,
             goToSongSearchScreen = {},
-            playNextSongItems = playNextSongItems,
+            playNextQueue = playNextSongItems,
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
             appEventsFlow = appEventsFlow,

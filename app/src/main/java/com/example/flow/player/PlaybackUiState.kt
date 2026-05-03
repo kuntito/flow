@@ -15,7 +15,7 @@ data class PlaybackUiState(
                 id = 0,
                 title = "",
                 artistStr = "",
-                albumArtUrl = null,
+                albumArtUrl = "",
                 songUrl = "",
                 durationMillis = 0,
             ),

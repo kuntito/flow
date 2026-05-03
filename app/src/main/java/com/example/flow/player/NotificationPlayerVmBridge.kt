@@ -26,7 +26,7 @@ class NotificationPlayerVmBridge(
     private val playerState: StateFlow<PlayerState>,
     private val albumArtBitmap: StateFlow<Bitmap?>,
     private val onPause: () -> Unit,
-    private val onPlay: (song: Song) -> Unit,
+    private val onContinuePlay: () -> Unit,
     private val onNextSong: () -> Unit,
     private val onPrevSong: () -> Unit,
     private val onSeekTo: (progress: Float) -> Unit,
@@ -40,13 +40,15 @@ class NotificationPlayerVmBridge(
                     if (playerState.value.isPlaying) {
                         onPause()
                     } else {
-                        playerState.value.loadedSong?.let{
-                            onPlay(it)
-                        }
+                        onContinuePlay()
                     }
                 }
-                actions.ACTION_NEXT_SONG -> onNextSong
-                actions.ACTION_PREVIOUS_SONG -> onPrevSong
+                actions.ACTION_NEXT_SONG -> {
+                    onNextSong()
+                }
+                actions.ACTION_PREVIOUS_SONG -> {
+                    onPrevSong()
+                }
                 actions.ACTION_SEEK_TO -> {
                     handleSeekTo(intent)
                 }

@@ -40,9 +40,17 @@ data class PlayerState(
  * steals audio focus on play.
  */
 class SongPlayer(
-    private val scope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
     appContext: Context,
+    private val onSongListened: (songId: Int) -> Unit,
 ) {
+    private val _playerState = MutableStateFlow(
+        PlayerState()
+    )
+    val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
+
+    private var playbackCheckpoints: PlaybackCheckpoints? = null
+
 
     // this flow is triggered when a song finishes playing, it emits the last played song.
     private val _onPlaybackComplete = MutableSharedFlow<Song>()
@@ -86,7 +94,7 @@ class SongPlayer(
                         currentPositionMs = 0
                     )
 
-                    scope.launch {
+                    coroutineScope.launch {
                         _playerState.value.loadedSong?.let { loadedSong ->
                             _onPlaybackComplete.emit(loadedSong)
                         }
@@ -96,7 +104,7 @@ class SongPlayer(
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
-                    scope.launch {
+                    coroutineScope.launch {
                         trackPlaybackPosition()
                     }
                 } else {
@@ -107,37 +115,22 @@ class SongPlayer(
     }
 
 
-    private val _playerState = MutableStateFlow(
-        PlayerState()
-    )
-    val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
-
     private var playSongJob: Job? = null
-    // TODO docstring...
-    fun play(
+    fun playFromStart(
         song: Song,
-        forceRestart: Boolean,
         onSongLoadComplete: () -> Unit,
     ) {
         playSongJob?.cancel()
-        playSongJob = scope.launch(Dispatchers.Main) {
+        playSongJob = coroutineScope.launch(Dispatchers.Main) {
+            loadSong(song)
+            onSongLoadComplete()
 
-            val isNewSong = _playerState.value.loadedSong?.id != song.id
-            // we typically only load new songs..
-            // but the new song could have the same id as the loaded song.
+            startPlayer()
+        }
+    }
 
-            // one instance, is pressing next when the db contains a single song.
-            // the db's API is designed to never run dry, so it resends the same song.
-
-            // in this case, we pass `forceRestart as true`, else,
-            // the player continues playing the song as if nothing happend.
-
-            // a fringe case? yes but it's handled here.
-            if (isNewSong or forceRestart) {
-                loadSong(song)
-                onSongLoadComplete()
-            }
-
+    fun continuePlayback() {
+        if (_playerState.value.loadedSong != null) {
             startPlayer()
         }
     }
@@ -145,7 +138,7 @@ class SongPlayer(
     private var trackPlaybackPositionJob: Job? = null
     private fun trackPlaybackPosition() {
         trackPlaybackPositionJob?.cancel()
-        trackPlaybackPositionJob = scope.launch(Dispatchers.Main) {
+        trackPlaybackPositionJob = coroutineScope.launch(Dispatchers.Main) {
             try {
                 while (exoPlayer.isPlaying) {
                     val newPosMs = exoPlayer.currentPosition.toInt()
@@ -155,6 +148,10 @@ class SongPlayer(
                         )
                     delay(1000)
                 }
+
+                playbackCheckpoints?.updateCheckpoints(
+                    _playerState.value.playProgress
+                )
             } catch (e: Exception) {
                 Log.d(flowDebugTag, "failed to track playback position: ${e.message}")
             }
@@ -174,6 +171,11 @@ class SongPlayer(
                 durationMs = song.durationMillis,
                 currentPositionMs = 0,
             )
+
+        playbackCheckpoints = PlaybackCheckpoints(
+            songId = song.id,
+            onSongListened = onSongListened
+        )
     }
 
     /**

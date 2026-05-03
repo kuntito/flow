@@ -2,6 +2,7 @@ package com.example.flow.ui.screens.home_screen.components.play_next_queue.model
 
 import com.example.flow.data.remote.response_models.SongSearchItem
 
+
 data class PlayNextSongItem(
     val id: Int,
     val title: String,
@@ -16,30 +17,33 @@ fun SongSearchItem.toPlayNextSongItem() = PlayNextSongItem(
     albumArtUrl = albumArtUrl,
 )
 
-val dummyPlayNextSongItem = PlayNextSongItem(
+private val template = PlayNextSongItem(
     id = 0,
-    title = "Champion",
-    artistStr = "Elina",
+    title = "",
+    artistStr = "",
     albumArtUrl = "",
 )
 
+val dummyPlayNextSongItem = template.copy(
+    id = 0,
+    title = "Champion",
+    artistStr = "Elina",
+)
+
 val dummyPlayNextQueue = listOf(
-    PlayNextSongItem(
+    template.copy(
         id = 0,
         title = "Champion",
         artistStr = "Elina",
-        albumArtUrl = "",
     ),
-    PlayNextSongItem(
+    template.copy(
         id = 1,
         title = "Masquerade",
         artistStr = "Elina",
-        albumArtUrl = "",
     ),
-    PlayNextSongItem(
+    template.copy(
         id = 2,
         title = "Apologize",
         artistStr = "Elina",
-        albumArtUrl = "",
     ),
 )

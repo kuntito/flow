@@ -3,16 +3,16 @@ package com.example.flow
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.flow.data.local_db.FlowDb
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.SongSearchItem
-import com.example.flow.data.remote.response_models.SongWithUrl
 import com.example.flow.helper_classes.AlbumArtLoader
+import com.example.flow.helper_classes.NextSongManager
 import com.example.flow.helper_classes.SongSearchManager
 import com.example.flow.player.NotificationPlayerVmBridge
-import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
 import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.RepeatSongManager
@@ -37,10 +37,18 @@ class FlowViewModel(
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
     private val songPlayer = SongPlayer(
-        viewModelScope,
-        appContext,
+        coroutineScope = viewModelScope,
+        appContext = appContext,
+        onSongListened = ::increaseSongPlayCount
     )
     private val playerState = songPlayer.playerState
+
+    private val songPlayCountDao = FlowDb.getDatabase(appContext).songPlayCountDao()
+    fun increaseSongPlayCount(songId: Int) {
+        viewModelScope.launch {
+            songPlayCountDao.incrementPlayCount(songId)
+        }
+    }
 
     private val repeatSongManager = RepeatSongManager(
         coroutineScope = viewModelScope,
@@ -66,13 +74,33 @@ class FlowViewModel(
     val resetSongSearchState = songSearchManager::resetSongSearchState
 
 
-    fun onPlay(
+    private val nextSongManager = NextSongManager(
+        fetchNextSongFlow = { flowDS.safeFetchNextSong()?.songWithUrl },
+        fetchSpecificSong = { songId -> flowDS.safeGetSongById(songId)?.songWithUrl },
+        coroutineScope = viewModelScope,
+    )
+    val playNextSongQueue = nextSongManager.songQueue
+    val playNextSongExists = nextSongManager.playNextSongExists
+    fun playSongNextFromSearch(
+        searchedSong: SongSearchItem
+    ) = nextSongManager.playSongNext(searchedSong.toPlayNextSongItem())
+    fun playSongLaterFromSearch(
+        searchedSong: SongSearchItem
+    ) = nextSongManager.playSongLater(searchedSong.toPlayNextSongItem())
+    fun swapSongPlayNextQueue(
+        fromIndex: Int,
+        toIndex: Int
+    ) = nextSongManager.swapSongsPNQ(fromIndex, toIndex)
+
+
+    /*
+    * plays song from the beginning.
+    * */
+    fun onPlayFromStart(
         song: Song,
-        forceRestart: Boolean,
     ) {
-        songPlayer.play(
+        songPlayer.playFromStart(
             song = song,
-            forceRestart = forceRestart,
             onSongLoadComplete = {
                 _flowPlaybackState.value = FlowPlaybackState.FlowStarted.LoadComplete(
                     playbackUiState = setupPlaybackUiState(song),
@@ -81,16 +109,18 @@ class FlowViewModel(
         )
     }
 
+    /*
+    * playing, after song pause.
+    * */
+    fun onContinuePlay() {
+        songPlayer.continuePlayback()
+    }
+
     private val notificationBridge = NotificationPlayerVmBridge(
         appContext = appContext,
         playerState = playerState,
         onPause = ::onPause,
-        onPlay = { song ->
-            onPlay(
-                song = song,
-                forceRestart = false
-            )
-        },
+        onContinuePlay = ::onContinuePlay,
         onNextSong = ::handleNextSongPlay,
         onPrevSong = ::onPrevClick,
         onSeekTo = ::onSeekTo,
@@ -103,9 +133,8 @@ class FlowViewModel(
         viewModelScope.launch {
             songPlayer.onPlaybackComplete.collect { lastPlayedSong ->
                 if (repeatSongManager.consumeRepeatIfActive()) {
-                    onPlay(
+                    onPlayFromStart(
                         song = lastPlayedSong,
-                        forceRestart = true,
                     )
                 } else {
                     handleNextSongPlay()
@@ -125,75 +154,36 @@ class FlowViewModel(
      * this overrides the flow API route.
      */
     fun handleNextSongPlay(
-        prioritySongId: Int? = null
+        prioritySongId: Int? = null,
     ) {
         if (nextSongJob?.isActive == true) return
+
         nextSongJob = viewModelScope.launch {
-            _flowPlaybackState.value = FlowPlaybackState.FlowStarted.LoadingNextSong
+            _flowPlaybackState.value = if (
+                _flowPlaybackState.value == FlowPlaybackState.Idle
+            ) {
+                FlowPlaybackState.LoadingInitialFlow
+            } else {
+                FlowPlaybackState.FlowStarted.LoadingNextSong
+            }
+
             onPause()
-            val nextSong = fetchNextSong(prioritySongId = prioritySongId)
-            nextSong?.let { ns ->
-                onPlay(
-                    song = ns,
-                    forceRestart = true,
+            val maybeSongWithUrl = nextSongManager.getNextSong(prioritySongId)
+
+            if (maybeSongWithUrl == null) {
+                _flowPlaybackState.value = FlowPlaybackState.Error
+            } else {
+                val nextSong = maybeSongWithUrl.toSong()
+
+                albumArtLoader.loadFromUrl(
+                    nextSong.albumArtUrl
+                )
+                onPlayFromStart(
+                    song = nextSong,
                 )
             }
         }
     }
-
-    /**
-     * fetches the next song from API, converts it to a domain model,
-     * returns the song domain model.
-     *
-     * it also triggers the album art download.
-     *
-     * if something goes wrong, it returns null
-     * and sets flow playback error state.
-     */
-    suspend fun fetchNextSong(
-        prioritySongId: Int?
-    ): Song? {
-        val songWithUrl = resolveNextSongUrl(prioritySongId)
-
-        return if (songWithUrl == null) {
-            _flowPlaybackState.value = FlowPlaybackState.Error
-            null
-        } else {
-            val nextSong = songWithUrl.toSong()
-
-            albumArtLoader.loadFromUrl(
-                nextSong.albumArtUrl
-            )
-
-            nextSong
-        }
-    }
-
-    /**
-     * fetches the next song from API.
-     *
-     * the flow API has a next song route. however, there are times
-     * the user wants something different.
-     *
-     * if user specifies a song, [prioritySongId], it fetches that.
-     * if not, checks the play next queue, if that has songs, it fetches the first one.
-     * if not, defaults to the API's next.
-     */
-    suspend fun resolveNextSongUrl(
-        prioritySongId: Int?
-    ): SongWithUrl? {
-        if (prioritySongId != null) {
-            return flowDS.safeGetSongById(prioritySongId)?.songWithUrl
-        }
-
-        val pnqNextSongId = getNextSongFromPlayNextQueue()
-        if (pnqNextSongId != null) {
-            return flowDS.safeGetSongById(pnqNextSongId)?.songWithUrl
-        }
-
-        return flowDS.safeFetchNextSong()?.songWithUrl
-    }
-
 
     fun onPrevClick() {}
 
@@ -207,14 +197,7 @@ class FlowViewModel(
 
 
     val playbackActions = PlaybackActions(
-        // `play` in this context is called from the play/pause button on the UI
-        // you don't want to force restart on playing.
-        play = { song ->
-            onPlay(
-                song = song,
-                forceRestart = false,
-            )
-        },
+        continuePlay = ::onContinuePlay,
         pause = ::onPause,
         seekTo = ::onSeekTo,
         nextSong = ::handleNextSongPlay,
@@ -226,6 +209,7 @@ class FlowViewModel(
         FlowPlaybackState.Idle
     )
 
+    // updating playback UI state when underlying state changes
     val flowPlaybackState: StateFlow<FlowPlaybackState> = combine(
         _flowPlaybackState,
         playerState,
@@ -250,6 +234,7 @@ class FlowViewModel(
         _flowPlaybackState.value = FlowPlaybackState.Idle
     }
 
+
     fun setupPlaybackUiState(currentSong: Song): PlaybackUiState {
         return PlaybackUiState(
             currentSong = currentSong,
@@ -258,6 +243,7 @@ class FlowViewModel(
             playbackActions = playbackActions,
         )
     }
+
 
     private var startFlowJob: Job? = null
     /**
@@ -272,82 +258,37 @@ class FlowViewModel(
         if (startFlowJob?.isActive == true) return
 
         startFlowJob = viewModelScope.launch {
-            _flowPlaybackState.value = FlowPlaybackState.LoadingInitialFlow
-
-            val firstSong = fetchNextSong(prioritySongId)
-            firstSong?.let {
-                onPlay(
-                    song = firstSong,
-                    forceRestart = true,
-                )
-            }
+            handleNextSongPlay(
+                prioritySongId = prioritySongId,
+            )
         }
     }
+
 
     fun onPlaySongFromSearch(songId: Int) {
-        if (_flowPlaybackState.value == FlowPlaybackState.Idle) {
-            onStartPlaybackFlow(songId)
-        } else {
-            handleNextSongPlay(songId)
-        }
+        handleNextSongPlay(songId)
     }
 
-
-    private val playNextQueueManager = PlayNextQueueManager(
-        coroutineScope = viewModelScope,
-    )
-
-    val playNextSongQueue = playNextQueueManager.songQueue
-    val playNextSongExists = playNextQueueManager.hasNext
-
-
-    fun playSongNext(
-        song: SongSearchItem
-    ) {
-        playNextQueueManager.addNext(
-            playNextSongItem = song.toPlayNextSongItem()
-        )
-    }
-
-    fun playSongLater(
-        song: SongSearchItem
-    ) {
-        playNextQueueManager.addLater(
-            playNextSongItem = song.toPlayNextSongItem(),
-        )
-    }
-
-    fun swapSongPlayNextQueue(fromIndex: Int, toIndex: Int) {
-        playNextQueueManager.swapSongs(fromIndex, toIndex)
-    }
-
-    /**
-     * returns the first song item in the play next queue.
-     *
-     * returns `null` if there's no such thing.
-     */
-    private fun getNextSongFromPlayNextQueue(): Int? {
-        return playNextQueueManager.getNextSong()?.id
-    }
 
     /**
      * play song from play next queue.
      */
     fun onPlaySongPNQ(songIndexPNQ: Int) {
-        val maybePlayNextSongItem = playNextQueueManager
-            .cherryPickAndTrim(
-                itemIndex = songIndexPNQ
-            )
-        if (maybePlayNextSongItem == null) {
+        val maybeNextSongId = nextSongManager.cherryPickFromPnq(
+            indexPickedSong = songIndexPNQ
+        )
+        if (maybeNextSongId == null) {
             // ideally this should never be `null`,
-            // since `songIndexPNQ` is passed from the play next queue.
-            // and play next queue is exactly what's in `playNextQueueManager`.
+            // the song index, `songIndexPNQ`, is passed from the play next queue.
+            // the play next queue is a reference from the `playNextQueueManager`.
+            // and this manager is what handles the cherry picking.
+
             // unless something changes,
-            // `maybePlayNextSongItem` should always have a value.
+            // `maybeNextSongId` should always have a value.
             return
         }
         handleNextSongPlay(
-            prioritySongId = maybePlayNextSongItem.id
+            prioritySongId = maybeNextSongId
         )
     }
 
