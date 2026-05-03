@@ -31,7 +31,10 @@ fun AlbumArtSP(
         modifier = modifier
             .border(
                 width = 0.1.dp,
-                color = colorTelli,
+                color = colorTelli
+                    .copy(
+                        alpha = 0.3f
+                    ),
                 shape = boxShape,
             )
             .size(size.dp)
