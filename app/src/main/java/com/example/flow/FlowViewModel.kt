@@ -9,6 +9,7 @@ import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.SongSearchItem
+import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.helper_classes.NextSongManager
 import com.example.flow.helper_classes.SongSearchManager
@@ -33,6 +34,7 @@ import kotlinx.coroutines.launch
 class FlowViewModel(
     private val appContext: Application,
     private val flowDS: FlowApiDataSource,
+    private val flowRepo: FlowRepository,
 ): AndroidViewModel(appContext) {
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
@@ -43,10 +45,9 @@ class FlowViewModel(
     )
     private val playerState = songPlayer.playerState
 
-    private val songPlayCountDao = FlowDb.getDatabase(appContext).songPlayCountDao()
     fun increaseSongPlayCount(songId: Int) {
         viewModelScope.launch {
-            songPlayCountDao.incrementPlayCount(songId)
+            flowRepo.incrementPlayCount(songId)
         }
     }
 

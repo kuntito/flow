@@ -146,12 +146,14 @@ class SongPlayer(
                         .copy(
                             currentPositionMs = newPosMs
                         )
+
+                    playbackCheckpoints?.updateCheckpoints(
+                        _playerState.value.playProgress
+                    )
+
                     delay(1000)
                 }
 
-                playbackCheckpoints?.updateCheckpoints(
-                    _playerState.value.playProgress
-                )
             } catch (e: Exception) {
                 Log.d(flowDebugTag, "failed to track playback position: ${e.message}")
             }
