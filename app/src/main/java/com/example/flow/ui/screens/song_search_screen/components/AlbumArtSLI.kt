@@ -28,7 +28,10 @@ fun AlbumArtSongListItem(
         modifier = modifier
             .border(
                 width = 0.05.dp,
-                color = colorTelli,
+                color = colorTelli
+                    .copy(
+                        alpha = 0.2f
+                    ),
                 shape = boxShape,
             )
             .size(size.dp)
