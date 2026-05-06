@@ -7,16 +7,17 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.zIndex
 import com.example.flow.data.local_db.FlowDb
 import com.example.flow.data.remote.FlowApiClient
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.repo.FlowRepository
+import com.example.flow.ui.components.util.ParticleLayer
 import com.example.flow.ui.theme.FlowTheme
 import com.example.flow.ui.theme.colorKDB
 import com.example.flow.ui.theme.colorSane
@@ -59,13 +60,23 @@ class MainActivity : ComponentActivity() {
             FlowTheme {
                 Box(
                     modifier = Modifier
-                        .background(color = colorKDB)
+//                        .background(color = colorKDB)
                         .fillMaxSize()
-                        .systemBarsPadding()
                 ) {
-                    ScreenNavigation(
-                        flowViewModel = flowViewModel,
+                    ParticleLayer(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .zIndex(1f)
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .systemBarsPadding()
+                    ) {
+                        ScreenNavigation(
+                            flowViewModel = flowViewModel,
+                        )
+                    }
                 }
             }
         }
