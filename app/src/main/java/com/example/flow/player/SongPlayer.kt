@@ -2,6 +2,7 @@ package com.example.flow.player
 
 import android.content.Context
 import android.media.AudioManager
+import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -83,6 +84,20 @@ class SongPlayer(
     private val exoPlayer = ExoPlayer
         .Builder(appContext)
         .build()
+
+    private val mediaSession = MediaSessionCompat(appContext, "FlowPlayer")
+        .apply {
+            setCallback(object: MediaSessionCompat.Callback() {
+                override fun onPause() {
+                    pause()
+                }
+
+                override fun onStop() {
+                    pause()
+                }
+            })
+            isActive = true
+        }
 
     init {
         exoPlayer.addListener(object: Player.Listener {
@@ -229,5 +244,6 @@ class SongPlayer(
         trackPlaybackPositionJob?.cancel()
         audioFocusManager.releaseFocus()
         wasPlayingBeforeFocusLoss = false
+        mediaSession.release()
     }
 }
