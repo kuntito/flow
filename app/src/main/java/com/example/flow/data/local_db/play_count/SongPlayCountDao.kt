@@ -6,6 +6,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 
+// TODO rename to SongListenCountDao, and other references of the `playCount` variable
+//  should become listen count
 @Dao
 interface SongPlayCountDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)

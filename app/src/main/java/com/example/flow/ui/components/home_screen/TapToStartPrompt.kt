@@ -15,7 +15,6 @@ import com.example.flow.ui.components.util.PreviewColumn
 @Composable
 fun TapToStartPrompt(
     modifier: Modifier = Modifier,
-    fontSize: Float = 16f,
     onStartPlayback: () -> Unit, // TODO is this the name you want?
 ) {
     Box(
@@ -31,7 +30,6 @@ fun TapToStartPrompt(
 
         AppTextButton(
             text = "tap to start",
-            fontSize = fontSize,
             isBlinking = true,
             onClick = onClick,
         )
@@ -43,7 +41,6 @@ fun TapToStartPrompt(
 private fun TapToStartPromptPreview() {
     PreviewColumn {
         TapToStartPrompt(
-            fontSize = 20f,
             onStartPlayback = {},
         )
     }

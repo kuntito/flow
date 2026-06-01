@@ -23,7 +23,10 @@ fun ParticleLayer(modifier: Modifier = Modifier) {
     val particleColors = listOf(
         colorAguero,
         colorMarcelo,
-        colorTelli,
+        colorTelli
+            .copy(
+                alpha = 0.8f
+            ),
     )
 
     val particles = remember {
