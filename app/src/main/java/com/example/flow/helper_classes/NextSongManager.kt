@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 class NextSongManager(
     val fetchNextSongFlow: suspend () -> SongWithUrl?,
     val fetchSpecificSong: suspend (Int) -> SongWithUrl?,
+    val fetchMoodSong: suspend(Int) -> SongWithUrl?,
     private val coroutineScope: CoroutineScope,
 ) {
     private val playNextQueueManager = PlayNextQueueManager(
@@ -27,7 +28,8 @@ class NextSongManager(
      * however, user can override this with [prioritySongId].
     * */
     suspend fun getNextSong(
-        prioritySongId: Int?
+        prioritySongId: Int?,
+        tagId: Int?,
     ): SongWithUrl? {
         val maybeSong = if (prioritySongId != null) {
             fetchSpecificSong(prioritySongId)
@@ -36,7 +38,9 @@ class NextSongManager(
             nextSongPnq ?: return null
 
             fetchSpecificSong(nextSongPnq.id)
-        } else {
+        } else if (tagId != null) {
+            fetchMoodSong(tagId)
+        }else {
             fetchNextSongFlow()
         }
 

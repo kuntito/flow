@@ -2,6 +2,7 @@ package com.example.flow.ui.screens.home_screen
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -40,10 +41,15 @@ import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalResources
 import com.example.flow.data.models.AppEvent
+import com.example.flow.data.models.Mood
+import com.example.flow.data.models.dummyMoodList
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
+import com.example.flow.ui.screens.home_screen.components.select_mood_dialog.SelectMoodDialog
+import com.example.flow.ui.screens.home_screen.models.MoodState
+import com.example.flow.ui.theme.colorNeutral
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -63,6 +69,11 @@ fun HomeScreenRoot(
 
     val appEventsFlow = flowViewModel.appEventsFlow
 
+    val moodList by flowViewModel.moodList.collectAsState()
+    val moodState by flowViewModel.moodState.collectAsState()
+    val startMood = flowViewModel::startMood
+    val endMood = flowViewModel::endMood
+
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
         flowPlaybackState = flowPlaybackState,
@@ -74,6 +85,10 @@ fun HomeScreenRoot(
         onMoveSongInQueue = onMoveSongInQueue,
         onPlaySongPNQ = onPlaySongPNQ,
         appEventsFlow = appEventsFlow,
+        moodList = moodList,
+        moodState = moodState,
+        startMood = startMood,
+        endMood = endMood,
     )
 }
 
@@ -90,11 +105,53 @@ fun HomeScreen(
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     appEventsFlow: Flow<AppEvent>,
+    moodList: List<Mood>,
+    moodState: MoodState,
+    startMood: (Mood) -> Unit,
+    endMood: () -> Unit,
 ) {
+    var isSelectMoodDialogOpen by remember { mutableStateOf(false) }
+    val showSelectMoodDialog = { isSelectMoodDialogOpen = true }
+    val dismissSelectMoodDialog = { isSelectMoodDialogOpen = false}
+
+    val onMoodIconClick = {
+        showSelectMoodDialog()
+    }
+
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+
+    val scope = rememberCoroutineScope()
+    val showSnackBar: (String) -> Unit = { message ->
+        scope.launch {
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
+
+    val handleEndMood = {
+        endMood()
+        showSnackBar("mood ended")
+    }
+
+    AnimatedVisibility(visible = isSelectMoodDialogOpen) {
+        SelectMoodDialog(
+            onDismiss = dismissSelectMoodDialog,
+            moodList = moodList,
+            onMoodItemClick = startMood,
+        )
+    }
+
     Scaffold(
         topBar = {
             FlowTopAppBar(
                 onSearchIconClick = goToSongSearchScreen,
+                onMoodIconClick = onMoodIconClick,
+                inAMood = moodState as? MoodState.InAMood,
+                endMood = handleEndMood,
             )
         },
         modifier = modifier
@@ -107,19 +164,8 @@ fun HomeScreen(
                 .padding(innerPadding)
             ,
         ) {
-            val snackbarHostState = remember {
-                SnackbarHostState()
-            }
 
-            val scope = rememberCoroutineScope()
-            val displayErrorSnackBar = {
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = "couldn't start",
-                        duration = SnackbarDuration.Short,
-                    )
-                }
-            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -149,7 +195,7 @@ fun HomeScreen(
                         )
                     }
                     FlowPlaybackState.Error -> {
-                        displayErrorSnackBar()
+                        showSnackBar("couldn't start")
                         onFlowPlaybackErrorAcknowledged()
                     }
                 }
@@ -159,7 +205,8 @@ fun HomeScreen(
                 snackbar = { data ->
                     AppSnackBar(
                         text = data.visuals.message,
-                        bgColor = colorDebit,
+                        // TODO color based on message type i.e. error message
+                        bgColor = colorNeutral,
                     )
                 }
             )
@@ -296,6 +343,21 @@ private fun HomeScreenPreview() {
     val onPlaySongPNQ: (Int) -> Unit = {}
     val appEventsFlow = emptyFlow<AppEvent>()
 
+    val moodList = dummyMoodList
+    var moodState: MoodState by remember {
+        mutableStateOf(MoodState.Neutral)
+    }
+    val startMood: (Mood) -> Unit = { mood ->
+        moodState = MoodState.InAMood(
+            tagId = mood.tagId,
+            moodName = mood.name,
+            durationMs = mood.durationMs,
+        )
+    }
+    val endMood = {
+        moodState = MoodState.Neutral
+    }
+
     PreviewColumn {
         AppTextButton(
             text = "toggle flow states",
@@ -312,6 +374,10 @@ private fun HomeScreenPreview() {
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
             appEventsFlow = appEventsFlow,
+            moodList = moodList,
+            moodState = moodState,
+            startMood = startMood,
+            endMood = endMood
         )
     }
 }

@@ -1,14 +1,16 @@
 package com.example.flow
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.flow.data.local_db.FlowDb
 import com.example.flow.data.models.AppEvent
+import com.example.flow.data.models.Mood
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.SongSearchItem
+import com.example.flow.data.remote.response_models.toMood
 import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.helper_classes.NextSongManager
@@ -20,12 +22,14 @@ import com.example.flow.player.RepeatSongManager
 import com.example.flow.player.SongPlayer
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.toPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
+import com.example.flow.ui.screens.home_screen.models.MoodState
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -36,6 +40,8 @@ class FlowViewModel(
     private val flowDS: FlowApiDataSource,
     private val flowRepo: FlowRepository,
 ): AndroidViewModel(appContext) {
+    private val _moodList = MutableStateFlow<List<Mood>>(emptyList())
+    val moodList = _moodList.asStateFlow()
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
     private val songPlayer = SongPlayer(
@@ -78,6 +84,7 @@ class FlowViewModel(
     private val nextSongManager = NextSongManager(
         fetchNextSongFlow = { flowDS.safeFetchNextSong()?.songWithUrl },
         fetchSpecificSong = { songId -> flowDS.safeGetSongById(songId)?.songWithUrl },
+        fetchMoodSong = { tagId -> flowDS.safeFetchMoodSong(tagId)?.songWithUrl },
         coroutineScope = viewModelScope,
     )
     val playNextSongQueue = nextSongManager.songQueue
@@ -143,6 +150,15 @@ class FlowViewModel(
             }
         }
 
+        viewModelScope.launch {
+            val response = flowDS.safeGetMoods()
+            Log.d(flowDebugTag, "calling fetch moods")
+            response?.moods?.let { fetchedMoods ->
+                _moodList.value = fetchedMoods.map { it.toMood() }
+                Log.d(flowDebugTag, "fetchedMoods: $fetchedMoods")
+            }
+        }
+
         notificationBridge.start()
     }
 
@@ -169,7 +185,10 @@ class FlowViewModel(
             }
 
             onPause()
-            val maybeSongWithUrl = nextSongManager.getNextSong(prioritySongId)
+            val maybeSongWithUrl = nextSongManager.getNextSong(
+                prioritySongId = prioritySongId,
+                tagId = getMoodTag()
+            )
 
             if (maybeSongWithUrl == null) {
                 _flowPlaybackState.value = FlowPlaybackState.Error
@@ -291,6 +310,40 @@ class FlowViewModel(
         handleNextSongPlay(
             prioritySongId = maybeNextSongId
         )
+    }
+
+
+    private val _moodState = MutableStateFlow<MoodState>(
+        MoodState.Neutral
+    )
+    val moodState = _moodState.asStateFlow()
+
+    fun startMood(
+        mood: Mood
+    ) {
+        _moodState.value = MoodState.InAMood(
+            tagId = mood.tagId,
+            moodName = mood.name,
+            durationMs = mood.durationMs,
+        )
+    }
+
+    fun endMood() {
+        _moodState.value = MoodState.Neutral
+    }
+
+    fun getMoodTag(): Int? {
+        _moodState.value.let { mds ->
+            if (mds is MoodState.InAMood) {
+                if (mds.isActive) {
+                    return mds.tagId
+                } else {
+                    _moodState.value = MoodState.Neutral
+                }
+            }
+        }
+
+        return null
     }
 
     override fun onCleared() {

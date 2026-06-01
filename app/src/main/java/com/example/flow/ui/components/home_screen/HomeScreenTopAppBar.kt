@@ -2,12 +2,11 @@ package com.example.flow.ui.components.home_screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,13 +16,19 @@ import androidx.compose.ui.unit.dp
 import com.example.flow.R
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.PreviewColumn
+import com.example.flow.ui.components.util.blinkable
+import com.example.flow.ui.screens.home_screen.models.MoodState
 import com.example.flow.ui.theme.colorTelli
+import com.example.flow.ui.theme.tsBlazeMono
 
 // TODO move this to screens.home_screen
 @Composable
 fun FlowTopAppBar(
     modifier: Modifier = Modifier,
     onSearchIconClick: () -> Unit,
+    onMoodIconClick: () -> Unit,
+    inAMood: MoodState.InAMood? = null,
+    endMood: () -> Unit,
 ) {
     val iconSize = 24
     Row(
@@ -34,13 +39,14 @@ fun FlowTopAppBar(
             .height(64.dp)
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(modifier = Modifier.width(iconSize.dp))
         Row(
-            horizontalArrangement = Arrangement.Center,
             modifier = Modifier
-                .weight(1f)
-            ,
+                .weight(1f),
         ) {
+            // intentionally empty, it balances the right row
+        }
+
+        if (inAMood == null) {
             Icon(
                 painter = painterResource(R.drawable.ic_flow),
                 contentDescription = null,
@@ -49,12 +55,46 @@ fun FlowTopAppBar(
                     .height(48.dp) // TODO why doesn't the height reflect?
                 ,
             )
+        } else {
+            Text(
+                text = inAMood.moodName,
+                style = tsBlazeMono,
+                modifier = Modifier
+                    .blinkable()
+                ,
+            )
         }
-        AppIconButton(
-            iconRes = R.drawable.ic_search,
-            size = iconSize,
+
+        Row(
+            horizontalArrangement = Arrangement
+                .spacedBy(
+                    space = 16.dp,
+                    alignment = Alignment.End
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .weight(1f)
+            ,
         ) {
-            onSearchIconClick()
+            if (inAMood == null) {
+                AppIconButton(
+                    iconRes = R.drawable.ic_helm,
+                    size = iconSize,
+                    onClick = onMoodIconClick,
+                )
+            } else {
+                AppIconButton(
+                    iconRes = R.drawable.ic_curtains,
+                    size = iconSize,
+                    onClick = endMood,
+                )
+            }
+            AppIconButton(
+                iconRes = R.drawable.ic_search,
+                size = iconSize,
+            ) {
+                onSearchIconClick()
+            }
         }
     }
 }
@@ -65,6 +105,9 @@ private fun FlowTopAppBarPreview() {
     PreviewColumn {
         FlowTopAppBar(
             onSearchIconClick = {},
+            onMoodIconClick = {},
+            inAMood = null,
+            endMood = {}
         )
     }
 }
