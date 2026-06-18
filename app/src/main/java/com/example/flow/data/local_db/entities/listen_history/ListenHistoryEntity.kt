@@ -8,5 +8,5 @@ data class ListenHistoryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val songId: Int,
-    val listenedAt: Long,
+    val listenedAtMillis: Long,
 )

@@ -10,5 +10,5 @@ data class PnqHistoryEntity(
     )
     val id: Int = 0,
     val songId: Int,
-    val addedAt: Long
+    val addedAtMillis: Long
 )

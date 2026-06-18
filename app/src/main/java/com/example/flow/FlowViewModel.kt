@@ -47,13 +47,14 @@ class FlowViewModel(
     private val songPlayer = SongPlayer(
         coroutineScope = viewModelScope,
         appContext = appContext,
-        onSongListened = ::increaseSongPlayCount
+        onSongListened = ::onSongListened
     )
     private val playerState = songPlayer.playerState
 
-    fun increaseSongPlayCount(songId: Int) {
+    fun onSongListened(songId: Int) {
         viewModelScope.launch {
             flowRepo.incrementPlayCount(songId)
+            flowRepo.logListen(songId)
         }
     }
 

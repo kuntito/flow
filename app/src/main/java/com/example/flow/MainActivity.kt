@@ -33,7 +33,8 @@ class MainActivity : ComponentActivity() {
 
         val db = FlowDb.getDatabase(applicationContext)
         val flowRepo = FlowRepository(
-            songPlayCountDao = db.songPlayCountDao()
+            songPlayCountDao = db.songPlayCountDao(),
+            listenHistoryDao = db.listenHistoryDao(),
         )
 
         // use this to nudge App Inspector to show db

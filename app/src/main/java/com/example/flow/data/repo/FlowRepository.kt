@@ -1,14 +1,25 @@
 package com.example.flow.data.repo
 
-import android.util.Log
+import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
+import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
-import com.example.flow.flowDebugTag
 
 class FlowRepository(
     private val songPlayCountDao: SongPlayCountDao,
+    private val listenHistoryDao: ListenHistoryDao,
 ) {
     suspend fun incrementPlayCount(songId: Int) {
-        Log.d(flowDebugTag, "repo, increment play count")
         songPlayCountDao.incrementOrCreate(songId)
+    }
+
+    suspend fun logListen(
+        songId: Int
+    ) {
+        listenHistoryDao.insert(
+            ListenHistoryEntity(
+                songId = songId,
+                listenedAtMillis = System.currentTimeMillis(),
+            )
+        )
     }
 }
