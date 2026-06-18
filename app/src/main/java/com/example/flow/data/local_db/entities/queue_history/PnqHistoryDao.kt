@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 
 @Dao
-interface QueueHistoryDao {
+interface PnqHistoryDao {
     @Insert
     suspend fun insert(entry: PnqHistoryEntity)
 }

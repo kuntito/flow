@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.stateIn
  */
 class PlayNextQueueManager(
     coroutineScope: CoroutineScope,
+    val onSongAdded: (songId: Int) -> Unit,
 ) {
     private val _playNextQueue = MutableStateFlow<List<PlayNextSongItem>>(emptyList())
     val songQueue: StateFlow<List<PlayNextSongItem>> = _playNextQueue.asStateFlow()
@@ -66,6 +67,7 @@ class PlayNextQueueManager(
         songToPlayNext: PlayNextSongItem
     ) {
         _playNextQueue.value = listOf(songToPlayNext) + _playNextQueue.value
+        onSongAdded(songToPlayNext.id)
     }
 
     /**

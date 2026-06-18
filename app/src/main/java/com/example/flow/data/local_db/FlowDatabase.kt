@@ -9,7 +9,7 @@ import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntit
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
-import com.example.flow.data.local_db.entities.queue_history.QueueHistoryDao
+import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
@@ -25,7 +25,7 @@ import com.example.flow.data.local_db.migrations.migration_3_4
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
     abstract fun listenHistoryDao(): ListenHistoryDao
-    abstract fun QueueHistoryDao(): QueueHistoryDao
+    abstract fun pnqHistoryDao(): PnqHistoryDao
 
     companion object {
         @Volatile

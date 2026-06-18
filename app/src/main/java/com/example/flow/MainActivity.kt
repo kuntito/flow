@@ -1,7 +1,6 @@
 package com.example.flow
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -35,6 +34,7 @@ class MainActivity : ComponentActivity() {
         val flowRepo = FlowRepository(
             songPlayCountDao = db.songPlayCountDao(),
             listenHistoryDao = db.listenHistoryDao(),
+            pnPnqHistoryDao = db.pnqHistoryDao()
         )
 
         // use this to nudge App Inspector to show db

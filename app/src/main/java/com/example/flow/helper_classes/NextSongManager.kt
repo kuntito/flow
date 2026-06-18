@@ -13,10 +13,12 @@ class NextSongManager(
     val fetchNextSongFlow: suspend () -> SongWithUrl?,
     val fetchSpecificSong: suspend (Int) -> SongWithUrl?,
     val fetchMoodSong: suspend(Int) -> SongWithUrl?,
+    onSongAddPnq: (Int) -> Unit,
     private val coroutineScope: CoroutineScope,
 ) {
     private val playNextQueueManager = PlayNextQueueManager(
         coroutineScope = coroutineScope,
+        onSongAdded = onSongAddPnq,
     )
     val songQueue = playNextQueueManager.songQueue
     val playNextSongExists = playNextQueueManager.hasNextSong

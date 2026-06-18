@@ -86,6 +86,7 @@ class FlowViewModel(
         fetchNextSongFlow = { flowDS.safeFetchNextSong()?.songWithUrl },
         fetchSpecificSong = { songId -> flowDS.safeGetSongById(songId)?.songWithUrl },
         fetchMoodSong = { tagId -> flowDS.safeFetchMoodSong(tagId)?.songWithUrl },
+        onSongAddPnq = { songId -> onSongAddPnq(songId) },
         coroutineScope = viewModelScope,
     )
     val playNextSongQueue = nextSongManager.songQueue
@@ -100,6 +101,13 @@ class FlowViewModel(
         fromIndex: Int,
         toIndex: Int
     ) = nextSongManager.swapSongsPNQ(fromIndex, toIndex)
+
+
+    fun onSongAddPnq(songId: Int) {
+        viewModelScope.launch {
+            flowRepo.logSongAddPnq(songId)
+        }
+    }
 
 
     /*
