@@ -1,4 +1,4 @@
-package com.example.flow.data.local_db.play_count
+package com.example.flow.data.local_db.entities.play_count
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
