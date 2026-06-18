@@ -8,17 +8,18 @@ import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountEntity
+import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.queue_history.QueueHistoryDao
-import com.example.flow.data.local_db.entities.queue_history.QueueHistoryEntity
 import com.example.flow.data.local_db.migrations.migration_1_2
+import com.example.flow.data.local_db.migrations.migration_2_3
 
 @Database(
     entities = [
         SongPlayCountEntity::class,
         ListenHistoryEntity::class,
-        QueueHistoryEntity::class,
+        PnqHistoryEntity::class,
     ],
-    version = 2,
+    version = 3,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
@@ -38,6 +39,7 @@ abstract class FlowDb: RoomDatabase() {
                 )
                     .addMigrations(
                         migration_1_2,
+                        migration_2_3,
                     )
                     .build()
 
