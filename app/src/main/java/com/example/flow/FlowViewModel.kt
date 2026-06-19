@@ -9,7 +9,7 @@ import com.example.flow.data.models.Mood
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
-import com.example.flow.data.remote.response_models.SongSearchItem
+import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.remote.response_models.toMood
 import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader

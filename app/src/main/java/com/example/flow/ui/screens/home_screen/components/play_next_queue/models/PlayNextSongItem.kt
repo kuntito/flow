@@ -1,6 +1,6 @@
 package com.example.flow.ui.screens.home_screen.components.play_next_queue.models
 
-import com.example.flow.data.remote.response_models.SongSearchItem
+import com.example.flow.data.models.SongSearchItem
 
 
 data class PlayNextSongItem(

@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.flow.data.remote.response_models.SongSearchItem
-import com.example.flow.data.remote.response_models.dummySearchResults
+import com.example.flow.data.models.SongSearchItem
+import com.example.flow.data.models.dummySearchResults
 import com.example.flow.ui.components.util.PreviewColumn
 
 @Composable

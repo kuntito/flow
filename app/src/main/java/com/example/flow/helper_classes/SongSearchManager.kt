@@ -1,6 +1,7 @@
 package com.example.flow.helper_classes
 
 import com.example.flow.data.remote.FlowApiDataSource
+import com.example.flow.data.remote.response_models.toSongSearchItem
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -39,7 +40,7 @@ class SongSearchManager(
                 _songSearchState.value = SongSearchState.FinishedNoResult
             } else {
                 _songSearchState.value = SongSearchState.FinishedWithResults(
-                    songSearchResults = songSearchResults
+                    songSearchResults = songSearchResults.map { it.toSongSearchItem() }
                 )
             }
 

@@ -1,6 +1,6 @@
 package com.example.flow.ui.screens.song_search_screen.models
 
-import com.example.flow.data.remote.response_models.SongSearchItem
+import com.example.flow.data.models.SongSearchItem
 
 sealed class SongSearchState {
     object Idle: SongSearchState()

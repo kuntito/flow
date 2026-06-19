@@ -2,6 +2,7 @@ package com.example.flow.data.remote
 
 import com.example.flow.data.remote.helpers.ApiCallInfo
 import com.example.flow.data.remote.helpers.safeApiCall
+import com.example.flow.data.remote.response_models.GetCacheItemsSongSearchResponse
 import com.example.flow.data.remote.response_models.GetMoodNextSongResponse
 import com.example.flow.data.remote.response_models.GetMoodsResponse
 import com.example.flow.data.remote.response_models.GetNextSongResponse
@@ -36,6 +37,9 @@ interface FlowApiService {
         @Path("tagId")
         tagId: Int
     ): GetMoodNextSongResponse
+
+    @GET("api/flow/cache-song-search")
+    suspend fun getCacheItemsSongSearch(): GetCacheItemsSongSearchResponse
 }
 
 /**
@@ -96,6 +100,15 @@ class FlowApiDataSource(
             "fetches song by mood",
             fn = {
                 api.getMoodSong(tagId)
+            }
+        )
+    )
+
+    suspend fun safeFetchCacheItemsSongSearch() = safeApiCall(
+        ApiCallInfo(
+            "fetches cache items for song search",
+            fn = {
+                api.getCacheItemsSongSearch()
             }
         )
     )
