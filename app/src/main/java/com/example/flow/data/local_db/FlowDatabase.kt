@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
+import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
+import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
@@ -17,6 +19,7 @@ import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
 import com.example.flow.data.local_db.migrations.migration_4_5
 import com.example.flow.data.local_db.migrations.migration_5_6
+import com.example.flow.data.local_db.migrations.migration_6_7
 
 @Database(
     entities = [
@@ -24,14 +27,16 @@ import com.example.flow.data.local_db.migrations.migration_5_6
         ListenHistoryEntity::class,
         PnqHistoryEntity::class,
         SongSearchCacheEntity::class,
+        PlayFromSearchEntity::class,
     ],
-    version = 6,
+    version = 7,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
     abstract fun listenHistoryDao(): ListenHistoryDao
     abstract fun pnqHistoryDao(): PnqHistoryDao
     abstract fun songSearchCacheDao(): SongSearchCacheDao
+    abstract fun playFromSearchDao(): PlayFromSearchDao
 
     companion object {
         @Volatile
@@ -50,11 +55,12 @@ abstract class FlowDb: RoomDatabase() {
                         migration_3_4,
                         migration_4_5,
                         migration_5_6,
+                        migration_6_7,
                     )
                     .build()
 
                 // force db to open, for AppInspector
-                instance.openHelper.writableDatabase
+//                instance.openHelper.writableDatabase
 
                 INSTANCE = instance
                 instance

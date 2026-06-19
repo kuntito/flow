@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
             listenHistoryDao = db.listenHistoryDao(),
             pnPnqHistoryDao = db.pnqHistoryDao(),
             songSearchCacheDao = db.songSearchCacheDao(),
+            playFromSearchDao = db.playFromSearchDao(),
         )
 
         // use this to nudge App Inspector to show db
