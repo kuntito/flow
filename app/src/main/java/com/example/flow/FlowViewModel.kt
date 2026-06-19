@@ -37,7 +37,6 @@ import kotlinx.coroutines.launch
 
 class FlowViewModel(
     private val appContext: Application,
-    private val flowDS: FlowApiDataSource,
     private val flowRepo: FlowRepository,
 ): AndroidViewModel(appContext) {
     private val _moodList = MutableStateFlow<List<Mood>>(emptyList())
@@ -73,7 +72,7 @@ class FlowViewModel(
     val albumArtBitmap = albumArtLoader.albumArtBitmap
 
     private val songSearchManager = SongSearchManager(
-        flowDS = flowDS,
+        searchSong = flowRepo::searchSong,
         coroutineScope = viewModelScope,
     )
     val songSearchState = songSearchManager.songSearchState
@@ -83,10 +82,10 @@ class FlowViewModel(
 
 
     private val nextSongManager = NextSongManager(
-        fetchNextSongFlow = { flowDS.safeFetchNextSong()?.songWithUrl },
-        fetchSpecificSong = { songId -> flowDS.safeGetSongById(songId)?.songWithUrl },
-        fetchMoodSong = { tagId -> flowDS.safeFetchMoodSong(tagId)?.songWithUrl },
-        onSongAddPnq = { songId -> onSongAddPnq(songId) },
+        fetchNextSongFlow = flowRepo::fetchNextSong,
+        fetchSpecificSong = flowRepo::fetchSongById,
+        fetchMoodSong = flowRepo::fetchMoodSong,
+        onSongAddPnq = ::onSongAddPnq,
         coroutineScope = viewModelScope,
     )
     val playNextSongQueue = nextSongManager.songQueue
@@ -160,11 +159,8 @@ class FlowViewModel(
         }
 
         viewModelScope.launch {
-            val response = flowDS.safeGetMoods()
-            Log.d(flowDebugTag, "calling fetch moods")
-            response?.moods?.let { fetchedMoods ->
-                _moodList.value = fetchedMoods.map { it.toMood() }
-                Log.d(flowDebugTag, "fetchedMoods: $fetchedMoods")
+            flowRepo.getMoods()?.let { moods ->
+                _moodList.value = moods
             }
         }
 

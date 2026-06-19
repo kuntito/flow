@@ -1,7 +1,7 @@
 package com.example.flow.helper_classes
 
-import com.example.flow.data.remote.FlowApiDataSource
-import com.example.flow.data.remote.response_models.toSongSearchItem
+
+import com.example.flow.data.models.SongSearchItem
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 
 class SongSearchManager(
-    private val flowDS: FlowApiDataSource,
+    private val searchSong: suspend (String) -> List<SongSearchItem>?,
     private val coroutineScope: CoroutineScope
 ) {
     private val _songSearchState = MutableStateFlow<SongSearchState>(
@@ -31,8 +31,7 @@ class SongSearchManager(
         songSearchJob = coroutineScope.launch {
             _songSearchState.value = SongSearchState.Searching
 
-            val songSearchResponse = flowDS.safeSearchSong(query)
-            val songSearchResults = songSearchResponse?.searchResults
+            val songSearchResults = searchSong(query)
 
             if (songSearchResults == null) {
                 _songSearchState.value = SongSearchState.Error
@@ -40,10 +39,9 @@ class SongSearchManager(
                 _songSearchState.value = SongSearchState.FinishedNoResult
             } else {
                 _songSearchState.value = SongSearchState.FinishedWithResults(
-                    songSearchResults = songSearchResults.map { it.toSongSearchItem() }
+                    songSearchResults = songSearchResults
                 )
             }
-
         }
     }
 

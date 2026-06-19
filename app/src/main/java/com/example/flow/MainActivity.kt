@@ -32,10 +32,11 @@ class MainActivity : ComponentActivity() {
 
         val db = FlowDb.getDatabase(applicationContext)
         val flowRepo = FlowRepository(
+            flowDs = flowDS,
             songPlayCountDao = db.songPlayCountDao(),
             listenHistoryDao = db.listenHistoryDao(),
             pnPnqHistoryDao = db.pnqHistoryDao(),
-            songSearchCacheDao = db.songSearchCacheDao()
+            songSearchCacheDao = db.songSearchCacheDao(),
         )
 
         // use this to nudge App Inspector to show db
@@ -45,7 +46,6 @@ class MainActivity : ComponentActivity() {
         val flowViewModel: FlowViewModel by viewModels {
             FlowViewModelFactory(
                 application,
-                flowDS,
                 flowRepo,
             )
         }
