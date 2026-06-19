@@ -5,11 +5,13 @@ import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntit
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
+import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
 
 class FlowRepository(
     private val songPlayCountDao: SongPlayCountDao,
     private val listenHistoryDao: ListenHistoryDao,
-    private val pnPnqHistoryDao: PnqHistoryDao
+    private val pnPnqHistoryDao: PnqHistoryDao,
+    private val songSearchCacheDao: SongSearchCacheDao,
 ) {
     suspend fun incrementPlayCount(songId: Int) {
         songPlayCountDao.incrementOrCreate(songId)

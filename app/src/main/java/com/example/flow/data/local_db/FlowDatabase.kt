@@ -10,22 +10,27 @@ import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
+import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheEntity
+import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
 import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
+import com.example.flow.data.local_db.migrations.migration_4_5
 
 @Database(
     entities = [
         SongPlayCountEntity::class,
         ListenHistoryEntity::class,
         PnqHistoryEntity::class,
+        SongSearchCacheEntity::class,
     ],
-    version = 4,
+    version = 5,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
     abstract fun listenHistoryDao(): ListenHistoryDao
     abstract fun pnqHistoryDao(): PnqHistoryDao
+    abstract fun songSearchCacheDao(): SongSearchCacheDao
 
     companion object {
         @Volatile
@@ -41,7 +46,8 @@ abstract class FlowDb: RoomDatabase() {
                     .addMigrations(
                         migration_1_2,
                         migration_2_3,
-                        migration_3_4
+                        migration_3_4,
+                        migration_4_5,
                     )
                     .build()
 
