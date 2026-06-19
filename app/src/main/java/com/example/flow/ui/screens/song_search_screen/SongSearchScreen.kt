@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.song_search_screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.flow.FlowViewModel
 import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.models.dummySearchResults
+import com.example.flow.flowDebugTag
 import com.example.flow.ui.components.general.AppTextButton
 import com.example.flow.ui.components.util.AppSnackBar
 import com.example.flow.ui.components.util.PreviewColumn
@@ -31,10 +33,7 @@ import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 
-// TODO impl, if i go to search screen, type query that yields results.
-//  and press the back button, i go to home screen.
-//  the next time i go to the search screen, for a split second, i see
-//  the previous search results
+
 @Composable
 fun SongSearchScreenRoot(
     flowViewModel: FlowViewModel,

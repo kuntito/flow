@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.song_search_screen.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,11 +21,13 @@ fun SearchScreenTopAppBar(
     onSongSearch: (String) -> Unit,
     onBackButtonClick: () -> Unit,
 ) {
+    BackHandler(enabled = true) {
+        onBackButtonClick()
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-//            .border(width = 1.dp, color = Color.Yellow)
             .height(72.dp)
         ,
     ) {

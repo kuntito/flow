@@ -76,7 +76,9 @@ class FlowViewModel(
     val songSearchState = songSearchManager.songSearchState
     val onSongSearchErrorAcknowledged = songSearchManager::onSongSearchErrorAcknowledged
     val searchForSong = songSearchManager::searchForSong
-    val resetSongSearchState = songSearchManager::resetSongSearchState
+    fun resetSongSearchState() {
+        songSearchManager.resetSongSearchState()
+    }
 
 
     private val nextSongManager = NextSongManager(
