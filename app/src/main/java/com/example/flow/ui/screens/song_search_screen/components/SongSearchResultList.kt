@@ -17,7 +17,7 @@ import com.example.flow.ui.components.util.PreviewColumn
 fun SongSearchResultList(
     modifier: Modifier = Modifier,
     songSearchItems: List<SongSearchItem>,
-    onPlaySongSearchItem: (Int) -> Unit,
+    onPlaySongSearchItem: (songId: Int) -> Unit,
     onPlaySongNext: (SongSearchItem) -> Unit,
     onPlaySongLater: (SongSearchItem) -> Unit,
     playNextSongExists: Boolean,

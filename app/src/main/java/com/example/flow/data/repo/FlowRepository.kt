@@ -3,6 +3,7 @@ package com.example.flow.data.repo
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
+import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
@@ -100,5 +101,18 @@ class FlowRepository(
                 entities
             )
         }
+    }
+
+    suspend fun logPlayFromSearch(
+        songId: Int,
+        searchQuery: String,
+    ) {
+        playFromSearchDao.insert(
+            PlayFromSearchEntity(
+                songId = songId,
+                searchQuery = searchQuery,
+                playedAtMillis = System.currentTimeMillis(),
+            )
+        )
     }
 }

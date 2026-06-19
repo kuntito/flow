@@ -1,7 +1,9 @@
 package com.example.flow.helper_classes
 
 
+import android.util.Log
 import com.example.flow.data.models.SongSearchItem
+import com.example.flow.flowDebugTag
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -39,6 +41,7 @@ class SongSearchManager(
                 _songSearchState.value = SongSearchState.FinishedNoResult
             } else {
                 _songSearchState.value = SongSearchState.FinishedWithResults(
+                    searchQuery = query,
                     songSearchResults = songSearchResults
                 )
             }

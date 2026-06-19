@@ -6,6 +6,7 @@ sealed class SongSearchState {
     object Idle: SongSearchState()
     object Searching: SongSearchState()
     data class FinishedWithResults(
+        val searchQuery: String,
         val songSearchResults: List<SongSearchItem>
     ): SongSearchState() {
         init {

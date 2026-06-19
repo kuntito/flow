@@ -8,9 +8,7 @@ import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
-import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.models.SongSearchItem
-import com.example.flow.data.remote.response_models.toMood
 import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.helper_classes.NextSongManager
@@ -294,8 +292,17 @@ class FlowViewModel(
     }
 
 
-    fun onPlaySongFromSearch(songId: Int) {
+    fun onPlaySongFromSearch(
+        songId: Int,
+        searchQuery: String,
+    ) {
         handleNextSongPlay(songId)
+        viewModelScope.launch {
+            flowRepo.logPlayFromSearch(
+                songId=songId,
+                searchQuery=searchQuery,
+            )
+        }
     }
 
 

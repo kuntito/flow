@@ -48,8 +48,11 @@ fun SongSearchScreenRoot(
         resetSongSearchState()
         goToPreviousScreen()
     }
-    val onPlaySongSearchItem: (Int) -> Unit = { songId ->
-        flowViewModel.onPlaySongFromSearch(songId)
+    val onPlaySongSearchItem: (
+        songId: Int,
+        searchQuery: String
+    ) -> Unit = { songId, searchQuery ->
+        flowViewModel.onPlaySongFromSearch(songId, searchQuery)
         onBackButtonClick()
     }
 
@@ -76,7 +79,7 @@ fun SongSearchScreen(
     onSongSearch: (String) -> Unit,
     onSongSearchErrorAcknowledged: () -> Unit,
     onBackButtonClick: () -> Unit,
-    onPlaySongSearchItem: (Int) -> Unit,
+    onPlaySongSearchItem: (Int, String) -> Unit,
     onPlaySongNext: (SongSearchItem) -> Unit,
     onPlaySongLater: (SongSearchItem) -> Unit,
     playNextSongExists: Boolean,
@@ -120,7 +123,12 @@ fun SongSearchScreen(
                     is SongSearchState.FinishedWithResults -> {
                         SongSearchResultList(
                             songSearchItems = songSearchState.songSearchResults,
-                            onPlaySongSearchItem = onPlaySongSearchItem,
+                            onPlaySongSearchItem = { songId ->
+                                onPlaySongSearchItem(
+                                    songId,
+                                    songSearchState.searchQuery,
+                                )
+                            },
                             onPlaySongNext = onPlaySongNext,
                             onPlaySongLater = onPlaySongLater,
                             playNextSongExists = playNextSongExists,
@@ -167,6 +175,7 @@ private fun SearchScreenPreview() {
                 SongSearchState.Searching -> {
                     songSearchState = SongSearchState.FinishedWithResults(
                         songSearchResults = dummySearchResults,
+                        searchQuery = "..."
                     )
                 }
                 is SongSearchState.FinishedWithResults -> {
@@ -189,7 +198,7 @@ private fun SearchScreenPreview() {
                 songSearchState = SongSearchState.Idle
             },
             onBackButtonClick = {},
-            onPlaySongSearchItem = {},
+            onPlaySongSearchItem = { _, _ -> },
             onPlaySongNext = {},
             onPlaySongLater = {},
             playNextSongExists = playNextSongExists,
