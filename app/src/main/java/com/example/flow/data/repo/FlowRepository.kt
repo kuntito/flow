@@ -6,12 +6,14 @@ import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
+import com.example.flow.data.local_db.entities.song_search_cache.normalizeForSongSearch
+import com.example.flow.data.local_db.entities.song_search_cache.toSongSearchItem
 import com.example.flow.data.models.Mood
 import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.SongWithUrl
 import com.example.flow.data.remote.response_models.toMood
-import com.example.flow.data.remote.response_models.toSongSearchItem
+import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 
 class FlowRepository(
     private val flowDs: FlowApiDataSource,
@@ -49,12 +51,14 @@ class FlowRepository(
     suspend fun searchSong(
         query: String
     ): List<SongSearchItem>? {
-        val response = flowDs.safeSearchSong(query)
-        return response
-            ?.searchResults
-            ?.map {
-                it.toSongSearchItem()
-            }
+        val searchResults = if (query == "*") {
+            songSearchCacheDao.getAll()
+        } else {
+            val normalizedQuery = normalizeForSongSearch(query)
+            songSearchCacheDao.search(normalizedQuery)
+        }
+
+        return searchResults.map { it.toSongSearchItem() }
     }
 
     suspend fun fetchNextSong(): SongWithUrl? {
@@ -82,5 +86,17 @@ class FlowRepository(
             ?.map {
                 it.toMood()
             }
+    }
+
+    suspend fun syncSongSearchCache() {
+        val response = flowDs.safeFetchCacheItemsSongSearch()
+        response?.cacheItems?.let { cacheItems ->
+            val entities = cacheItems.map{
+                it.toSongSearchCacheEntity()
+            }
+            songSearchCacheDao.replaceAll(
+                entities
+            )
+        }
     }
 }

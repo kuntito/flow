@@ -16,6 +16,7 @@ import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
 import com.example.flow.data.local_db.migrations.migration_4_5
+import com.example.flow.data.local_db.migrations.migration_5_6
 
 @Database(
     entities = [
@@ -24,7 +25,7 @@ import com.example.flow.data.local_db.migrations.migration_4_5
         PnqHistoryEntity::class,
         SongSearchCacheEntity::class,
     ],
-    version = 5,
+    version = 6,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
@@ -48,11 +49,12 @@ abstract class FlowDb: RoomDatabase() {
                         migration_2_3,
                         migration_3_4,
                         migration_4_5,
+                        migration_5_6,
                     )
                     .build()
 
-                // force db to open
-//                instance.openHelper.writableDatabase
+                // force db to open, for AppInspector
+                instance.openHelper.writableDatabase
 
                 INSTANCE = instance
                 instance
