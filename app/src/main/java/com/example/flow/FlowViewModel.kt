@@ -1,9 +1,10 @@
 package com.example.flow
 
 import android.app.Application
-import android.util.Log
+import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
 import com.example.flow.data.models.Song
@@ -14,31 +15,75 @@ import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.helper_classes.NextSongManager
 import com.example.flow.helper_classes.SongSearchManager
 import com.example.flow.player.NotificationPlayerVmBridge
+import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
+import com.example.flow.player.PlaybackCache
+import com.example.flow.player.PlaybackCacheItem
 import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.RepeatSongManager
 import com.example.flow.player.SongPlayer
+import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.toPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.home_screen.models.MoodState
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.Int
+import kotlin.time.Duration.Companion.milliseconds
 
+@UnstableApi
 class FlowViewModel(
     private val appContext: Application,
     private val flowRepo: FlowRepository,
 ): AndroidViewModel(appContext) {
     private val _moodList = MutableStateFlow<List<Mood>>(emptyList())
     val moodList = _moodList.asStateFlow()
+    private val _moodState = MutableStateFlow<MoodState>(
+        MoodState.Neutral
+    )
+    val moodState = _moodState.asStateFlow()
+    val moodIdObservable: StateFlow<Int?> = moodState
+        .map{ (it as? MoodState.InAMood)?.moodId }
+        .distinctUntilChanged()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            null,
+        )
+
+    private var moodExpiryJob: Job? = null
+    fun startMood(
+        mood: Mood
+    ) {
+        _moodState.value = MoodState.InAMood(
+            moodId = mood.moodId,
+            moodName = mood.name,
+        )
+
+        moodExpiryJob?.cancel()
+        moodExpiryJob = viewModelScope.launch {
+            delay(mood.durationMs.milliseconds)
+            _moodState.value = MoodState.Neutral
+        }
+    }
+
+    fun endMood() {
+        _moodState.value = MoodState.Neutral
+        moodExpiryJob?.cancel()
+    }
+
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
     private val songPlayer = SongPlayer(
@@ -80,26 +125,30 @@ class FlowViewModel(
         songSearchManager.resetSongSearchState()
     }
 
-
-    private val nextSongManager = NextSongManager(
-        fetchNextSongFlow = flowRepo::fetchNextSong,
-        fetchSpecificSong = flowRepo::fetchSongById,
-        fetchMoodSong = flowRepo::fetchMoodSong,
-        onSongAddPnq = ::onSongAddPnq,
+    private val pnqManager = PlayNextQueueManager(
         coroutineScope = viewModelScope,
+        onSongAdded = ::onSongAddPnq,
     )
-    val playNextSongQueue = nextSongManager.songQueue
-    val playNextSongExists = nextSongManager.playNextSongExists
+
+    val playNextSongQueue = pnqManager.songQueue
+    val pnqTop: StateFlow<PlayNextSongItem?> = playNextSongQueue
+        .map{ it.firstOrNull() }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            null,
+        )
+    val playNextSongExists = pnqManager.hasNextSong
     fun playSongNextFromSearch(
         searchedSong: SongSearchItem
-    ) = nextSongManager.playSongNext(searchedSong.toPlayNextSongItem())
+    ) = pnqManager.addNext(searchedSong.toPlayNextSongItem())
     fun playSongLaterFromSearch(
         searchedSong: SongSearchItem
-    ) = nextSongManager.playSongLater(searchedSong.toPlayNextSongItem())
+    ) = pnqManager.addLater(searchedSong.toPlayNextSongItem())
     fun swapSongPlayNextQueue(
         fromIndex: Int,
         toIndex: Int
-    ) = nextSongManager.swapSongsPNQ(fromIndex, toIndex)
+    ) = pnqManager.swapSongs(fromIndex, toIndex)
 
 
     fun onSongAddPnq(songId: Int) {
@@ -108,6 +157,18 @@ class FlowViewModel(
         }
     }
 
+    private val nextSongManager = NextSongManager(
+        moodId =  moodIdObservable,
+        pnqTop = pnqTop,
+        popPnqTop = {
+            pnqManager.getNextSong()
+        },
+        updateCache = ::updateCache,
+        fetchSpecificSong = flowRepo::fetchSongById,
+        fetchNextSongApi = flowRepo::fetchNextSong,
+        fetchMoodSong =  flowRepo::fetchMoodSong,
+        coroutineScope = viewModelScope,
+    )
 
     /*
     * plays song from the beginning.
@@ -121,7 +182,7 @@ class FlowViewModel(
                 _flowPlaybackState.value = FlowPlaybackState.FlowStarted.LoadComplete(
                     playbackUiState = setupPlaybackUiState(song),
                 )
-            }
+            },
         )
     }
 
@@ -196,7 +257,6 @@ class FlowViewModel(
             onPause()
             val maybeSongWithUrl = nextSongManager.getNextSong(
                 prioritySongId = prioritySongId,
-                tagId = getMoodTag()
             )
 
             if (maybeSongWithUrl == null) {
@@ -312,9 +372,9 @@ class FlowViewModel(
      * play song from play next queue.
      */
     fun onPlaySongPNQ(songIndexPNQ: Int) {
-        val maybeNextSongId = nextSongManager.cherryPickFromPnq(
-            indexPickedSong = songIndexPNQ
-        )
+        val maybeNextSongId = pnqManager.cherryPickAndTrim(
+            itemIndex = songIndexPNQ
+        )?.id
         if (maybeNextSongId == null) {
             // ideally this should never be `null`,
             // the song index, `songIndexPNQ`, is passed from the play next queue.
@@ -330,38 +390,16 @@ class FlowViewModel(
         )
     }
 
-
-    private val _moodState = MutableStateFlow<MoodState>(
-        MoodState.Neutral
-    )
-    val moodState = _moodState.asStateFlow()
-
-    fun startMood(
-        mood: Mood
+    @OptIn(UnstableApi::class)
+    fun updateCache(
+        cacheItem: PlaybackCacheItem,
     ) {
-        _moodState.value = MoodState.InAMood(
-            tagId = mood.tagId,
-            moodName = mood.name,
-            durationMs = mood.durationMs,
-        )
-    }
-
-    fun endMood() {
-        _moodState.value = MoodState.Neutral
-    }
-
-    fun getMoodTag(): Int? {
-        _moodState.value.let { mds ->
-            if (mds is MoodState.InAMood) {
-                if (mds.isActive) {
-                    return mds.tagId
-                } else {
-                    _moodState.value = MoodState.Neutral
-                }
-            }
+        viewModelScope.launch {
+            PlaybackCache.prefetch(
+                context = appContext,
+                cacheItem = cacheItem,
+            )
         }
-
-        return null
     }
 
     override fun onCleared() {

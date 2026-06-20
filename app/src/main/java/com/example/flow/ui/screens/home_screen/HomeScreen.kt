@@ -2,6 +2,7 @@ package com.example.flow.ui.screens.home_screen
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,9 +38,9 @@ import com.example.flow.ui.components.util.AppSnackBar
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.home_screen.components.AudioFlowLoadingIndicator
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
-import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalResources
+import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
 import com.example.flow.data.models.dummyMoodList
@@ -53,6 +54,7 @@ import com.example.flow.ui.theme.colorNeutral
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
+@OptIn(UnstableApi::class)
 @Composable
 fun HomeScreenRoot(
     flowViewModel: FlowViewModel,
@@ -349,9 +351,8 @@ private fun HomeScreenPreview() {
     }
     val startMood: (Mood) -> Unit = { mood ->
         moodState = MoodState.InAMood(
-            tagId = mood.tagId,
+            moodId = mood.moodId,
             moodName = mood.name,
-            durationMs = mood.durationMs,
         )
     }
     val endMood = {

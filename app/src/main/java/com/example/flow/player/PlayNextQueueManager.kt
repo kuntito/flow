@@ -89,6 +89,8 @@ class PlayNextQueueManager(
      * it returns the [Song] at the given index,
      * and updates the play next queue to only items after the index.
      *
+     * it picks and trims what comes before.
+     *
      * if the index doesn't exist, it returns null.
      */
     fun cherryPickAndTrim(itemIndex: Int): PlayNextSongItem? {

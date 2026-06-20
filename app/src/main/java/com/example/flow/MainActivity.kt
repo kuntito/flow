@@ -6,12 +6,14 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.zIndex
+import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.local_db.FlowDb
 import com.example.flow.data.remote.FlowApiClient
 import com.example.flow.data.remote.FlowApiDataSource
@@ -23,6 +25,7 @@ import com.example.flow.ui.theme.colorSane
 
 const val flowDebugTag = "flow_tag"
 class MainActivity : ComponentActivity() {
+    @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

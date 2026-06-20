@@ -6,7 +6,9 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import com.example.flow.data.models.Song
 import com.example.flow.flowDebugTag
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +42,7 @@ data class PlayerState(
  *
  * steals audio focus on play.
  */
+@UnstableApi
 class SongPlayer(
     private val coroutineScope: CoroutineScope,
     appContext: Context,
@@ -83,6 +86,14 @@ class SongPlayer(
         }
     private val exoPlayer = ExoPlayer
         .Builder(appContext)
+        .setMediaSourceFactory(
+            DefaultMediaSourceFactory(
+                PlaybackCache
+                    .getDataSourceFactory(
+                        appContext
+                    )
+            )
+        )
         .build()
 
     private val mediaSession = MediaSessionCompat(appContext, "FlowPlayer")
@@ -176,9 +187,12 @@ class SongPlayer(
     }
 
     private fun loadSong(song: Song) {
-        val mediaItem = MediaItem.fromUri(
-            song.songUrl
-        )
+        val mediaItem = MediaItem
+            .Builder()
+            .setUri(song.songUrl)
+            .setCustomCacheKey(song.id.toString())
+            .build()
+
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
 
