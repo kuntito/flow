@@ -4,4 +4,5 @@ import com.example.flow.data.models.AppEvent
 
 sealed interface SongPlayingEvent: AppEvent {
     object OnExceedMaxRepeats: SongPlayingEvent
+    object OnRepeatForAMinute: SongPlayingEvent
 }

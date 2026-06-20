@@ -69,12 +69,25 @@ fun SongPlayingWithPlayNextSheet(
             }
         }
 
+        val displayRepeatForAMinuteSnackBar = {
+            scope.launch {
+                snackBarHostState.showSnackbar(
+                    message = "repeatin' for a minute..",
+                    duration = SnackbarDuration.Short,
+                )
+            }
+        }
+
         ObserveAsEvents<AppEvent>(
             flow = appEventsFlow
         ) { appEvent ->
             when (appEvent) {
                 SongPlayingEvent.OnExceedMaxRepeats -> {
                     displayMaxRepeatsSnackBar()
+                }
+
+                SongPlayingEvent.OnRepeatForAMinute -> {
+                    displayRepeatForAMinuteSnackBar()
                 }
                 else -> {}
             }

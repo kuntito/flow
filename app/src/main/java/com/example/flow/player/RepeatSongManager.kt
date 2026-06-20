@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 class RepeatSongManager(
     private val coroutineScope: CoroutineScope,
     private val onAttemptExceedMaxRepeats: suspend () -> Unit,
+    private val onRepeatForAMinute: suspend () -> Unit,
 ) {
     private val _repeatMode: MutableStateFlow<PlaybackRepeatMode> = MutableStateFlow(
         PlaybackRepeatMode.NoRepeat
@@ -71,6 +72,25 @@ class RepeatSongManager(
 
         decrementRepeatCount()
         return true
+    }
+
+    /**
+     * doesn't actually repeat for a minute.
+     *
+     * it repeats the current song for a while.
+     * typically used when the current song is a mood.
+     *
+     * i.e. Dirty Mind - Tiphe & Emo Grae
+     */
+    fun repeatForAMinute() {
+        // TODO perhaps, don't harcode this...
+        val repeatForAMinuteCount = 10
+        _repeatMode.value = PlaybackRepeatMode.RepeatWithCount(
+            repeatForAMinuteCount
+        )
+        coroutineScope.launch {
+            onRepeatForAMinute()
+        }
     }
 
     fun reset() {

@@ -104,6 +104,9 @@ class FlowViewModel(
         coroutineScope = viewModelScope,
         onAttemptExceedMaxRepeats = {
             eventChannel.send(SongPlayingEvent.OnExceedMaxRepeats)
+        },
+        onRepeatForAMinute = {
+            eventChannel.send(SongPlayingEvent.OnRepeatForAMinute)
         }
     )
     val playbackRepeatMode = repeatSongManager.playbackRepeatMode
@@ -293,6 +296,7 @@ class FlowViewModel(
         nextSong = ::handleNextSongPlay,
         prevSong = ::onPrevClick,
         toggleRepeatMode = repeatSongManager::toggleRepeatMode,
+        repeatForAMinute = repeatSongManager::repeatForAMinute
     )
 
     private val _flowPlaybackState = MutableStateFlow<FlowPlaybackState>(

@@ -19,14 +19,16 @@ fun SongRepeatButton(
     modifier: Modifier = Modifier,
     repeatMode: PlaybackRepeatMode,
     toggleRepeatMode: () -> Unit,
+    repeatForAMinute: () -> Unit,
     size: Int = 18,
 ) {
     val iconRes = when (repeatMode) {
         PlaybackRepeatMode.NoRepeat -> R.drawable.ic_repeat_off
-        is PlaybackRepeatMode.RepeatWithCount -> when (repeatMode.repeatCount) {
-            1 -> R.drawable.ic_repeat_one
-            2 -> R.drawable.ic_repeat_two
-            3 -> R.drawable.ic_repeat_three
+        is PlaybackRepeatMode.RepeatWithCount -> when  {
+            repeatMode.repeatCount > 3 -> R.drawable.ic_repeat_for_a_min
+            repeatMode.repeatCount == 3 -> R.drawable.ic_repeat_three
+            repeatMode.repeatCount == 2 -> R.drawable.ic_repeat_two
+            repeatMode.repeatCount == 1 -> R.drawable.ic_repeat_one
             // i don't expect to reach this state, since max repeat count is `3`
             // but if i do, display a generic repeat icon
             else -> R.drawable.ic_repeat_active
@@ -36,6 +38,7 @@ fun SongRepeatButton(
     AppIconButton(
         iconRes = iconRes,
         onClick = toggleRepeatMode,
+        onLongClick = repeatForAMinute,
         size = size,
         modifier = modifier,
     )
@@ -81,6 +84,7 @@ private fun SongRepeatButtonPreview() {
         SongRepeatButton(
             repeatMode = repeatMode,
             toggleRepeatMode = toggleRepeat,
+            repeatForAMinute = {},
             size = 100,
         )
     }

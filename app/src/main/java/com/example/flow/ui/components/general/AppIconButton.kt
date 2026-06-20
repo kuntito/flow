@@ -20,10 +20,12 @@ fun AppIconButton(
     @DrawableRes iconRes: Int,
     size: Int = 24,
     isClickable: Boolean = true,
+    onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
     ClickableSurface(
         onClick = onClick,
+        onLongClick = onLongClick,
         rippleRadius = size * 1.05f,
         isClickable = isClickable,
         modifier = modifier,

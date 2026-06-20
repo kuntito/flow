@@ -38,6 +38,7 @@ fun ClickableSurface(
     isClickable: Boolean = true,
     onClick: () -> Unit,
     onDoubleClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     var isSurfaceClicked by remember { mutableStateOf(false) }
@@ -68,7 +69,8 @@ fun ClickableSurface(
                     bounded = isRippleBounded,
                 ), // Change the ripple color here
                 onClick = onClick,
-                onDoubleClick = { onDoubleClick?.invoke() }
+                onDoubleClick = { onDoubleClick?.invoke() },
+                onLongClick = { onLongClick?.invoke() }
             )
             .alpha(if (isSurfaceClicked) 0.5f else 1f)
         ,
