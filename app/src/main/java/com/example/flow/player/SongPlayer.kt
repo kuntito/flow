@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 
 data class PlayerState(
@@ -166,7 +167,7 @@ class SongPlayer(
         trackPlaybackPositionJob?.cancel()
         trackPlaybackPositionJob = coroutineScope.launch(Dispatchers.Main) {
             try {
-                while (exoPlayer.isPlaying) {
+                while (exoPlayer.isPlaying && exoPlayer.playbackState == Player.STATE_READY) {
                     val newPosMs = exoPlayer.currentPosition.toInt()
                     _playerState.value = _playerState.value
                         .copy(
@@ -177,7 +178,7 @@ class SongPlayer(
                         _playerState.value.playProgress
                     )
 
-                    delay(1000)
+                    delay(1000.milliseconds)
                 }
 
             } catch (e: Exception) {
