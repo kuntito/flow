@@ -3,13 +3,13 @@ package com.example.flow.data.remote.response_models
 import com.example.flow.data.models.Mood
 
 data class MoodApi(
-    val moodId: Int,
+    val tagId: Int, // TODO change to moodId, server side.
     val moodName: String,
     val durationMillis: Long,
 )
 
 fun MoodApi.toMood(): Mood = Mood(
-    moodId = moodId,
+    moodId = tagId,
     name = moodName,
     durationMs = durationMillis,
 )
