@@ -72,4 +72,8 @@ class RepeatSongManager(
         decrementRepeatCount()
         return true
     }
+
+    fun reset() {
+        _repeatMode.value = PlaybackRepeatMode.NoRepeat
+    }
 }

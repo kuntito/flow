@@ -244,6 +244,7 @@ class FlowViewModel(
         prioritySongId: Int? = null,
     ) {
         if (nextSongJob?.isActive == true) return
+        repeatSongManager.reset()
 
         nextSongJob = viewModelScope.launch {
             _flowPlaybackState.value = if (
