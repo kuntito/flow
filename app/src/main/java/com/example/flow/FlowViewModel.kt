@@ -26,6 +26,8 @@ import com.example.flow.ui.screens.home_screen.components.play_next_queue.models
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.toPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.home_screen.models.MoodState
+import com.example.flow.ui.screens.home_screen.models.SleepTimerDuration
+import com.example.flow.ui.screens.home_screen.models.SleepTimerState
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -48,6 +50,72 @@ class FlowViewModel(
     private val appContext: Application,
     private val flowRepo: FlowRepository,
 ): AndroidViewModel(appContext) {
+    private var stopBecauseSleepTimer = false
+    fun setStopBecauseSleepTimer(flag: Boolean) {
+        stopBecauseSleepTimer = flag
+    }
+
+    fun resetStopBecauseSleepTimer() {
+        setStopBecauseSleepTimer(false)
+    }
+    private val _sleepTimerState = MutableStateFlow<SleepTimerState>(
+        SleepTimerState.Inactive
+    )
+    val sleepTimerState = _sleepTimerState.asStateFlow()
+
+    private var sleepTimerJob: Job? = null
+    fun startSleepTimer(
+        sleepTimerDuration: SleepTimerDuration
+    ) {
+        sleepTimerJob?.cancel()
+
+        val durationMs = sleepTimerDuration.minutes * 60 * 1000L
+
+        _sleepTimerState.value = SleepTimerState.Active(
+            initDuration = sleepTimerDuration,
+            remainingMs = durationMs
+        )
+
+        sleepTimerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000.milliseconds)
+
+                val activeState = _sleepTimerState.value as? SleepTimerState.Active
+                    ?: return@launch
+
+                val remainingMs = activeState.remainingMs - 1000
+
+                if (remainingMs <= 0) {
+                    setStopBecauseSleepTimer(true)
+                    resetSleepTimerState()
+                    return@launch
+                }
+
+                _sleepTimerState.value = activeState
+                    .copy(
+                        remainingMs = remainingMs,
+                    )
+            }
+        }
+    }
+
+    fun resetSleepTimerState() {
+        _sleepTimerState.value = SleepTimerState.Inactive
+    }
+
+    fun cancelSleepTimer() {
+        sleepTimerJob?.cancel()
+        resetStopBecauseSleepTimer()
+        resetSleepTimerState()
+    }
+
+    fun restartSleepTimer() {
+        val currentState = _sleepTimerState.value
+        if (currentState is SleepTimerState.Active) {
+            startSleepTimer(currentState.initDuration)
+        }
+    }
+
     private val _moodList = MutableStateFlow<List<Mood>>(emptyList())
     val moodList = _moodList.asStateFlow()
     private val _moodState = MutableStateFlow<MoodState>(
@@ -246,6 +314,12 @@ class FlowViewModel(
     fun handleNextSongPlay(
         prioritySongId: Int? = null,
     ) {
+        if (stopBecauseSleepTimer) {
+            resetStopBecauseSleepTimer()
+            resetPlayback()
+            return
+        }
+
         if (nextSongJob?.isActive == true) return
         repeatSongManager.reset()
 
@@ -286,6 +360,11 @@ class FlowViewModel(
 
     fun onSeekTo(progress: Float) {
         songPlayer.seekTo(progress)
+    }
+
+    fun resetPlayback() {
+        repeatSongManager.reset()
+        endMood()
     }
 
 
