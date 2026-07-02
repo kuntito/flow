@@ -39,6 +39,7 @@ fun AppTextButton(
     isBlinking: Boolean = false,
     @DrawableRes
     leftIconRes: Int? = null,
+    isClickable: Boolean = true,
     onClick: () -> Unit,
 ) {
     val textStyle = DEFAULT_TEXT_STYLE
@@ -48,6 +49,7 @@ fun AppTextButton(
         )
     ClickableSurface(
         onClick = onClick,
+        isClickable = isClickable,
         isRippleBounded = true,
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))

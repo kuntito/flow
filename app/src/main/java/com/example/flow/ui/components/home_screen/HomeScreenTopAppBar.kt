@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +30,7 @@ fun FlowTopAppBar(
     onMoodIconClick: () -> Unit,
     inAMood: MoodState.InAMood? = null,
     endMood: () -> Unit,
+    isSleepTimerActive: Boolean,
 ) {
     val iconSize = 24
     Row(
@@ -89,6 +91,15 @@ fun FlowTopAppBar(
                     onClick = endMood,
                 )
             }
+            if (isSleepTimerActive) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_hourglass),
+                    contentDescription = null,
+                    tint = colorTelli,
+                    modifier = Modifier
+                        .size(iconSize.dp),
+                )
+            }
             AppIconButton(
                 iconRes = R.drawable.ic_search,
                 size = iconSize,
@@ -107,7 +118,8 @@ private fun FlowTopAppBarPreview() {
             onSearchIconClick = {},
             onMoodIconClick = {},
             inAMood = null,
-            endMood = {}
+            endMood = {},
+            isSleepTimerActive = true,
         )
     }
 }

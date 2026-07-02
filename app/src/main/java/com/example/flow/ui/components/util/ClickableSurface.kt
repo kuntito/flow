@@ -72,7 +72,13 @@ fun ClickableSurface(
                 onDoubleClick = { onDoubleClick?.invoke() },
                 onLongClick = { onLongClick?.invoke() }
             )
-            .alpha(if (isSurfaceClicked) 0.5f else 1f)
+            .alpha(
+                when {
+                    !isClickable -> 0.4f
+                    isSurfaceClicked -> 0.5f
+                    else -> 1f
+                }
+            )
         ,
     )
 }

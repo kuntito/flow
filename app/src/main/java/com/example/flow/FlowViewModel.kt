@@ -27,6 +27,7 @@ import com.example.flow.ui.screens.home_screen.components.play_next_queue.models
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.home_screen.models.MoodState
 import com.example.flow.ui.screens.home_screen.models.SleepTimerDuration
+import com.example.flow.ui.screens.home_screen.models.SleepTimerEvent
 import com.example.flow.ui.screens.home_screen.models.SleepTimerState
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import kotlinx.coroutines.Job
@@ -50,6 +51,9 @@ class FlowViewModel(
     private val appContext: Application,
     private val flowRepo: FlowRepository,
 ): AndroidViewModel(appContext) {
+    private val eventChannel = Channel<AppEvent>()
+    val appEventsFlow = eventChannel.receiveAsFlow()
+
     private var stopBecauseSleepTimer = false
     fun setStopBecauseSleepTimer(flag: Boolean) {
         stopBecauseSleepTimer = flag
@@ -62,13 +66,15 @@ class FlowViewModel(
         SleepTimerState.Inactive
     )
     val sleepTimerState = _sleepTimerState.asStateFlow()
+    val sleepDurations = listOf(
+        SleepTimerDuration.Fifteen,
+        SleepTimerDuration.Thirty,
+    )
 
     private var sleepTimerJob: Job? = null
-    fun startSleepTimer(
-        sleepTimerDuration: SleepTimerDuration
+    private suspend fun runSleepTimer(
+        sleepTimerDuration: SleepTimerDuration,
     ) {
-        sleepTimerJob?.cancel()
-
         val durationMs = sleepTimerDuration.minutes * 60 * 1000L
 
         _sleepTimerState.value = SleepTimerState.Active(
@@ -76,45 +82,77 @@ class FlowViewModel(
             remainingMs = durationMs
         )
 
-        sleepTimerJob = viewModelScope.launch {
-            while (true) {
-                delay(1000.milliseconds)
+        while (true) {
+            delay(1000.milliseconds)
 
-                val activeState = _sleepTimerState.value as? SleepTimerState.Active
-                    ?: return@launch
+            val activeState = _sleepTimerState.value as? SleepTimerState.Active
+                ?: return
 
-                val remainingMs = activeState.remainingMs - 1000
+            val remainingMs = activeState.remainingMs - 1000
 
-                if (remainingMs <= 0) {
-                    setStopBecauseSleepTimer(true)
-                    resetSleepTimerState()
-                    return@launch
-                }
+            if (remainingMs <= 0) {
+                // TODO this shouldn't be called here..
+                //  it should observe sleep timer state and be called accordingly0
+                setStopBecauseSleepTimer(true)
 
-                _sleepTimerState.value = activeState
-                    .copy(
-                        remainingMs = remainingMs,
-                    )
+                resetSleepTimerState()
+                return
             }
+
+            _sleepTimerState.value = activeState
+                .copy(
+                    remainingMs = remainingMs,
+                )
         }
+    }
+
+    fun startSleepTimer(
+        sleepTimerDuration: SleepTimerDuration,
+    ) {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = viewModelScope.launch {
+            eventChannel.send(
+                SleepTimerEvent.OnStartSleepTimer(
+                    sleepTimerDuration.minutes
+                )
+            )
+            runSleepTimer(sleepTimerDuration)
+        }
+    }
+
+
+    fun restartSleepTimer() {
+        val currentState = _sleepTimerState.value
+        if (currentState !is SleepTimerState.Active) return
+
+        sleepTimerJob?.cancel()
+        sleepTimerJob = viewModelScope.launch {
+            val duration = currentState.initDuration
+            eventChannel.send(SleepTimerEvent.OnRestartSleepTimer(
+                duration.minutes
+            ))
+            runSleepTimer(duration)
+        }
+    }
+
+    fun cancelSleepTimer() {
+        sleepTimerJob?.cancel()
+        resetSleepTimerState()
+
+        viewModelScope.launch {
+            eventChannel.send(SleepTimerEvent.OnCancelSleepTimer)
+        }
+
+        // TODO this shouldn't be called here,
+        //  it should observe the sleep timer state
+        //  and reset when sleep timer is idle.
+        resetStopBecauseSleepTimer()
     }
 
     fun resetSleepTimerState() {
         _sleepTimerState.value = SleepTimerState.Inactive
     }
 
-    fun cancelSleepTimer() {
-        sleepTimerJob?.cancel()
-        resetStopBecauseSleepTimer()
-        resetSleepTimerState()
-    }
-
-    fun restartSleepTimer() {
-        val currentState = _sleepTimerState.value
-        if (currentState is SleepTimerState.Active) {
-            startSleepTimer(currentState.initDuration)
-        }
-    }
 
     private val _moodList = MutableStateFlow<List<Mood>>(emptyList())
     val moodList = _moodList.asStateFlow()
@@ -152,8 +190,6 @@ class FlowViewModel(
         moodExpiryJob?.cancel()
     }
 
-    private val eventChannel = Channel<AppEvent>()
-    val appEventsFlow = eventChannel.receiveAsFlow()
     private val songPlayer = SongPlayer(
         coroutineScope = viewModelScope,
         appContext = appContext,

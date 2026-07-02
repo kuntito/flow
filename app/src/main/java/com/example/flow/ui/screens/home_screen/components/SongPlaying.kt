@@ -33,6 +33,7 @@ fun SongPlaying(
     playbackUiState: PlaybackUiState,
     playbackRepeatMode: PlaybackRepeatMode,
     albumArtBitmap: Bitmap?,
+    showSleepTimerDialog: () -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -43,6 +44,7 @@ fun SongPlaying(
         ) {
             AlbumArtSP(
                albumArtBitmap = albumArtBitmap,
+                onLongClick = showSleepTimerDialog,
             )
             Spacer(
                 modifier = Modifier
@@ -135,6 +137,7 @@ private fun SongPlayingPreview() {
             playbackUiState = playbackUiState,
             playbackRepeatMode = repeatMode,
             albumArtBitmap = albumArtBitmap,
+            showSleepTimerDialog = {},
         )
     }
 }

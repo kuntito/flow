@@ -26,7 +26,7 @@ import com.example.flow.ui.theme.tsOrion
 fun SleepDurationButton(
     modifier: Modifier = Modifier,
     isActive: Boolean,
-    duration: Int,
+    durMins: Int,
     onClick: () -> Unit,
 ) {
     val color by animateColorAsState(
@@ -54,7 +54,7 @@ fun SleepDurationButton(
             ,
         ){
             Text(
-                text = duration.toString(),
+                text = durMins.toString(),
                 style = tsOrion,
                 color = color,
             )
@@ -75,7 +75,7 @@ private fun SleepDurationButtonPreview() {
         SleepDurationButton(
             isActive = isActive,
             onClick = toggleIsActive,
-            duration = duration
+            durMins = duration
         )
     }
 }

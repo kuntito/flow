@@ -33,6 +33,7 @@ import com.example.flow.ui.screens.home_screen.components.play_next_queue.PlayNe
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.ObserveAsEvents
+import com.example.flow.ui.screens.home_screen.models.SleepTimerEvent
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import com.example.flow.ui.theme.colorIsco
 import kotlinx.coroutines.flow.Flow
@@ -49,6 +50,7 @@ fun SongPlayingWithPlayNextSheet(
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     appEventsFlow: Flow<AppEvent>,
+    showSleepTimerDialog: () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.TopCenter, // for snack bar
@@ -78,6 +80,30 @@ fun SongPlayingWithPlayNextSheet(
             }
         }
 
+        val showSnackStartSleepTimer: (Int) -> Unit = { durationMinutes ->
+            scope.launch {
+                snackBarHostState.showSnackbar(
+                    message = "sleeping in $durationMinutes..."
+                )
+            }
+        }
+
+        val showSnackRestartSleepTimer: (Int) -> Unit = { durationMinutes ->
+            scope.launch {
+                snackBarHostState.showSnackbar(
+                    message = "restarting sleep, $durationMinutes to go.."
+                )
+            }
+        }
+
+        val showSnackCancelSleepTimer: () -> Unit = {
+            scope.launch {
+                snackBarHostState.showSnackbar(
+                    message = "ji masun!"
+                )
+            }
+        }
+
         ObserveAsEvents<AppEvent>(
             flow = appEventsFlow
         ) { appEvent ->
@@ -88,6 +114,16 @@ fun SongPlayingWithPlayNextSheet(
 
                 SongPlayingEvent.OnRepeatForAMinute -> {
                     displayRepeatForAMinuteSnackBar()
+                }
+
+                is SleepTimerEvent.OnStartSleepTimer -> {
+                    showSnackStartSleepTimer(appEvent.durationMinutes)
+                }
+                is SleepTimerEvent.OnRestartSleepTimer -> {
+                    showSnackRestartSleepTimer(appEvent.durationMinutes)
+                }
+                SleepTimerEvent.OnCancelSleepTimer -> {
+                    showSnackCancelSleepTimer()
                 }
                 else -> {}
             }
@@ -101,6 +137,7 @@ fun SongPlayingWithPlayNextSheet(
                 playbackUiState = playbackUiState,
                 playbackRepeatMode = playbackRepeatMode,
                 albumArtBitmap = albumArtBitmap,
+                showSleepTimerDialog = showSleepTimerDialog,
                 modifier = Modifier
                     .align(Alignment.Center)
             )
@@ -220,6 +257,7 @@ private fun SongPlayingWithPlayNextSheetPreview() {
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
             appEventsFlow = appEventsFlow,
+            showSleepTimerDialog = {},
         )
     }
 }

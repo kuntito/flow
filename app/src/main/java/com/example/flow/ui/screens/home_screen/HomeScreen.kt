@@ -2,6 +2,7 @@ package com.example.flow.ui.screens.home_screen
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
@@ -44,12 +45,16 @@ import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
 import com.example.flow.data.models.dummyMoodList
+import com.example.flow.flowDebugTag
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.components.select_mood_dialog.SelectMoodDialog
+import com.example.flow.ui.screens.home_screen.components.sleep_timer.SleepTimerDialog
 import com.example.flow.ui.screens.home_screen.models.MoodState
+import com.example.flow.ui.screens.home_screen.models.SleepTimerDuration
+import com.example.flow.ui.screens.home_screen.models.SleepTimerState
 import com.example.flow.ui.theme.colorNeutral
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -76,6 +81,13 @@ fun HomeScreenRoot(
     val startMood = flowViewModel::startMood
     val endMood = flowViewModel::endMood
 
+    val sleepDurations = flowViewModel.sleepDurations
+    val sleepTimerState by flowViewModel.sleepTimerState.collectAsState()
+    val onStartSleepTimer = flowViewModel::startSleepTimer
+    val onCancelSleepTimer = flowViewModel::cancelSleepTimer
+    val onRestartSleepTimer = flowViewModel::restartSleepTimer
+
+
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
         flowPlaybackState = flowPlaybackState,
@@ -91,6 +103,11 @@ fun HomeScreenRoot(
         moodState = moodState,
         startMood = startMood,
         endMood = endMood,
+        sleepDurations = sleepDurations,
+        sleepTimerState = sleepTimerState,
+        onStartSleepTimer = onStartSleepTimer,
+        onRestartSleepTimer = onRestartSleepTimer,
+        onCancelSleepTimer = onCancelSleepTimer,
     )
 }
 
@@ -111,6 +128,12 @@ fun HomeScreen(
     moodState: MoodState,
     startMood: (Mood) -> Unit,
     endMood: () -> Unit,
+    // TODO put all these in a container
+    sleepDurations: List<SleepTimerDuration>,
+    sleepTimerState: SleepTimerState,
+    onStartSleepTimer: (SleepTimerDuration) -> Unit,
+    onRestartSleepTimer: () -> Unit,
+    onCancelSleepTimer: () -> Unit,
 ) {
     var isSelectMoodDialogOpen by remember { mutableStateOf(false) }
     val showSelectMoodDialog = { isSelectMoodDialogOpen = true }
@@ -147,6 +170,22 @@ fun HomeScreen(
         )
     }
 
+    var isSleepTimerDialogOpen by remember { mutableStateOf(false) }
+    val showSleepTimerDialog = { isSleepTimerDialogOpen = true }
+    val hideSleepTimerDialog = { isSleepTimerDialogOpen = false}
+    AnimatedVisibility(
+        visible = isSleepTimerDialogOpen
+    ) {
+        SleepTimerDialog(
+            onDismiss = hideSleepTimerDialog,
+            durations = sleepDurations,
+            sleepTimerState = sleepTimerState,
+            onStartTimer = onStartSleepTimer,
+            onRestartTimer = onRestartSleepTimer,
+            onCancelTimer = onCancelSleepTimer,
+        )
+    }
+
     Scaffold(
         topBar = {
             FlowTopAppBar(
@@ -154,6 +193,7 @@ fun HomeScreen(
                 onMoodIconClick = onMoodIconClick,
                 inAMood = moodState as? MoodState.InAMood,
                 endMood = handleEndMood,
+                isSleepTimerActive = sleepTimerState is SleepTimerState.Active
             )
         },
         modifier = modifier
@@ -194,6 +234,7 @@ fun HomeScreen(
                             onMoveSongInQueue = onMoveSongInQueue,
                             onPlaySongPNQ = onPlaySongPNQ,
                             appEventsFlow = appEventsFlow,
+                            showSleepTimerDialog = showSleepTimerDialog,
                         )
                     }
                     FlowPlaybackState.Error -> {
@@ -216,169 +257,169 @@ fun HomeScreen(
     }
 }
 
-@Preview
-@Composable
-private fun HomeScreenPreview() {
-    val size = 200
-    val albumArtUrl = "https://picsum.photos/$size/$size"
-    val currentSong = dummySong
-        .copy(
-            albumArtUrl = albumArtUrl,
-        )
-
-    var isPlaying by remember {
-        mutableStateOf(false)
-    }
-    val onPlay: (Song) -> Unit = {
-        isPlaying = true
-    }
-    val onPause = {
-        isPlaying = false
-    }
-    var playbackRepeatMode: PlaybackRepeatMode by remember {
-        mutableStateOf(
-            PlaybackRepeatMode.NoRepeat,
-        )
-    }
-
-    val toggleRepeatMode: () -> Unit = {
-        val curentRepeatMode = playbackRepeatMode
-        playbackRepeatMode = when(curentRepeatMode) {
-            PlaybackRepeatMode.NoRepeat -> PlaybackRepeatMode.RepeatWithCount(1)
-            is PlaybackRepeatMode.RepeatWithCount -> {
-                val currCount = curentRepeatMode.repeatCount
-                val newCount = currCount + 1
-
-                val atMaxCount = currCount == PlaybackRepeatMode.RepeatWithCount.MAX_REPEAT_COUNT
-                if (atMaxCount) {
-                    curentRepeatMode
-                } else {
-                    PlaybackRepeatMode.RepeatWithCount(newCount)
-                }
-            }
-        }
-    }
-
-    var playProgress by remember {
-        mutableFloatStateOf(0.3f)
-    }
-    val onSeekTo: (Float) -> Unit = {
-        playProgress = it
-    }
-
-    val playbackActions = dummyPlaybackActions
-        .copy(
-            continuePlay = {
-                onPlay(currentSong)
-            },
-            pause = onPause,
-            seekTo = onSeekTo,
-            toggleRepeatMode = toggleRepeatMode,
-        )
-
-    var flowPlaybackState: FlowPlaybackState by remember{
-        mutableStateOf(FlowPlaybackState.Idle)
-    }
-
-    val onFlowPlaybackErrorAcknowledged = {
-        flowPlaybackState = FlowPlaybackState.Idle
-    }
-
-    val playbackUiState by remember {
-        derivedStateOf {
-            dummyPlaybackUiState
-                .copy(
-                    currentSong = currentSong,
-                    isPlaying = isPlaying,
-                    playProgress = playProgress,
-                    playbackActions = playbackActions,
-                )
-        }
-    }
-
-    LaunchedEffect(playbackUiState) {
-        if (flowPlaybackState is FlowPlaybackState.FlowStarted.LoadComplete) {
-            flowPlaybackState = FlowPlaybackState.FlowStarted.LoadComplete(
-                playbackUiState = playbackUiState
-            )
-        }
-    }
-
-    val onToggleFlowState = {
-        when (flowPlaybackState) {
-            FlowPlaybackState.Idle -> {
-                flowPlaybackState = FlowPlaybackState.LoadingInitialFlow
-            }
-            FlowPlaybackState.LoadingInitialFlow -> {
-                flowPlaybackState = FlowPlaybackState.FlowStarted.LoadComplete(
-                    playbackUiState = playbackUiState
-                )
-            }
-            is FlowPlaybackState.FlowStarted.LoadComplete -> {
-                flowPlaybackState = FlowPlaybackState.FlowStarted.LoadingNextSong
-            }
-            FlowPlaybackState.FlowStarted.LoadingNextSong -> {
-                flowPlaybackState = FlowPlaybackState.Error
-            }
-            FlowPlaybackState.Error -> {}
-        }
-    }
-
-    val albumArtBitmap = BitmapFactory.decodeResource(
-        LocalResources.current,
-        R.drawable.album_art_placeholder
-    )
-
-    val x = (1..3).map{
-        dummyPlayNextSongItem.copy(
-            id = it,
-            title = "song $it",
-            artistStr = "artist $it",
-        )
-    }
-    var playNextSongItems by remember { mutableStateOf(x) }
-    val onMoveSongInQueue: (Int, Int) -> Unit = { fromIdx, toIdx ->
-        playNextSongItems = playNextSongItems.toMutableList().apply {
-            add(toIdx, removeAt(fromIdx))
-        }
-    }
-    val onPlaySongPNQ: (Int) -> Unit = {}
-    val appEventsFlow = emptyFlow<AppEvent>()
-
-    val moodList = dummyMoodList
-    var moodState: MoodState by remember {
-        mutableStateOf(MoodState.Neutral)
-    }
-    val startMood: (Mood) -> Unit = { mood ->
-        moodState = MoodState.InAMood(
-            moodId = mood.moodId,
-            moodName = mood.name,
-        )
-    }
-    val endMood = {
-        moodState = MoodState.Neutral
-    }
-
-    PreviewColumn {
-        AppTextButton(
-            text = "toggle flow states",
-            onClick = onToggleFlowState
-        )
-        HomeScreen(
-            startPlaybackFlow = {},
-            flowPlaybackState = flowPlaybackState,
-            onFlowPlaybackErrorAcknowledged = onFlowPlaybackErrorAcknowledged,
-            playbackRepeatMode = playbackRepeatMode,
-            albumArtBitmap = albumArtBitmap,
-            goToSongSearchScreen = {},
-            playNextQueue = playNextSongItems,
-            onMoveSongInQueue = onMoveSongInQueue,
-            onPlaySongPNQ = onPlaySongPNQ,
-            appEventsFlow = appEventsFlow,
-            moodList = moodList,
-            moodState = moodState,
-            startMood = startMood,
-            endMood = endMood
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun HomeScreenPreview() {
+//    val size = 200
+//    val albumArtUrl = "https://picsum.photos/$size/$size"
+//    val currentSong = dummySong
+//        .copy(
+//            albumArtUrl = albumArtUrl,
+//        )
+//
+//    var isPlaying by remember {
+//        mutableStateOf(false)
+//    }
+//    val onPlay: (Song) -> Unit = {
+//        isPlaying = true
+//    }
+//    val onPause = {
+//        isPlaying = false
+//    }
+//    var playbackRepeatMode: PlaybackRepeatMode by remember {
+//        mutableStateOf(
+//            PlaybackRepeatMode.NoRepeat,
+//        )
+//    }
+//
+//    val toggleRepeatMode: () -> Unit = {
+//        val curentRepeatMode = playbackRepeatMode
+//        playbackRepeatMode = when(curentRepeatMode) {
+//            PlaybackRepeatMode.NoRepeat -> PlaybackRepeatMode.RepeatWithCount(1)
+//            is PlaybackRepeatMode.RepeatWithCount -> {
+//                val currCount = curentRepeatMode.repeatCount
+//                val newCount = currCount + 1
+//
+//                val atMaxCount = currCount == PlaybackRepeatMode.RepeatWithCount.MAX_REPEAT_COUNT
+//                if (atMaxCount) {
+//                    curentRepeatMode
+//                } else {
+//                    PlaybackRepeatMode.RepeatWithCount(newCount)
+//                }
+//            }
+//        }
+//    }
+//
+//    var playProgress by remember {
+//        mutableFloatStateOf(0.3f)
+//    }
+//    val onSeekTo: (Float) -> Unit = {
+//        playProgress = it
+//    }
+//
+//    val playbackActions = dummyPlaybackActions
+//        .copy(
+//            continuePlay = {
+//                onPlay(currentSong)
+//            },
+//            pause = onPause,
+//            seekTo = onSeekTo,
+//            toggleRepeatMode = toggleRepeatMode,
+//        )
+//
+//    var flowPlaybackState: FlowPlaybackState by remember{
+//        mutableStateOf(FlowPlaybackState.Idle)
+//    }
+//
+//    val onFlowPlaybackErrorAcknowledged = {
+//        flowPlaybackState = FlowPlaybackState.Idle
+//    }
+//
+//    val playbackUiState by remember {
+//        derivedStateOf {
+//            dummyPlaybackUiState
+//                .copy(
+//                    currentSong = currentSong,
+//                    isPlaying = isPlaying,
+//                    playProgress = playProgress,
+//                    playbackActions = playbackActions,
+//                )
+//        }
+//    }
+//
+//    LaunchedEffect(playbackUiState) {
+//        if (flowPlaybackState is FlowPlaybackState.FlowStarted.LoadComplete) {
+//            flowPlaybackState = FlowPlaybackState.FlowStarted.LoadComplete(
+//                playbackUiState = playbackUiState
+//            )
+//        }
+//    }
+//
+//    val onToggleFlowState = {
+//        when (flowPlaybackState) {
+//            FlowPlaybackState.Idle -> {
+//                flowPlaybackState = FlowPlaybackState.LoadingInitialFlow
+//            }
+//            FlowPlaybackState.LoadingInitialFlow -> {
+//                flowPlaybackState = FlowPlaybackState.FlowStarted.LoadComplete(
+//                    playbackUiState = playbackUiState
+//                )
+//            }
+//            is FlowPlaybackState.FlowStarted.LoadComplete -> {
+//                flowPlaybackState = FlowPlaybackState.FlowStarted.LoadingNextSong
+//            }
+//            FlowPlaybackState.FlowStarted.LoadingNextSong -> {
+//                flowPlaybackState = FlowPlaybackState.Error
+//            }
+//            FlowPlaybackState.Error -> {}
+//        }
+//    }
+//
+//    val albumArtBitmap = BitmapFactory.decodeResource(
+//        LocalResources.current,
+//        R.drawable.album_art_placeholder
+//    )
+//
+//    val x = (1..3).map{
+//        dummyPlayNextSongItem.copy(
+//            id = it,
+//            title = "song $it",
+//            artistStr = "artist $it",
+//        )
+//    }
+//    var playNextSongItems by remember { mutableStateOf(x) }
+//    val onMoveSongInQueue: (Int, Int) -> Unit = { fromIdx, toIdx ->
+//        playNextSongItems = playNextSongItems.toMutableList().apply {
+//            add(toIdx, removeAt(fromIdx))
+//        }
+//    }
+//    val onPlaySongPNQ: (Int) -> Unit = {}
+//    val appEventsFlow = emptyFlow<AppEvent>()
+//
+//    val moodList = dummyMoodList
+//    var moodState: MoodState by remember {
+//        mutableStateOf(MoodState.Neutral)
+//    }
+//    val startMood: (Mood) -> Unit = { mood ->
+//        moodState = MoodState.InAMood(
+//            moodId = mood.moodId,
+//            moodName = mood.name,
+//        )
+//    }
+//    val endMood = {
+//        moodState = MoodState.Neutral
+//    }
+//
+//    PreviewColumn {
+//        AppTextButton(
+//            text = "toggle flow states",
+//            onClick = onToggleFlowState
+//        )
+//        HomeScreen(
+//            startPlaybackFlow = {},
+//            flowPlaybackState = flowPlaybackState,
+//            onFlowPlaybackErrorAcknowledged = onFlowPlaybackErrorAcknowledged,
+//            playbackRepeatMode = playbackRepeatMode,
+//            albumArtBitmap = albumArtBitmap,
+//            goToSongSearchScreen = {},
+//            playNextQueue = playNextSongItems,
+//            onMoveSongInQueue = onMoveSongInQueue,
+//            onPlaySongPNQ = onPlaySongPNQ,
+//            appEventsFlow = appEventsFlow,
+//            moodList = moodList,
+//            moodState = moodState,
+//            startMood = startMood,
+//            endMood = endMood
+//        )
+//    }
+//}
