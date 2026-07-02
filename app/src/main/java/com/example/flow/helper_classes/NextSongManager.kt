@@ -8,7 +8,6 @@ import com.example.flow.ui.screens.home_screen.components.play_next_queue.models
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -59,12 +58,26 @@ class NextSongManager(
     init {
         coroutineScope.launch {
             combine(moodId, pnqTop, ::Pair)
-            .collectLatest { (moodId, pnqTop) ->
-                prepareNextSong(
+            .collect { (moodId, pnqTop) ->
+                runPrepareNextSongJob(
                     moodId = moodId,
                     pnqTop = pnqTop,
                 )
             }
+        }
+    }
+
+    private var prepareNextSongJob: Job? = null
+    private fun runPrepareNextSongJob(
+        moodId: Int?,
+        pnqTop: PlayNextSongItem?
+    ) {
+        prepareNextSongJob?.cancel()
+        prepareNextSongJob = coroutineScope.launch {
+            prepareNextSong(
+                moodId = moodId,
+                pnqTop = pnqTop,
+            )
         }
     }
 
@@ -87,10 +100,10 @@ class NextSongManager(
                     nextSongSnapshot
                 }
             }
-            // FIXME, if a third variable comes in, you'd need to prevent refetches
-            //  if moodId stays the same, currently, the moodId branch is only called
-            //  when pnqTop is null and the mood changes.
             moodId != null -> {
+                // FIXME, this branch assumes `pnqTop != null` is the only branch above it
+                //  adding a new branch needs to consider this
+                //  currently it reads, if pnqTop is missing and there's a mood, use mood.
                 fetchMoodSong(moodId)?.let {
                     NextSongItem(
                         song = it,
@@ -111,10 +124,10 @@ class NextSongManager(
 
         fetchedNextSongItem?.let {
             val song = it.song
-//            Log.d(
-//                flowDebugTag,
-//                "prepareNextSong: ${song.title}-${song.id}, mood=${moodId}, pnqTop=${pnqTop}"
-//            )
+            Log.d(
+                flowDebugTag,
+                "prepareNextSong: ${song.title}-${song.id}, mood=${moodId}, pnqTop=${pnqTop}"
+            )
             nextSongItem = it
 
             val playbackCacheItem = PlaybackCacheItem(
@@ -125,8 +138,6 @@ class NextSongManager(
         }
     }
 
-    private var prepareNextSongJob: Job? = null
-
     /**
      * gets the next song unless,
      * user specifies song.
@@ -135,8 +146,14 @@ class NextSongManager(
         prioritySongId: Int?
     ): SongWithUrl? {
         val nsi = if (prioritySongId == null) {
+            val stillPreparingNextSong = prepareNextSongJob?.isActive == true
+            if (nextSongItem == null && stillPreparingNextSong) {
+                prepareNextSongJob?.join()
+            }
+
             val nextSongSnapshot = nextSongItem
             nextSongItem = null
+
             nextSongSnapshot
         } else {
             fetchSpecificSong(prioritySongId)?.let {
@@ -147,18 +164,17 @@ class NextSongManager(
             }
         }
 
-        if (nextSongItem == null && prepareNextSongJob?.isActive != true) {
-            prepareNextSongJob = coroutineScope.launch {
-                prepareNextSong(
-                    moodId = moodId.value,
-                    pnqTop = pnqTop.value,
-                )
-            }
-        }
-
         if (nsi?.source == NextSongSource.PNQ) {
             popPnqTop()
         }
+
+        if (nextSongItem == null && prepareNextSongJob?.isActive != true) {
+            runPrepareNextSongJob(
+                moodId = moodId.value,
+                pnqTop = pnqTop.value,
+            )
+        }
+
 
         return nsi?.song
     }
