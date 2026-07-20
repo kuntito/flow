@@ -2,6 +2,7 @@ package com.example.flow.player
 
 import android.content.Context
 import android.media.AudioManager
+import android.net.Uri
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.media3.common.MediaItem
@@ -21,7 +22,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.core.net.toUri
 
 
 data class PlayerState(
@@ -85,10 +88,12 @@ class SongPlayer(
 
             }
         }
+
     private val exoPlayer = ExoPlayer
         .Builder(appContext)
         .setMediaSourceFactory(
             DefaultMediaSourceFactory(
+                // TODO, remove cache after implementing yours
                 PlaybackCache
                     .getDataSourceFactory(
                         appContext
@@ -188,9 +193,13 @@ class SongPlayer(
     }
 
     private fun loadSong(song: Song) {
+        val uri = song.cachedFilePath?.let {
+            Uri.fromFile(File(it))
+        } ?: song.songUrl.toUri()
+
         val mediaItem = MediaItem
             .Builder()
-            .setUri(song.songUrl)
+            .setUri(uri)
             .setCustomCacheKey(song.id.toString())
             .build()
 

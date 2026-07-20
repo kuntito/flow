@@ -9,6 +9,7 @@ data class Song(
     val durationMillis: Int,
     val albumArtUrl: String,
     val songUrl: String,
+    val cachedFilePath: String? = null,
 )
 
 fun SongWithUrl.toSong() = Song(
