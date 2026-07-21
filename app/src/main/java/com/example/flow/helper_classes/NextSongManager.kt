@@ -1,9 +1,12 @@
 package com.example.flow.helper_classes
 
 import android.util.Log
+import com.example.flow.data.models.Song
+import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.response_models.SongWithUrl
 import com.example.flow.flowDebugTag
 import com.example.flow.player.PlaybackCacheItem
+import com.example.flow.player.LruSongCache
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -19,7 +22,7 @@ enum class NextSongSource {
 }
 
 data class NextSongItem(
-    val song: SongWithUrl,
+    val song: Song,
     val source: NextSongSource,
 )
 
@@ -52,6 +55,7 @@ class NextSongManager(
     val fetchNextSongApi: suspend() -> SongWithUrl?,
     val fetchMoodSong: suspend(moodId: Int) -> SongWithUrl?,
     private val coroutineScope: CoroutineScope,
+    private val lruSongCache: LruSongCache,
 ) {
     private var nextSongItem: NextSongItem? = null
 
@@ -92,7 +96,7 @@ class NextSongManager(
                 if (nextSongSnapshot == null || nextSongSnapshot.song.id != pnqTop.id) {
                     fetchSpecificSong(pnqTop.id)?.let {
                         NextSongItem(
-                            song = it,
+                            song = it.toSong(),
                             source = NextSongSource.PNQ
                         )
                     }
@@ -106,7 +110,7 @@ class NextSongManager(
                 //  currently it reads, if pnqTop is missing and there's a mood, use mood.
                 fetchMoodSong(moodId)?.let {
                     NextSongItem(
-                        song = it,
+                        song = it.toSong(),
                         source = NextSongSource.MOOD,
                     )
                 }
@@ -114,7 +118,7 @@ class NextSongManager(
             else -> {
                 fetchNextSongApi()?.let {
                     NextSongItem(
-                        song = it,
+                        song = it.toSong(),
                         source = NextSongSource.API_DEFAULT
                     )
                 }
@@ -127,6 +131,15 @@ class NextSongManager(
             Log.d(
                 flowDebugTag,
                 "prepareNextSong: ${song.title}-${song.id}, mood=${moodId}, pnqTop=${pnqTop}"
+            )
+
+
+            val cachedFp = lruSongCache.getFilePathOrDownload(
+                song.id,
+                song.songUrl
+            )
+            song.copy(
+
             )
             nextSongItem = it
 
@@ -144,7 +157,7 @@ class NextSongManager(
      */
     suspend fun getNextSong(
         prioritySongId: Int?
-    ): SongWithUrl? {
+    ): Song? {
         val nsi = if (prioritySongId == null) {
             val stillPreparingNextSong = prepareNextSongJob?.isActive == true
             if (nextSongItem == null && stillPreparingNextSong) {
@@ -158,7 +171,7 @@ class NextSongManager(
         } else {
             fetchSpecificSong(prioritySongId)?.let {
                 NextSongItem(
-                    song = it,
+                    song = it.toSong(),
                     source = NextSongSource.USER_CHOICE
                 )
             }

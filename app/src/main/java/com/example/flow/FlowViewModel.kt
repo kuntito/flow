@@ -1,7 +1,6 @@
 package com.example.flow
 
 import android.app.Application
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +14,7 @@ import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.helper_classes.NextSongManager
 import com.example.flow.helper_classes.SongSearchManager
+import com.example.flow.player.LruSongCache
 import com.example.flow.player.NotificationPlayerVmBridge
 import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -52,6 +51,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class FlowViewModel(
     private val appContext: Application,
     private val flowRepo: FlowRepository,
+    private val lruSongCache: LruSongCache,
 ): AndroidViewModel(appContext) {
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
@@ -277,6 +277,7 @@ class FlowViewModel(
         fetchNextSongApi = flowRepo::fetchNextSong,
         fetchMoodSong =  flowRepo::fetchMoodSong,
         coroutineScope = viewModelScope,
+        lruSongCache = lruSongCache,
     )
 
     /*
@@ -371,14 +372,14 @@ class FlowViewModel(
             }
 
             onPause()
-            val maybeSongWithUrl = nextSongManager.getNextSong(
+            val maybeSong = nextSongManager.getNextSong(
                 prioritySongId = prioritySongId,
             )
 
-            if (maybeSongWithUrl == null) {
+            if (maybeSong == null) {
                 _flowPlaybackState.value = FlowPlaybackState.Error
             } else {
-                val nextSong = maybeSongWithUrl.toSong()
+                val nextSong = maybeSong
 
                 albumArtLoader.loadFromUrl(
                     nextSong.albumArtUrl

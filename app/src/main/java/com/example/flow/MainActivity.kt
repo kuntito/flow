@@ -18,6 +18,7 @@ import com.example.flow.data.local_db.FlowDb
 import com.example.flow.data.remote.FlowApiClient
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.repo.FlowRepository
+import com.example.flow.player.LruSongCache
 import com.example.flow.ui.components.util.ParticleLayer
 import com.example.flow.ui.theme.FlowTheme
 import com.example.flow.ui.theme.colorKDB
@@ -43,6 +44,8 @@ class MainActivity : ComponentActivity() {
             playFromSearchDao = db.playFromSearchDao(),
         )
 
+        val lruSongCache = LruSongCache()
+
         // use this to nudge App Inspector to show db
 //        val dbPath = db.openHelper.writableDatabase.path
 //        Log.d(flowDebugTag, "db path: $dbPath")
@@ -51,6 +54,7 @@ class MainActivity : ComponentActivity() {
             FlowViewModelFactory(
                 application,
                 flowRepo,
+                lruSongCache,
             )
         }
 
