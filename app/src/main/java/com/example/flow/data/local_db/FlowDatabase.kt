@@ -24,6 +24,7 @@ import com.example.flow.data.local_db.migrations.migration_5_6
 import com.example.flow.data.local_db.migrations.migration_6_7
 import com.example.flow.data.local_db.migrations.migration_7_8
 import com.example.flow.data.local_db.migrations.migration_8_9
+import com.example.flow.data.local_db.migrations.migration_9_10
 
 @Database(
     entities = [
@@ -34,7 +35,7 @@ import com.example.flow.data.local_db.migrations.migration_8_9
         PlayFromSearchEntity::class,
         LruCacheEntity::class,
     ],
-    version = 9,
+    version = 10,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
@@ -63,6 +64,7 @@ abstract class FlowDb: RoomDatabase() {
                         migration_6_7,
                         migration_7_8,
                         migration_8_9,
+                        migration_9_10,
                     )
                     .build()
 

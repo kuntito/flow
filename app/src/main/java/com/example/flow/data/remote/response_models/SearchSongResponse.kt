@@ -10,6 +10,7 @@ data class SongSearchItemApi(
     val artistStr: String,
     val albumArtUrl: String,
     val durationMillis: Int,
+    val listenCount: Int,
 )
 
 fun SongSearchItemApi.toSongSearchItem() = SongSearchItem(
@@ -27,7 +28,8 @@ fun SongSearchItemApi.toSongSearchCacheEntity() = SongSearchCacheEntity(
     albumArtUrl = albumArtUrl,
     normalizedTitle = normalizeForSongSearch(title),
     normalizedArtistName = normalizeForSongSearch(artistStr),
-    durationMillis = durationMillis
+    durationMillis = durationMillis,
+    listenCount = listenCount,
 )
 
 data class SearchSongResponse(

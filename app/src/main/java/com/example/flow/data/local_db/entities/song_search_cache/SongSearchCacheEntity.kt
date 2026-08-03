@@ -15,6 +15,7 @@ data class SongSearchCacheEntity(
     val normalizedTitle: String,
     val normalizedArtistName: String,
     val durationMillis: Int?,
+    val listenCount: Int?,
 )
 
 /**
