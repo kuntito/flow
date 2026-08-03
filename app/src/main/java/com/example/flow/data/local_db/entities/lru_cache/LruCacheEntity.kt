@@ -1,5 +1,6 @@
 package com.example.flow.data.local_db.entities.lru_cache
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,5 +10,6 @@ data class LruCacheEntity(
     val songId: Int,
     val filePath: String,
     val recency: Long,
-    val fileSize: Long,
+    @ColumnInfo(name = "fileSize")
+    val fileSizeBytes: Long,
 )

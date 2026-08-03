@@ -7,21 +7,21 @@ import androidx.room.Query
 
 @Dao
 interface LruCacheDao {
-//    @Query("SELECT * FROM lru_cache WHERE songId = :songId")
-//    suspend fun getBySongId(songId: Int): LruCacheEntity?
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun upsert(entry: LruCacheEntity)
-//
-//    @Query("UPDATE lru_cache SET recency = :recency WHERE songId = :songId")
-//    suspend fun updateRecency(songId: Int, recency: Long)
-//
-//    @Query("SELECT COALESCE(SUM(fileSize), 0) FROM lru_cache")
-//    suspend fun totalSize(): Long
-//
-//    @Query("SELECT * FROM lru_cache ORDER BY recency ASC LIMIT 1")
-//    suspend fun leastRecent(): LruCacheEntity?
-//
-//    @Query("DELETE FROM lru_cache WHERE songId = :songId")
-//    suspend fun delete(songId: Int)
+    @Query("SELECT filePath FROM lru_cache WHERE songId = :songId")
+    suspend fun getBySongId(songId: Int): String?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(entry: LruCacheEntity)
+
+    @Query("UPDATE lru_cache SET recency = :recency WHERE songId = :songId")
+    suspend fun updateRecency(songId: Int, recency: Long)
+
+    @Query("SELECT COALESCE(SUM(fileSize), 0) FROM lru_cache")
+    suspend fun totalSize(): Long
+
+    @Query("SELECT * FROM lru_cache ORDER BY recency ASC LIMIT 1")
+    suspend fun leastRecent(): LruCacheEntity?
+
+    @Query("DELETE FROM lru_cache WHERE songId = :songId")
+    suspend fun delete(songId: Int)
 }

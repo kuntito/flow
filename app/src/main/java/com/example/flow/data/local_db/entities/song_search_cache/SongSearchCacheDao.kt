@@ -32,4 +32,7 @@ interface SongSearchCacheDao {
     suspend fun search(
         query: String
     ): List<SongSearchCacheEntity>
+
+    @Query("SELECT * FROM song_search_cache WHERE songId = :songId")
+    suspend fun getSongById(songId: Int): SongSearchCacheEntity?
 }

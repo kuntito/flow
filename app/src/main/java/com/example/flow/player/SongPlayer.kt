@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.core.net.toUri
+import androidx.media3.datasource.DefaultDataSource
 
 
 data class PlayerState(
@@ -88,16 +89,16 @@ class SongPlayer(
 
             }
         }
-
+    // TODO, properly remove simple cache from player
+    //  after verifying your cache works.
     private val exoPlayer = ExoPlayer
         .Builder(appContext)
         .setMediaSourceFactory(
             DefaultMediaSourceFactory(
-                // TODO, remove cache after implementing yours
-                PlaybackCache
-                    .getDataSourceFactory(
-                        appContext
-                    )
+                DefaultDataSource.Factory(
+                    appContext,
+                    PlaybackCache.getDataSourceFactory(appContext)
+                )
             )
         )
         .build()
@@ -193,9 +194,13 @@ class SongPlayer(
     }
 
     private fun loadSong(song: Song) {
-        val uri = song.cachedFilePath?.let {
-            Uri.fromFile(File(it))
-        } ?: song.songUrl.toUri()
+        val uri = song.cachedFilePath
+            ?.let(::File)
+            ?.takeIf(File::exists)
+            ?.let(Uri::fromFile)
+            ?: song.songUrl.toUri()
+
+        Log.d(flowDebugTag, "loadSong uri: $uri, cachedFp: ${song.cachedFilePath}")
 
         val mediaItem = MediaItem
             .Builder()

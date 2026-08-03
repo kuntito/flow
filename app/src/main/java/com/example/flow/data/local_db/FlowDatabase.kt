@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
+import com.example.flow.data.local_db.entities.lru_cache.LruCacheDao
+import com.example.flow.data.local_db.entities.lru_cache.LruCacheEntity
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
@@ -20,6 +22,8 @@ import com.example.flow.data.local_db.migrations.migration_3_4
 import com.example.flow.data.local_db.migrations.migration_4_5
 import com.example.flow.data.local_db.migrations.migration_5_6
 import com.example.flow.data.local_db.migrations.migration_6_7
+import com.example.flow.data.local_db.migrations.migration_7_8
+import com.example.flow.data.local_db.migrations.migration_8_9
 
 @Database(
     entities = [
@@ -28,8 +32,9 @@ import com.example.flow.data.local_db.migrations.migration_6_7
         PnqHistoryEntity::class,
         SongSearchCacheEntity::class,
         PlayFromSearchEntity::class,
+        LruCacheEntity::class,
     ],
-    version = 7,
+    version = 9,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
@@ -37,7 +42,7 @@ abstract class FlowDb: RoomDatabase() {
     abstract fun pnqHistoryDao(): PnqHistoryDao
     abstract fun songSearchCacheDao(): SongSearchCacheDao
     abstract fun playFromSearchDao(): PlayFromSearchDao
-
+    abstract fun lruSongCacheDao(): LruCacheDao
     companion object {
         @Volatile
         private var INSTANCE: FlowDb? = null
@@ -56,6 +61,8 @@ abstract class FlowDb: RoomDatabase() {
                         migration_4_5,
                         migration_5_6,
                         migration_6_7,
+                        migration_7_8,
+                        migration_8_9,
                     )
                     .build()
 

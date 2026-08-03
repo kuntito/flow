@@ -11,14 +11,12 @@ import com.example.flow.player.LruSongCache
 class FlowViewModelFactory(
     private val application: Application,
     private val flowRepo: FlowRepository,
-    private val lruSongCache: LruSongCache,
 ): ViewModelProvider.Factory {
     @OptIn(UnstableApi::class)
     override fun <T: ViewModel> create(modelClass: Class<T>): T {
         return FlowViewModel(
             application,
             flowRepo,
-            lruSongCache,
         ) as T
     }
 }

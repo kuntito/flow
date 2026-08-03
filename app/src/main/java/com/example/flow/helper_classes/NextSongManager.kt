@@ -51,11 +51,10 @@ class NextSongManager(
     val pnqTop: StateFlow<PlayNextSongItem?>,
     val popPnqTop: () -> Unit,
     val updateCache: (PlaybackCacheItem) -> Unit,
-    val fetchSpecificSong: suspend(songId: Int) -> SongWithUrl?,
-    val fetchNextSongApi: suspend() -> SongWithUrl?,
-    val fetchMoodSong: suspend(moodId: Int) -> SongWithUrl?,
+    val fetchSpecificSong: suspend(songId: Int) -> Song?,
+    val fetchNextSongApi: suspend() -> Song?,
+    val fetchMoodSong: suspend(moodId: Int) -> Song?,
     private val coroutineScope: CoroutineScope,
-    private val lruSongCache: LruSongCache,
 ) {
     private var nextSongItem: NextSongItem? = null
 
@@ -96,7 +95,7 @@ class NextSongManager(
                 if (nextSongSnapshot == null || nextSongSnapshot.song.id != pnqTop.id) {
                     fetchSpecificSong(pnqTop.id)?.let {
                         NextSongItem(
-                            song = it.toSong(),
+                            song = it,
                             source = NextSongSource.PNQ
                         )
                     }
@@ -110,7 +109,7 @@ class NextSongManager(
                 //  currently it reads, if pnqTop is missing and there's a mood, use mood.
                 fetchMoodSong(moodId)?.let {
                     NextSongItem(
-                        song = it.toSong(),
+                        song = it,
                         source = NextSongSource.MOOD,
                     )
                 }
@@ -118,7 +117,7 @@ class NextSongManager(
             else -> {
                 fetchNextSongApi()?.let {
                     NextSongItem(
-                        song = it.toSong(),
+                        song = it,
                         source = NextSongSource.API_DEFAULT
                     )
                 }
@@ -126,22 +125,14 @@ class NextSongManager(
         }
 
 
-        fetchedNextSongItem?.let {
-            val song = it.song
+        fetchedNextSongItem?.let { nsi ->
+            val song = nsi.song
             Log.d(
                 flowDebugTag,
                 "prepareNextSong: ${song.title}-${song.id}, mood=${moodId}, pnqTop=${pnqTop}"
             )
 
-
-            val cachedFp = lruSongCache.getFilePathOrDownload(
-                song.id,
-                song.songUrl
-            )
-            song.copy(
-
-            )
-            nextSongItem = it
+            nextSongItem = nsi
 
             val playbackCacheItem = PlaybackCacheItem(
                 songId = song.id,
@@ -171,7 +162,7 @@ class NextSongManager(
         } else {
             fetchSpecificSong(prioritySongId)?.let {
                 NextSongItem(
-                    song = it.toSong(),
+                    song = it,
                     source = NextSongSource.USER_CHOICE
                 )
             }
@@ -181,6 +172,18 @@ class NextSongManager(
             popPnqTop()
         }
 
+        // TODO at time of writing,
+        //  for every song request, the repo checks locally for the song file.
+        //  if file missing,
+        //  it triggers the file download and returns tells it's caller the file isn't available.
+        //
+        //  next song manager, pre-fetches the next song while the current one is playing.
+        //  by the time, current song finishes playing,
+        //  it returns the pre-fetched next song on request
+        //
+        //  however, it's reasonable to expect that any triggered
+        //  download for the pre-fetched song should have finished by the time current song ends.
+        //  and so, i should re-check the cache.
         if (nextSongItem == null && prepareNextSongJob?.isActive != true) {
             runPrepareNextSongJob(
                 moodId = moodId.value,
@@ -189,6 +192,7 @@ class NextSongManager(
         }
 
 
+        Log.d(flowDebugTag, "getNextSong: ${nsi?.song?.title}, cachedFp: ${nsi?.song?.cachedFilePath}")
         return nsi?.song
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.zIndex
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.local_db.FlowDb
 import com.example.flow.data.remote.FlowApiClient
@@ -23,6 +24,10 @@ import com.example.flow.ui.components.util.ParticleLayer
 import com.example.flow.ui.theme.FlowTheme
 import com.example.flow.ui.theme.colorKDB
 import com.example.flow.ui.theme.colorSane
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import java.io.File
 
 const val flowDebugTag = "flow_tag"
 class MainActivity : ComponentActivity() {
@@ -35,6 +40,21 @@ class MainActivity : ComponentActivity() {
         )
 
         val db = FlowDb.getDatabase(applicationContext)
+
+        val lruSongCache = LruSongCache(
+            lruCacheDao = db.lruSongCacheDao(),
+            cacheDir = File(
+                applicationContext.filesDir,
+                "lru_song_cache"
+            ),
+            coroutineScope = CoroutineScope(
+                // need this one, cause i'm touching file system
+                Dispatchers.IO +
+                        // so canceling a child job, only cancels that job
+                        SupervisorJob()
+            )
+        )
+
         val flowRepo = FlowRepository(
             flowDs = flowDS,
             songPlayCountDao = db.songPlayCountDao(),
@@ -42,19 +62,17 @@ class MainActivity : ComponentActivity() {
             pnPnqHistoryDao = db.pnqHistoryDao(),
             songSearchCacheDao = db.songSearchCacheDao(),
             playFromSearchDao = db.playFromSearchDao(),
+            lruSongCache = lruSongCache,
         )
 
-        val lruSongCache = LruSongCache()
-
         // use this to nudge App Inspector to show db
-//        val dbPath = db.openHelper.writableDatabase.path
-//        Log.d(flowDebugTag, "db path: $dbPath")
+        val dbPath = db.openHelper.writableDatabase.path
+        Log.d(flowDebugTag, "db path: $dbPath")
 
         val flowViewModel: FlowViewModel by viewModels {
             FlowViewModelFactory(
                 application,
                 flowRepo,
-                lruSongCache,
             )
         }
 

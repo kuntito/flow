@@ -8,7 +8,6 @@ import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
 import com.example.flow.data.models.Song
-import com.example.flow.data.models.toSong
 import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader
@@ -51,7 +50,6 @@ import kotlin.time.Duration.Companion.milliseconds
 class FlowViewModel(
     private val appContext: Application,
     private val flowRepo: FlowRepository,
-    private val lruSongCache: LruSongCache,
 ): AndroidViewModel(appContext) {
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
@@ -277,7 +275,6 @@ class FlowViewModel(
         fetchNextSongApi = flowRepo::fetchNextSong,
         fetchMoodSong =  flowRepo::fetchMoodSong,
         coroutineScope = viewModelScope,
-        lruSongCache = lruSongCache,
     )
 
     /*
@@ -381,8 +378,9 @@ class FlowViewModel(
             } else {
                 val nextSong = maybeSong
 
-                albumArtLoader.loadFromUrl(
-                    nextSong.albumArtUrl
+                albumArtLoader.loadAlbumArt(
+                    songFilePath = nextSong.cachedFilePath,
+                    aaUrl = nextSong.albumArtUrl
                 )
                 onPlayFromStart(
                     song = nextSong,
