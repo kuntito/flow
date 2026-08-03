@@ -27,4 +27,10 @@ interface SongPlayCountDao {
         insertIfNotExists(songPlayCountEntity)
         incrementPlayCount(songId)
     }
+
+    @Query("SELECT * FROM songPlayCount WHERE playCount > 0")
+    suspend fun getAll(): List<SongPlayCountEntity>
+
+    @Query("DELETE FROM songPlayCount")
+    suspend fun deleteAll()
 }

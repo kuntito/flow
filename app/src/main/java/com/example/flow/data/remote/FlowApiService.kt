@@ -7,8 +7,13 @@ import com.example.flow.data.remote.response_models.GetMoodNextSongResponse
 import com.example.flow.data.remote.response_models.GetMoodsResponse
 import com.example.flow.data.remote.response_models.GetNextSongResponse
 import com.example.flow.data.remote.response_models.GetSongByIdResponse
+import com.example.flow.data.remote.response_models.ListenCountItemApi
 import com.example.flow.data.remote.response_models.SearchSongResponse
+import com.example.flow.data.remote.response_models.SyncListenCountsBody
+import com.example.flow.data.remote.response_models.SyncListenCountsResponse
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
 import retrofit2.http.Path
 
@@ -40,6 +45,11 @@ interface FlowApiService {
 
     @GET("api/flow/cache-song-search")
     suspend fun getCacheItemsSongSearch(): GetCacheItemsSongSearchResponse
+
+    @POST("api/flow/sync-listen-counts")
+    suspend fun syncListenCounts(
+        @Body body: SyncListenCountsBody
+    ): SyncListenCountsResponse
 }
 
 /**
@@ -109,6 +119,19 @@ class FlowApiDataSource(
             "fetches cache items for song search",
             fn = {
                 api.getCacheItemsSongSearch()
+            }
+        )
+    )
+
+    suspend fun safeSyncListenCounts(
+        items: List<ListenCountItemApi>
+    ) = safeApiCall(
+        ApiCallInfo(
+            "syncing listen counts",
+            fn = {
+                api.syncListenCounts(
+                    SyncListenCountsBody(itemsListenCount = items)
+                )
             }
         )
     )

@@ -17,6 +17,7 @@ import com.example.flow.data.models.Song
 import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
+import com.example.flow.data.remote.response_models.ListenCountItemApi
 import com.example.flow.data.remote.response_models.SongWithUrl
 import com.example.flow.data.remote.response_models.toMood
 import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
@@ -167,5 +168,26 @@ class FlowRepository(
                 playedAtMillis = System.currentTimeMillis(),
             )
         )
+    }
+
+    // TODO, can this run at set intervals?
+    //  and how do you address double syncs.
+    suspend fun syncListenCounts() {
+        val listenCounts = songPlayCountDao.getAll()
+        if (listenCounts.isEmpty()) return
+
+        val items = listenCounts.map {
+            ListenCountItemApi(
+                songId = it.songId,
+                listenCount = it.playCount,
+            )
+        }
+
+        Log.d(flowDebugTag, "syncing listen count")
+        val response = flowDs.safeSyncListenCounts(items)
+        if (response?.success == true) {
+            songPlayCountDao.deleteAll()
+            Log.d(flowDebugTag, "sync successful")
+        }
     }
 }
