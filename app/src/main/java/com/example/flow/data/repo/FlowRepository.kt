@@ -69,7 +69,9 @@ class FlowRepository(
             songSearchCacheDao.search(normalizedQuery)
         }
 
-        return searchResults.map { it.toSongSearchItem() }
+        return searchResults
+            .sortedByDescending { it.listenCount ?: 0 }
+            .map { it.toSongSearchItem() }
     }
 
     /**
