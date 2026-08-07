@@ -132,7 +132,7 @@ class CustomTextFieldState(
 @Composable
 fun rememberCustomTextFieldState(
     onQueryChange: (String) -> Unit,
-    initText: String = "",
+    initText: String = "*",
 ): CustomTextFieldState {
     val keyboard = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()

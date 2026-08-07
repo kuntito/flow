@@ -70,7 +70,7 @@ class FlowRepository(
         }
 
         return searchResults
-            .sortedByDescending { it.listenCount ?: 0 }
+            .sortedBy { it.listenCount ?: 0 }
             .map { it.toSongSearchItem() }
     }
 
