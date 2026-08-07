@@ -17,10 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.flow.R
 import com.example.flow.data.models.DropdownMenuOption
 import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.models.dummySongSearchItem
 import com.example.flow.ui.components.general.AppDropdownMenuItem
+import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.ClickableSurface
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.theme.colorAguero
@@ -99,6 +101,11 @@ fun SongSearchSLI(
                         .weight(1f)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
+                AppIconButton(
+                    iconRes = R.drawable.ic_queue,
+                    onClick = playSongLater,
+                )
+                Spacer(modifier = Modifier.width(16.dp))
             }
             DropdownMenu(
                 expanded = isDropdownMenuVisible,
@@ -132,6 +139,7 @@ private fun SongSearchSLIPreview() {
     val song = dummySongSearchItem
         .copy(
             albumArtUrl = albumArtUrl,
+            title = "deeper than telekinesis, deeper than your "
         )
 
     var playNextSongExists by remember { mutableStateOf(false) }

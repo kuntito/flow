@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.ui.components.util.PreviewColumn
@@ -27,11 +29,15 @@ fun SongTitleAndArtistSLI(
         Text(
             text = songTitle,
             style = tsOrion,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = artistStr,
             style = tsHush,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

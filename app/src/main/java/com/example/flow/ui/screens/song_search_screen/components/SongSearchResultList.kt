@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.models.dummySearchResults
 import com.example.flow.ui.components.util.PreviewColumn
+import com.example.flow.ui.components.util.ShrinkableList
 
 @Composable
 fun SongSearchResultList(
@@ -22,34 +23,27 @@ fun SongSearchResultList(
     onPlaySongLater: (SongSearchItem) -> Unit,
     playNextSongExists: Boolean,
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-        ,
-    ) {
-        item {
-            Spacer(modifier = Modifier
-                .height(16.dp))
-        }
-        itemsIndexed(songSearchItems) { index, song ->
-            SongSearchSLI(
-                song = song,
-                onPlaySong = {
-                    onPlaySongSearchItem(song.id)
-                },
-                playSongNext = {
-                    onPlaySongNext(song)
-                },
-                playSongLater = {
-                    onPlaySongLater(song)
-                },
-                playNextSongExists = playNextSongExists,
-            )
-        }
-        item {
-            Spacer(modifier = Modifier
-                .height(16.dp))
-        }
+    ShrinkableList(
+        items = songSearchItems,
+        getKey = { it.id },
+        modifier = modifier.fillMaxSize(),
+    ) { song, removeFromList ->
+        SongSearchSLI(
+            song = song,
+            onPlaySong = {
+                onPlaySongSearchItem(song.id)
+            },
+            playSongNext = {
+                removeFromList()
+                onPlaySongNext(song)
+            },
+            playSongLater = {
+                removeFromList()
+                onPlaySongLater(song)
+            },
+            playNextSongExists = playNextSongExists,
+        )
+
     }
 }
 
