@@ -12,8 +12,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.ui.components.util.PreviewColumn
-import com.example.flow.ui.theme.tsHush
+import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsOrion
+import com.example.flow.ui.theme.tsTodd
 
 @Composable
 fun SongTitleAndArtistSP(
@@ -36,13 +37,13 @@ fun SongTitleAndArtistSP(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = artistStr,
-            style = tsHush
-                // magnifies the `fontSize` of `tsHush`
-                .run {
-                    copy(
-                        fontSize = fontSize * 1.2
-                    )
-                }
+            style = tsTodd
+                .copy(
+                    color = colorTelli
+                        .copy(
+                            alpha = 0.7f
+                        ),
+                )
             ,
         )
     }

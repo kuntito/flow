@@ -31,6 +31,10 @@ val tsOrionMono = tsOrion.copy(
     fontFamily = FontFamily.Monospace,
 )
 
+val tsTodd = baseStyle.copy(
+    fontSize = 14.sp,
+)
+
 val tsHush = baseStyle.copy(
     fontSize = 12.sp,
     fontWeight = FontWeight.Thin,
