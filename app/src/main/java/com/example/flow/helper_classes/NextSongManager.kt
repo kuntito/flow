@@ -2,11 +2,8 @@ package com.example.flow.helper_classes
 
 import android.util.Log
 import com.example.flow.data.models.Song
-import com.example.flow.data.models.toSong
-import com.example.flow.data.remote.response_models.SongWithUrl
 import com.example.flow.flowDebugTag
 import com.example.flow.player.PlaybackCacheItem
-import com.example.flow.player.LruSongCache
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -52,7 +49,7 @@ class NextSongManager(
     val popPnqTop: () -> Unit,
     val updateCache: (PlaybackCacheItem) -> Unit,
     val fetchSpecificSong: suspend(songId: Int) -> Song?,
-    val fetchNextSongApi: suspend() -> Song?,
+    val fetchNextSong: suspend() -> Song?,
     val fetchMoodSong: suspend(moodId: Int) -> Song?,
     private val coroutineScope: CoroutineScope,
 ) {
@@ -115,7 +112,7 @@ class NextSongManager(
                 }
             }
             else -> {
-                fetchNextSongApi()?.let {
+                fetchNextSong()?.let {
                     NextSongItem(
                         song = it,
                         source = NextSongSource.API_DEFAULT

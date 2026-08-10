@@ -9,6 +9,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
 
+/**
+ *  TODO this should be called song file cache
+ *   it caches song files.
+ */
 class LruSongCache(
     private val lruCacheDao: LruCacheDao,
     private val coroutineScope: CoroutineScope,
@@ -119,5 +123,16 @@ class LruSongCache(
         }
 
         return cachedFp
+    }
+
+    suspend fun getLeastRecentCached(): LruCacheEntity? {
+        val item = lruCacheDao.leastRecent() ?: return null
+
+        lruCacheDao.updateRecency(
+            songId = item.songId,
+            recency = System.currentTimeMillis(),
+        )
+
+        return item
     }
 }

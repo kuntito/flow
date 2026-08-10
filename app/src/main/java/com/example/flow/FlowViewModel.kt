@@ -13,7 +13,6 @@ import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.helper_classes.NextSongManager
 import com.example.flow.helper_classes.SongSearchManager
-import com.example.flow.player.LruSongCache
 import com.example.flow.player.NotificationPlayerVmBridge
 import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
@@ -272,7 +271,7 @@ class FlowViewModel(
         },
         updateCache = ::updateCache,
         fetchSpecificSong = flowRepo::fetchSongById,
-        fetchNextSongApi = flowRepo::fetchNextSong,
+        fetchNextSong = flowRepo::fetchNextSong,
         fetchMoodSong =  flowRepo::fetchMoodSong,
         coroutineScope = viewModelScope,
     )

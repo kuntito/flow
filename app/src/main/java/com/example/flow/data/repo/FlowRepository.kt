@@ -94,11 +94,35 @@ class FlowRepository(
             )
     }
 
+    /**
+     * fetches the next song from API.
+     *
+     * if it fails, fetches from local cache.
+     *
+     * if that fails, it returns `null`.
+     */
     suspend fun fetchNextSong(): Song? {
-        return flowDs
+        val songFromApi = flowDs
             .safeFetchNextSong()
             ?.songWithUrl
             ?.let { enrichSongWithCache(it) }
+
+        if (songFromApi == null) {
+            return fetchNextSongFromCache()
+        }
+
+        return songFromApi
+    }
+
+    suspend fun fetchNextSongFromCache(): Song? {
+        val itemSongFileCache = lruSongCache.getLeastRecentCached() ?: return null
+        val itemSongSearchCache = songSearchCacheDao.getSongById(
+            itemSongFileCache.songId
+        ) ?: return null
+
+        return itemSongSearchCache.toSong(
+            cachedFilePath = itemSongFileCache.filePath
+        )
     }
 
     /**
