@@ -35,4 +35,7 @@ interface SongSearchCacheDao {
 
     @Query("SELECT * FROM song_search_cache WHERE songId = :songId")
     suspend fun getSongById(songId: Int): SongSearchCacheEntity?
+
+    @Query("SELECT * FROM song_search_cache ORDER BY COALESCE(recency, 0) ASC")
+    suspend fun getAllByLeastRecent(): List<SongSearchCacheEntity>
 }

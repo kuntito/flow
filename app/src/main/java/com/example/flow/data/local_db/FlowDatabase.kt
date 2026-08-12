@@ -16,6 +16,7 @@ import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheEntity
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
+import com.example.flow.data.local_db.migrations.migration_10_11
 import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
@@ -35,7 +36,7 @@ import com.example.flow.data.local_db.migrations.migration_9_10
         PlayFromSearchEntity::class,
         LruCacheEntity::class,
     ],
-    version = 10,
+    version = 11,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
@@ -65,6 +66,7 @@ abstract class FlowDb: RoomDatabase() {
                         migration_7_8,
                         migration_8_9,
                         migration_9_10,
+                        migration_10_11,
                     )
                     .build()
 

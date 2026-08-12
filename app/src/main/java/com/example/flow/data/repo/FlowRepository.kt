@@ -62,8 +62,12 @@ class FlowRepository(
     suspend fun searchSong(
         query: String
     ): List<SongSearchItem>? {
+        // TODO typing '?' shows all songs, same with '*'
+        //  chances are, the asterisk never worked as expected from the jump
         val searchResults = if (query == "*") {
             songSearchCacheDao.getAll()
+        } else if (query == "÷") {
+            songSearchCacheDao.getAllByLeastRecent()
         } else {
             val normalizedQuery = normalizeForSongSearch(query)
             songSearchCacheDao.search(normalizedQuery)
@@ -173,6 +177,7 @@ class FlowRepository(
 
     suspend fun syncSongSearchCache() {
         val response = flowDs.safeFetchCacheItemsSongSearch()
+        Log.d(flowDebugTag, "cache sync: ${response?.cacheItems?.firstOrNull()}")
         response?.cacheItems?.let { cacheItems ->
             val entities = cacheItems.map{
                 it.toSongSearchCacheEntity()
