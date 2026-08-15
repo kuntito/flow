@@ -513,10 +513,16 @@ class FlowViewModel(
 
     private val _savePlaylistState = MutableStateFlow<SavePlaylistState>(SavePlaylistState.Idle)
     val savePlaylistState = _savePlaylistState.asStateFlow()
-    fun onSavePlaylist(songs: List<PlayNextSongItem>) {
+    fun onSavePlaylist(
+        playlistName: String,
+        songs: List<PlayNextSongItem>
+    ) {
         viewModelScope.launch {
             _savePlaylistState.value = SavePlaylistState.Saving
-            val success = flowRepo.savePlaylist(songs)
+            val success = flowRepo.savePlaylist(
+                playlistName,
+                songs
+            )
             _savePlaylistState.value = if (success) SavePlaylistState.Saved else SavePlaylistState.Failed
             delay(1000)
             _savePlaylistState.value = SavePlaylistState.Idle

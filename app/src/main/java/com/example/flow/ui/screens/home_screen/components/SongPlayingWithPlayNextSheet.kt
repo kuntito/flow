@@ -51,7 +51,7 @@ fun SongPlayingWithPlayNextSheet(
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     savePlaylistState: SavePlaylistState,
-    onSavePlaylist: (List<PlayNextSongItem>) -> Unit,
+    onSavePlaylist: (String, List<PlayNextSongItem>) -> Unit,
     appEventsFlow: Flow<AppEvent>,
     showSleepTimerDialog: () -> Unit,
 ) {
@@ -260,7 +260,7 @@ private fun SongPlayingWithPlayNextSheetPreview() {
             albumArtBitmap = albumArtBitmap,
             playNextQueue = playNextSongItems,
             savePlaylistState = SavePlaylistState.Idle,
-            onSavePlaylist = { },
+            onSavePlaylist = { _, _ -> },
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
             appEventsFlow = appEventsFlow,

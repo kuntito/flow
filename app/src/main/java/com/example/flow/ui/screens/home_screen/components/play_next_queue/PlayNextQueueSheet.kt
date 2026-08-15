@@ -22,7 +22,7 @@ fun PlayNextQueueSheet(
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     savePlaylistState: SavePlaylistState,
-    onSavePlaylist: (List<PlayNextSongItem>) -> Unit,
+    onSavePlaylist: (String, List<PlayNextSongItem>) -> Unit,
 ) {
     val sheetCollapsedHeight = 48
     val sheetMaxHeight = LocalConfiguration.current.screenHeightDp
@@ -37,6 +37,19 @@ fun PlayNextQueueSheet(
         appDraggableSheetState.collapse()
     }
 
+    var showNamePlaylistDialog by remember { mutableStateOf(false) }
+    if (showNamePlaylistDialog) {
+        DialogNamePlaylist(
+            onSavePlaylistName = { name ->
+                onSavePlaylist(name, songQueue)
+            },
+            onDismiss = {
+                showNamePlaylistDialog = false
+            }
+        )
+
+    }
+
     AppDraggableSheet(
         modifier = modifier,
         sheetCollapsedHeight = sheetCollapsedHeight,
@@ -46,7 +59,7 @@ fun PlayNextQueueSheet(
             SavePlaylistIcon(
                 state = savePlaylistState,
                 onSaveClick = {
-                    onSavePlaylist(songQueue)
+                    showNamePlaylistDialog = true
                 }
             )
         }
@@ -84,7 +97,7 @@ private fun PlayNextQueueSheetPreview() {
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
             savePlaylistState = SavePlaylistState.Idle,
-            onSavePlaylist = { }
+            onSavePlaylist = {_, _ ->  }
         )
     }
 }

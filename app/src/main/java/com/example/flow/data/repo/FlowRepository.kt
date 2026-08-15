@@ -229,17 +229,20 @@ class FlowRepository(
     }
 
     suspend fun savePlaylist(
+        playlistName: String?,
         songs: List<PlayNextSongItem>,
     ): Boolean {
+        if (songs.size < 2) return false
+
         return try {
             // TODO implement playlist naming feature
-            val playlistName = SimpleDateFormat(
+            val nowDatestr = SimpleDateFormat(
                 // e.g. "Aug 15, 3:42 PM"
                 "MMM d, h:mm a", Locale.getDefault()
             ).format(Date())
 
             playlistDao.createPlaylist(
-                name = playlistName,
+                name = (playlistName ?: nowDatestr).trim(),
                 songIds = songs.map { it.id },
             )
             true
