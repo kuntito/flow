@@ -40,6 +40,7 @@ fun AppDraggableSheet(
     sheetMaxHeight: Int,
     appDraggableSheetState: AppDraggableSheetState,
     sheetActiveColor: Color = colorAguero,
+    trailingIconItem: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
 
@@ -105,6 +106,8 @@ fun AppDraggableSheet(
             onSheetHandlePress = onSheetHandlePress,
             draggableModifier = draggableModifier,
             isNotCollapsed = appDraggableSheetState.isNotCollapsed,
+            isExpanded = appDraggableSheetState.isExpanded,
+            trailingIconItem = trailingIconItem,
         )
         AppDraggableSheetBody(
             content = content,

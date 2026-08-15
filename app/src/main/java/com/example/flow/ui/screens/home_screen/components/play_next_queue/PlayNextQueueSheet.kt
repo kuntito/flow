@@ -8,11 +8,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.flow.R
+import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.general.draggable_sheet.AppDraggableSheet
 import com.example.flow.ui.components.general.draggable_sheet.rememberAppDraggableSheetState
 import com.example.flow.ui.components.util.PreviewBox
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
+import com.example.flow.ui.theme.colorMarcelo
+import com.example.flow.ui.theme.colorTelli
 
 @Composable
 fun PlayNextQueueSheet(
@@ -20,6 +24,7 @@ fun PlayNextQueueSheet(
     songQueue: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
+    onSavePlaylist: (List<PlayNextSongItem>) -> Unit,
 ) {
     val sheetCollapsedHeight = 48
     val sheetMaxHeight = LocalConfiguration.current.screenHeightDp
@@ -39,6 +44,15 @@ fun PlayNextQueueSheet(
         sheetCollapsedHeight = sheetCollapsedHeight,
         sheetMaxHeight = sheetMaxHeight,
         appDraggableSheetState = appDraggableSheetState,
+        trailingIconItem = {
+            AppIconButton(
+                iconRes = R.drawable.ic_save,
+                color = colorTelli,
+                onClick = {
+                    onSavePlaylist(songQueue)
+                },
+            )
+        }
     ) {
         PlayNextQueue(
             songQueue = songQueue,
@@ -72,6 +86,7 @@ private fun PlayNextQueueSheetPreview() {
             songQueue = songQueue,
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
+            onSavePlaylist = { _ -> }
         )
     }
 }

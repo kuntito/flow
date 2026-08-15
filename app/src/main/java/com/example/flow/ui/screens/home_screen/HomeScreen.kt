@@ -73,6 +73,7 @@ fun HomeScreenRoot(
     val playNextQueue by flowViewModel.playNextSongQueue.collectAsState()
     val onMoveSongInQueue = flowViewModel::swapSongPlayNextQueue
     val onPlaySongPNQ: (Int) -> Unit = flowViewModel::onPlaySongPNQ
+    val onSavePlaylist: (List<PlayNextSongItem>) -> Unit = flowViewModel::onSavePlaylist
 
     val appEventsFlow = flowViewModel.appEventsFlow
 
@@ -98,6 +99,7 @@ fun HomeScreenRoot(
         playNextQueue = playNextQueue,
         onMoveSongInQueue = onMoveSongInQueue,
         onPlaySongPNQ = onPlaySongPNQ,
+        onSavePlaylist = onSavePlaylist,
         appEventsFlow = appEventsFlow,
         moodList = moodList,
         moodState = moodState,
@@ -123,6 +125,7 @@ fun HomeScreen(
     playNextQueue: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
+    onSavePlaylist: (List<PlayNextSongItem>) -> Unit,
     appEventsFlow: Flow<AppEvent>,
     moodList: List<Mood>,
     moodState: MoodState,
@@ -233,6 +236,7 @@ fun HomeScreen(
                             playNextQueue = playNextQueue,
                             onMoveSongInQueue = onMoveSongInQueue,
                             onPlaySongPNQ = onPlaySongPNQ,
+                            onSavePlaylist = onSavePlaylist,
                             appEventsFlow = appEventsFlow,
                             showSleepTimerDialog = showSleepTimerDialog,
                         )

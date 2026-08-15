@@ -510,6 +510,10 @@ class FlowViewModel(
         )
     }
 
+    fun onSavePlaylist(songs: List<PlayNextSongItem>) {
+
+    }
+
     @OptIn(UnstableApi::class)
     fun updateCache(
         cacheItem: PlaybackCacheItem,
