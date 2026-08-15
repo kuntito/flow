@@ -6,6 +6,7 @@ import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntit
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
+import com.example.flow.data.local_db.entities.playlist.PlaylistDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
@@ -24,6 +25,9 @@ import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class FlowRepository(
     private val flowDs: FlowApiDataSource,
@@ -32,6 +36,7 @@ class FlowRepository(
     private val pnPnqHistoryDao: PnqHistoryDao,
     private val songSearchCacheDao: SongSearchCacheDao,
     private val playFromSearchDao: PlayFromSearchDao,
+    private val playlistDao: PlaylistDao,
     private val lruSongCache: LruSongCache,
 ) {
     suspend fun incrementPlayCount(songId: Int) {
@@ -226,6 +231,21 @@ class FlowRepository(
     suspend fun savePlaylist(
         songs: List<PlayNextSongItem>,
     ): Boolean {
-        return false
+        return try {
+            // TODO implement playlist naming feature
+            val playlistName = SimpleDateFormat(
+                // e.g. "Aug 15, 3:42 PM"
+                "MMM d, h:mm a", Locale.getDefault()
+            ).format(Date())
+
+            playlistDao.createPlaylist(
+                name = playlistName,
+                songIds = songs.map { it.id },
+            )
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 }

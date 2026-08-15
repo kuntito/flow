@@ -12,11 +12,15 @@ import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountEntity
+import com.example.flow.data.local_db.entities.playlist.PlaylistDao
+import com.example.flow.data.local_db.entities.playlist.PlaylistEntity
+import com.example.flow.data.local_db.entities.playlist.PlaylistSongEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheEntity
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
 import com.example.flow.data.local_db.migrations.migration_10_11
+import com.example.flow.data.local_db.migrations.migration_11_12
 import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
@@ -35,8 +39,10 @@ import com.example.flow.data.local_db.migrations.migration_9_10
         SongSearchCacheEntity::class,
         PlayFromSearchEntity::class,
         LruCacheEntity::class,
+        PlaylistEntity::class,
+        PlaylistSongEntity::class,
     ],
-    version = 11,
+    version = 12,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
@@ -45,6 +51,7 @@ abstract class FlowDb: RoomDatabase() {
     abstract fun songSearchCacheDao(): SongSearchCacheDao
     abstract fun playFromSearchDao(): PlayFromSearchDao
     abstract fun lruSongCacheDao(): LruCacheDao
+    abstract fun playlistDao(): PlaylistDao
     companion object {
         @Volatile
         private var INSTANCE: FlowDb? = null
@@ -67,6 +74,7 @@ abstract class FlowDb: RoomDatabase() {
                         migration_8_9,
                         migration_9_10,
                         migration_10_11,
+                        migration_11_12,
                     )
                     .build()
 

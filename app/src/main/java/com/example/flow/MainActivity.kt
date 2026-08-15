@@ -62,6 +62,7 @@ class MainActivity : ComponentActivity() {
             pnPnqHistoryDao = db.pnqHistoryDao(),
             songSearchCacheDao = db.songSearchCacheDao(),
             playFromSearchDao = db.playFromSearchDao(),
+            playlistDao = db.playlistDao(),
             lruSongCache = lruSongCache,
         )
 
