@@ -25,6 +25,7 @@ import com.example.flow.ui.screens.home_screen.components.play_next_queue.models
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.toPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.home_screen.models.MoodState
+import com.example.flow.ui.screens.home_screen.models.SavePlaylistState
 import com.example.flow.ui.screens.home_screen.models.SleepTimerDuration
 import com.example.flow.ui.screens.home_screen.models.SleepTimerEvent
 import com.example.flow.ui.screens.home_screen.models.SleepTimerState
@@ -510,8 +511,16 @@ class FlowViewModel(
         )
     }
 
+    private val _savePlaylistState = MutableStateFlow<SavePlaylistState>(SavePlaylistState.Idle)
+    val savePlaylistState = _savePlaylistState.asStateFlow()
     fun onSavePlaylist(songs: List<PlayNextSongItem>) {
-
+        viewModelScope.launch {
+            _savePlaylistState.value = SavePlaylistState.Saving
+            val success = flowRepo.savePlaylist(songs)
+            _savePlaylistState.value = if (success) SavePlaylistState.Saved else SavePlaylistState.Failed
+            delay(1000)
+            _savePlaylistState.value = SavePlaylistState.Idle
+        }
     }
 
     @OptIn(UnstableApi::class)

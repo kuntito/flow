@@ -33,6 +33,7 @@ import com.example.flow.ui.screens.home_screen.components.play_next_queue.PlayNe
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.ObserveAsEvents
+import com.example.flow.ui.screens.home_screen.models.SavePlaylistState
 import com.example.flow.ui.screens.home_screen.models.SleepTimerEvent
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import com.example.flow.ui.theme.colorIsco
@@ -49,6 +50,7 @@ fun SongPlayingWithPlayNextSheet(
     playNextQueue: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
+    savePlaylistState: SavePlaylistState,
     onSavePlaylist: (List<PlayNextSongItem>) -> Unit,
     appEventsFlow: Flow<AppEvent>,
     showSleepTimerDialog: () -> Unit,
@@ -151,6 +153,7 @@ fun SongPlayingWithPlayNextSheet(
                     songQueue = playNextQueue,
                     onMoveSongInQueue = onMoveSongInQueue,
                     onPlaySongPNQ = onPlaySongPNQ,
+                    savePlaylistState = savePlaylistState,
                     onSavePlaylist = onSavePlaylist,
                 )
             }
@@ -256,7 +259,8 @@ private fun SongPlayingWithPlayNextSheetPreview() {
             playbackRepeatMode = playbackRepeatMode,
             albumArtBitmap = albumArtBitmap,
             playNextQueue = playNextSongItems,
-            onSavePlaylist = { _ -> },
+            savePlaylistState = SavePlaylistState.Idle,
+            onSavePlaylist = { },
             onMoveSongInQueue = onMoveSongInQueue,
             onPlaySongPNQ = onPlaySongPNQ,
             appEventsFlow = appEventsFlow,

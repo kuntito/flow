@@ -23,6 +23,7 @@ import com.example.flow.data.remote.response_models.toMood
 import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
+import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 
 class FlowRepository(
     private val flowDs: FlowApiDataSource,
@@ -220,5 +221,11 @@ class FlowRepository(
             songPlayCountDao.deleteAll()
             Log.d(flowDebugTag, "sync successful")
         }
+    }
+
+    suspend fun savePlaylist(
+        songs: List<PlayNextSongItem>,
+    ): Boolean {
+        return false
     }
 }

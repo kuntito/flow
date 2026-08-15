@@ -53,6 +53,7 @@ import com.example.flow.ui.screens.home_screen.components.play_next_queue.models
 import com.example.flow.ui.screens.home_screen.components.select_mood_dialog.SelectMoodDialog
 import com.example.flow.ui.screens.home_screen.components.sleep_timer.SleepTimerDialog
 import com.example.flow.ui.screens.home_screen.models.MoodState
+import com.example.flow.ui.screens.home_screen.models.SavePlaylistState
 import com.example.flow.ui.screens.home_screen.models.SleepTimerDuration
 import com.example.flow.ui.screens.home_screen.models.SleepTimerState
 import com.example.flow.ui.theme.colorNeutral
@@ -73,6 +74,7 @@ fun HomeScreenRoot(
     val playNextQueue by flowViewModel.playNextSongQueue.collectAsState()
     val onMoveSongInQueue = flowViewModel::swapSongPlayNextQueue
     val onPlaySongPNQ: (Int) -> Unit = flowViewModel::onPlaySongPNQ
+    val savePlaylistState by flowViewModel.savePlaylistState.collectAsState()
     val onSavePlaylist: (List<PlayNextSongItem>) -> Unit = flowViewModel::onSavePlaylist
 
     val appEventsFlow = flowViewModel.appEventsFlow
@@ -99,6 +101,7 @@ fun HomeScreenRoot(
         playNextQueue = playNextQueue,
         onMoveSongInQueue = onMoveSongInQueue,
         onPlaySongPNQ = onPlaySongPNQ,
+        savePlaylistState = savePlaylistState,
         onSavePlaylist = onSavePlaylist,
         appEventsFlow = appEventsFlow,
         moodList = moodList,
@@ -125,6 +128,7 @@ fun HomeScreen(
     playNextQueue: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
+    savePlaylistState: SavePlaylistState,
     onSavePlaylist: (List<PlayNextSongItem>) -> Unit,
     appEventsFlow: Flow<AppEvent>,
     moodList: List<Mood>,
@@ -236,6 +240,7 @@ fun HomeScreen(
                             playNextQueue = playNextQueue,
                             onMoveSongInQueue = onMoveSongInQueue,
                             onPlaySongPNQ = onPlaySongPNQ,
+                            savePlaylistState = savePlaylistState,
                             onSavePlaylist = onSavePlaylist,
                             appEventsFlow = appEventsFlow,
                             showSleepTimerDialog = showSleepTimerDialog,
