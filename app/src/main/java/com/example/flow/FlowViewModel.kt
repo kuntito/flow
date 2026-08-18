@@ -336,6 +336,10 @@ class FlowViewModel(
             flowRepo.syncSongSearchCache()
         }
 
+        viewModelScope.launch {
+            flowRepo.syncListenCounts()
+        }
+
         notificationBridge.start()
     }
 

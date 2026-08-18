@@ -80,7 +80,7 @@ class FlowRepository(
         }
 
         return searchResults
-            .sortedBy { it.listenCount ?: 0 }
+            .sortedByDescending { it.listenCount ?: 0 }
             .map { it.toSongSearchItem() }
     }
 
@@ -207,24 +207,29 @@ class FlowRepository(
         )
     }
 
-    // TODO, can this run at set intervals?
-    //  and how do you address double syncs.
+    private var isSyncing = false
     suspend fun syncListenCounts() {
-        val listenCounts = songPlayCountDao.getAll()
-        if (listenCounts.isEmpty()) return
+        if (isSyncing) return
+        isSyncing = true
+        try {
+            val listenCounts = songPlayCountDao.getAll()
+            if (listenCounts.isEmpty()) return
 
-        val items = listenCounts.map {
-            ListenCountItemApi(
-                songId = it.songId,
-                listenCount = it.playCount,
-            )
-        }
+            val items = listenCounts.map {
+                ListenCountItemApi(
+                    songId = it.songId,
+                    listenCount = it.playCount,
+                )
+            }
 
-        Log.d(flowDebugTag, "syncing listen count")
-        val response = flowDs.safeSyncListenCounts(items)
-        if (response?.success == true) {
-            songPlayCountDao.deleteAll()
-            Log.d(flowDebugTag, "sync successful")
+            Log.d(flowDebugTag, "syncing listen count")
+            val response = flowDs.safeSyncListenCounts(items)
+            if (response?.success == true) {
+                songPlayCountDao.deleteAll()
+                Log.d(flowDebugTag, "sync successful")
+            }
+        } finally {
+            isSyncing = false
         }
     }
 
