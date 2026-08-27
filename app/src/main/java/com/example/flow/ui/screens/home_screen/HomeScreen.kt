@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.Flow
 fun HomeScreenRoot(
     flowViewModel: FlowViewModel,
     goToSongSearchScreen: () -> Unit,
+    goToPlaylistScreen: () -> Unit,
 ) {
     val flowPlaybackState by flowViewModel.flowPlaybackState.collectAsState()
     val playbackRepeatMode by flowViewModel.playbackRepeatMode.collectAsState()
@@ -80,6 +81,7 @@ fun HomeScreenRoot(
         playbackRepeatMode = playbackRepeatMode,
         albumArtBitmap = albumArtBitmap,
         goToSongSearchScreen = goToSongSearchScreen,
+        goToPlaylistScreen = goToPlaylistScreen,
         playNextQueue = playNextQueue,
         onMoveSongInQueue = onMoveSongInQueue,
         onPlaySongPNQ = onPlaySongPNQ,
@@ -107,6 +109,7 @@ fun HomeScreen(
     playbackRepeatMode: PlaybackRepeatMode,
     albumArtBitmap: Bitmap?,
     goToSongSearchScreen: () -> Unit,
+    goToPlaylistScreen: () -> Unit,
     playNextQueue: List<PlayNextSongItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
@@ -182,7 +185,8 @@ fun HomeScreen(
                 onMoodIconClick = onMoodIconClick,
                 inAMood = moodState as? MoodState.InAMood,
                 endMood = handleEndMood,
-                isSleepTimerActive = sleepTimerState is SleepTimerState.Active
+                isSleepTimerActive = sleepTimerState is SleepTimerState.Active,
+                goToPlaylistScreen = goToPlaylistScreen,
             )
         },
         modifier = modifier

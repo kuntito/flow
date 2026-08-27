@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.home_screen.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,21 +31,27 @@ fun FlowTopAppBar(
     inAMood: MoodState.InAMood? = null,
     endMood: () -> Unit,
     isSleepTimerActive: Boolean,
+    goToPlaylistScreen: () -> Unit,
 ) {
     val iconSize = 24
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-//            .border(width = 1.dp, color = Color.Yellow)
+//            .border(width = 1.dp, color = colorTelli)
             .height(64.dp)
             .padding(horizontal = 16.dp)
     ) {
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .weight(1f),
         ) {
-            // intentionally empty, it balances the right row
+            AppIconButton(
+                iconRes = R.drawable.ic_list,
+                size = iconSize,
+                onClick = goToPlaylistScreen,
+            )
         }
 
         if (inAMood == null) {
@@ -119,6 +126,7 @@ private fun FlowTopAppBarPreview() {
             inAMood = null,
             endMood = {},
             isSleepTimerActive = true,
+            goToPlaylistScreen = {},
         )
     }
 }

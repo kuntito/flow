@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.flow.ui.screens.home_screen.HomeScreenRoot
+import com.example.flow.ui.screens.playlist_screen.PlaylistScreenRoot
 import com.example.flow.ui.screens.song_search_screen.SongSearchScreenRoot
 import kotlinx.serialization.Serializable
 
@@ -29,6 +30,11 @@ fun ScreenNavigation(
                     navController.navigate(
                         AppScreens.SongSearchScreen
                     )
+                },
+                goToPlaylistScreen = {
+                    navController.navigate(
+                        AppScreens.PlaylistScreen,
+                    )
                 }
             )
         }
@@ -36,6 +42,14 @@ fun ScreenNavigation(
             SongSearchScreenRoot(
                 flowViewModel = flowViewModel,
                 goToPreviousScreen = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable<AppScreens.PlaylistScreen> {
+            PlaylistScreenRoot(
+                flowViewModel = flowViewModel,
+                navBack = {
                     navController.popBackStack()
                 }
             )
@@ -49,4 +63,7 @@ sealed class AppScreens {
 
     @Serializable
     object SongSearchScreen
+
+    @Serializable
+    object PlaylistScreen
 }
