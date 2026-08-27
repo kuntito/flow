@@ -1,4 +1,4 @@
-package com.example.flow.ui.components.home_screen
+package com.example.flow.ui.screens.home_screen.components
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
@@ -11,7 +11,6 @@ import com.example.flow.flowDebugTag
 import com.example.flow.ui.components.general.AppTextButton
 import com.example.flow.ui.components.util.PreviewColumn
 
-// TODO move this to screens.home_screen
 @Composable
 fun TapToStartPrompt(
     modifier: Modifier = Modifier,

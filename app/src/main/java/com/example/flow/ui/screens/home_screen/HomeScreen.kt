@@ -1,8 +1,6 @@
 package com.example.flow.ui.screens.home_screen
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
@@ -13,43 +11,28 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.flow.FlowViewModel
-import com.example.flow.R
-import com.example.flow.data.models.Song
-import com.example.flow.data.models.dummySong
 import com.example.flow.player.PlaybackUiState
-import com.example.flow.player.dummyPlaybackActions
-import com.example.flow.player.dummyPlaybackUiState
-import com.example.flow.ui.components.general.AppTextButton
-import com.example.flow.ui.components.home_screen.FlowTopAppBar
-import com.example.flow.ui.components.home_screen.TapToStartPrompt
+import com.example.flow.ui.screens.home_screen.components.FlowTopAppBar
+import com.example.flow.ui.screens.home_screen.components.TapToStartPrompt
 import com.example.flow.ui.components.util.AppSnackBar
-import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.home_screen.components.AudioFlowLoadingIndicator
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.LocalResources
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
-import com.example.flow.data.models.dummyMoodList
-import com.example.flow.flowDebugTag
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.components.select_mood_dialog.SelectMoodDialog
 import com.example.flow.ui.screens.home_screen.components.sleep_timer.SleepTimerDialog
 import com.example.flow.ui.screens.home_screen.models.MoodState
@@ -58,7 +41,6 @@ import com.example.flow.ui.screens.home_screen.models.SleepTimerDuration
 import com.example.flow.ui.screens.home_screen.models.SleepTimerState
 import com.example.flow.ui.theme.colorNeutral
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 @OptIn(UnstableApi::class)
 @Composable

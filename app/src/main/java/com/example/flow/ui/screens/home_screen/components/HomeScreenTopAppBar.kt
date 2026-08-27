@@ -1,4 +1,4 @@
-package com.example.flow.ui.components.home_screen
+package com.example.flow.ui.screens.home_screen.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -22,7 +22,6 @@ import com.example.flow.ui.screens.home_screen.models.MoodState
 import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsBlazeMono
 
-// TODO move this to screens.home_screen
 @Composable
 fun FlowTopAppBar(
     modifier: Modifier = Modifier,
