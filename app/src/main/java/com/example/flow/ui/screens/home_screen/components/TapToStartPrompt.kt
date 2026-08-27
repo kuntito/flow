@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.example.flow.flowDebugTag
 import com.example.flow.ui.components.general.AppTextButton
 import com.example.flow.ui.components.util.PreviewColumn
@@ -31,6 +32,7 @@ fun TapToStartPrompt(
             text = "tap to start",
             isBlinking = true,
             onClick = onClick,
+            fontSize = 18.sp,
         )
     }
 }
