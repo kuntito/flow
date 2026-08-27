@@ -37,6 +37,7 @@ fun FlowTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = appTypography,
         content = content
     )
 }
