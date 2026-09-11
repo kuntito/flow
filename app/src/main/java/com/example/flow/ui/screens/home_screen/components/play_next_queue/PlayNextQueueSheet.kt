@@ -7,10 +7,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import com.example.flow.R
 import com.example.flow.data.models.Song
+import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.general.draggable_sheet.AppDraggableSheet
 import com.example.flow.ui.components.general.draggable_sheet.rememberAppDraggableSheetState
 import com.example.flow.ui.screens.home_screen.models.SavePlaylistState
+import com.example.flow.ui.theme.colorTelli
 
 @Composable
 fun PlayNextQueueSheet(
@@ -18,6 +21,7 @@ fun PlayNextQueueSheet(
     songQueue: List<Song>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
+    clearPnq: () -> Unit,
     savePlaylistState: SavePlaylistState,
     onSavePlaylist: (String, List<Song>) -> Unit,
 ) {
@@ -47,14 +51,24 @@ fun PlayNextQueueSheet(
 
     }
 
+    val iconSize = 16
+
     AppDraggableSheet(
         modifier = modifier,
         sheetCollapsedHeight = sheetCollapsedHeight,
         sheetMaxHeight = sheetMaxHeight,
         appDraggableSheetState = appDraggableSheetState,
+        leadingIconItem = {
+            AppIconButton(
+                iconRes = R.drawable.ic_clear,
+                size = iconSize,
+                onClick = clearPnq,
+            )
+        },
         trailingIconItem = {
             SavePlaylistIcon(
                 state = savePlaylistState,
+                iconSize = iconSize,
                 onSaveClick = {
                     showNamePlaylistDialog = true
                 }

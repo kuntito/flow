@@ -46,6 +46,7 @@ fun AppDraggableSheetHeader(
     draggableModifier: Modifier,
     isNotCollapsed: Boolean,
     isExpanded: Boolean,
+    leadingIconItem: @Composable (() -> Unit)? = null,
     trailingIconItem: @Composable (() -> Unit)? = null,
 ) {
 
@@ -65,9 +66,16 @@ fun AppDraggableSheetHeader(
             )
         ,
     ) {
-        // placeholder to balance the right icon
-        // allowing the handle to remain at the center.
-        Spacer(modifier = Modifier.width(iconSize.dp))
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(iconSize.dp)
+            ,
+        ) {
+            if (isExpanded) {
+                leadingIconItem?.invoke()
+            }
+        }
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier

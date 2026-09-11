@@ -35,6 +35,7 @@ fun SongPlayingWithPlayNextSheet(
     playNextQueue: List<Song>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
+    clearPnq: () -> Unit,
     savePlaylistState: SavePlaylistState,
     onSavePlaylist: (String, List<Song>) -> Unit,
     appEventsFlow: Flow<AppEvent>,
@@ -138,6 +139,7 @@ fun SongPlayingWithPlayNextSheet(
                     songQueue = playNextQueue,
                     onMoveSongInQueue = onMoveSongInQueue,
                     onPlaySongPNQ = onPlaySongPNQ,
+                    clearPnq = clearPnq,
                     savePlaylistState = savePlaylistState,
                     onSavePlaylist = onSavePlaylist,
                 )

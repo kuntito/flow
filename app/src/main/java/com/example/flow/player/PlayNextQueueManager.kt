@@ -107,4 +107,8 @@ class PlayNextQueueManager(
         }
         return maybeItem
     }
+
+    fun clearPnq() {
+        _playNextQueue.value = emptyList()
+    }
 }

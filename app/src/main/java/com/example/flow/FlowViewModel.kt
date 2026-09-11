@@ -269,6 +269,8 @@ class FlowViewModel(
         }
     }
 
+    fun onClearPnq() = pnqManager.clearPnq()
+
     private val nextSongManager = NextSongManager(
         moodId =  moodIdObservable,
         pnqTop = pnqTop,
