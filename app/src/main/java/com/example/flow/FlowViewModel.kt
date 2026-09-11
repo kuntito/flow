@@ -257,7 +257,7 @@ class FlowViewModel(
     ) = pnqManager.addNext(searchedSong)
     fun playSongLaterFromSearch(
         searchedSong: Song
-    ) = pnqManager.addLater(searchedSong)
+    ) = pnqManager.include(searchedSong)
     fun swapSongPlayNextQueue(
         fromIndex: Int,
         toIndex: Int
@@ -587,7 +587,7 @@ class FlowViewModel(
     fun playSongLaterFromPlaylist(
         song: Song
     ) {
-        pnqManager.addLater(song)
+        pnqManager.include(song)
         viewModelScope.launch {
             eventChannel.send(
                 PlaylistEvent.OnAddPlayLater(

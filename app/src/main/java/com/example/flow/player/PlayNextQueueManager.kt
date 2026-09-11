@@ -16,20 +16,10 @@ import kotlinx.coroutines.flow.stateIn
  *
  * it's separate from the main playback queue.
  *
- * say you're listening to a list of songs,
- * and suddenly want to listen to Khalid
- * you want your list to remain the same,
- * but want some Khalid songs to come first.
+ * you'd use [addNext] to play a song next
  *
- * you search for those songs and play them next.
- *
- * if you're particular about the order of songs,
- * say you want to listen to 'Silence' then 'Saturday Nights'.
- *
- * you'd use [addNext] for 'Silence'
- * then [addLater] for 'Saturday Nights'
- *
- * this way they appear in order.
+ * then [include] to play a song later.
+ * later means 'not next'.
  */
 class PlayNextQueueManager(
     coroutineScope: CoroutineScope,
@@ -70,12 +60,27 @@ class PlayNextQueueManager(
     }
 
     /**
-     * places song at the end of the queue
+     * places a song anywhere in the queue,
+     * anywhere but the first position.
      */
-    fun addLater(
-        songToPlayLater: Song
+    fun include(
+        song: Song
     ) {
-        _playNextQueue.value += songToPlayLater
+        val snapshotQueue = _playNextQueue.value
+
+        if (snapshotQueue.isEmpty()) {
+            _playNextQueue.value = listOf(song)
+            return
+        }
+
+        val insertIndex = (1..snapshotQueue.size).random()
+
+        _playNextQueue.value = snapshotQueue.toMutableList().apply {
+            add(
+                insertIndex,
+                song
+            )
+        }
     }
 
     /**
