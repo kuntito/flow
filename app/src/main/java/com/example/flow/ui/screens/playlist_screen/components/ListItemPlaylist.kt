@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.playlist_screen.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,10 +22,12 @@ import com.example.flow.R
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.genSamplePlaylistItems
 import com.example.flow.ui.components.general.AppIconButton
+import com.example.flow.ui.components.util.ClickableSurface
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsOrion
 
+// TODO impl, play next and play later for entire playlist
 @Composable
 fun ListItemPlaylist(
     modifier: Modifier = Modifier,
@@ -55,30 +58,26 @@ fun ListItemPlaylist(
                 .weight(1f)
             ,
         ) {
-            Text(
-                text = item.name,
-                style = tsOrion,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            ClickableSurface(
+                onClick = {},
+                onDoubleClick = onPlay,
+                isRippleBounded = true,
+            ) {
+                Text(
+                    text = item.name,
+                    style = tsOrion,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(vertical = 4.dp, horizontal = 2.dp)
+                )
+            }
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-            ,
-        ) {
-            AppIconButton(
-                iconRes = R.drawable.ic_play,
-                size = 16,
-                onClick = onPlay,
-            )
-            Spacer(Modifier.width(24.dp))
-            AppIconButton(
-                iconRes = R.drawable.ic_eye,
-                size = 20,
-                onClick = onViewSongs,
-            )
-        }
+        AppIconButton(
+            iconRes = R.drawable.ic_eye,
+            size = 20,
+            onClick = onViewSongs,
+        )
     }
 }
 
