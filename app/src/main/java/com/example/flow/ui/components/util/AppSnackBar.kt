@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarVisuals
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,8 +27,8 @@ import com.example.flow.ui.theme.tsHush
 @Composable
 fun AppSnackBar(
     modifier: Modifier = Modifier,
-    bgColor: Color = colorIsco,
-    textColor: Color = colorTelli,
+    bgColor: Color? = null,
+    textColor: Color? = null,
     fontWeight: FontWeight = FontWeight.Normal,
     text: String,
 ) {
@@ -37,12 +39,12 @@ fun AppSnackBar(
         modifier = modifier
             .height(height.dp)
             .clip(RoundedCornerShape(50))
-            .background(color = bgColor)
+            .background(color = bgColor ?: colorIsco)
         ,
     ) {
         Text(
             text = text,
-            color = textColor,
+            color = textColor ?: colorTelli,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = tsHush
@@ -56,6 +58,15 @@ fun AppSnackBar(
         )
     }
 }
+
+data class AppSnackBarVisuals(
+    override val message: String,
+    override val actionLabel: String? = null,
+    override val withDismissAction: Boolean = false,
+    override val duration: SnackbarDuration = SnackbarDuration.Short,
+    val textColor: Color = colorTelli,
+    val bgColor: Color = colorIsco,
+) : SnackbarVisuals
 
 @Preview
 @Composable

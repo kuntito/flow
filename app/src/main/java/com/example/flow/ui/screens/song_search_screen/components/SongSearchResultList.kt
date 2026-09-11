@@ -20,7 +20,7 @@ fun SongSearchResultList(
         getKey = { it.id },
         modifier = modifier.fillMaxSize(),
     ) { song, removeFromList ->
-        SongSearchSLI(
+        SongLi(
             song = song,
             onPlaySong = {
                 onPlaySongSearchItem(song.id)

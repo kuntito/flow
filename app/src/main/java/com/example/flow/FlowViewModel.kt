@@ -28,6 +28,7 @@ import com.example.flow.ui.screens.home_screen.models.SleepTimerDuration
 import com.example.flow.ui.screens.home_screen.models.SleepTimerEvent
 import com.example.flow.ui.screens.home_screen.models.SleepTimerState
 import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
+import com.example.flow.ui.screens.playlist_screen.models.PlaylistEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -397,7 +398,7 @@ class FlowViewModel(
      * sometimes, user specifies a song with [prioritySongId]
      * this overrides the flow API route.
      */
-    fun handleNextSongPlay(
+    private fun handleNextSongPlay(
         prioritySongId: Int? = null,
     ) {
         if (stopBecauseSleepTimer) {
@@ -559,6 +560,41 @@ class FlowViewModel(
         handleNextSongPlay(
             prioritySongId = maybeNextSongId
         )
+    }
+
+    /**
+     * plays a song associated with a playlist.
+     *
+     * currently, it just plays the song.
+     */
+    fun playSongFromPlaylist(song: Song) {
+        handleNextSongPlay(prioritySongId = song.id)
+    }
+
+    fun playSongNextFromPlaylist(
+        song: Song
+    ) {
+        pnqManager.addNext(song)
+        viewModelScope.launch {
+            eventChannel.send(
+                PlaylistEvent.OnAddPlayNext(
+                    song
+                )
+            )
+        }
+    }
+
+    fun playSongLaterFromPlaylist(
+        song: Song
+    ) {
+        pnqManager.addLater(song)
+        viewModelScope.launch {
+            eventChannel.send(
+                PlaylistEvent.OnAddPlayLater(
+                    song
+                )
+            )
+        }
     }
 
     private val _savePlaylistState = MutableStateFlow<SavePlaylistState>(SavePlaylistState.Idle)

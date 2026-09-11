@@ -27,8 +27,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // TODO impl, maxLines = 1, for song title and artistStr
+// TODO move to a common place, it's no longer tied to search screen, also used in Playlists screen
 @Composable
-fun SongSearchSLI(
+fun SongLi(
     modifier: Modifier = Modifier,
     song: Song,
     onPlaySong: () -> Unit,

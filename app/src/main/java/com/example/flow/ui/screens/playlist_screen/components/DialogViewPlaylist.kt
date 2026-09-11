@@ -28,6 +28,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.flow.R
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
+import com.example.flow.ui.screens.song_search_screen.components.SongLi
 import com.example.flow.ui.theme.colorAguero
 import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsHush
@@ -38,6 +39,10 @@ fun DialogViewPlaylist(
     onDismiss: () -> Unit,
     playlistItem: PlaylistItem,
     songs: List<Song>,
+    playSong: (Song) -> Unit,
+    playSongNext: (Song) -> Unit,
+    playSongLater: (Song) -> Unit,
+    playNextSongExists: Boolean,
 ) {
     val shape = RoundedCornerShape(16.dp)
 
@@ -118,10 +123,16 @@ fun DialogViewPlaylist(
                         items = songs,
                         key = { it.id }
                     ) {
-                        LiViewPlaylistSong(
-                            albumArtUrl = it.albumArtUrl,
-                            songTitle = it.title,
-                            artistStr = it.artistStr,
+                        SongLi(
+                            song = it,
+                            onPlaySong = { playSong(it) },
+                            playSongNext = {
+                                playSongNext(it)
+                            },
+                            playSongLater = {
+                                playSongLater(it)
+                            },
+                            playNextSongExists = playNextSongExists,
                         )
                     }
                 }
