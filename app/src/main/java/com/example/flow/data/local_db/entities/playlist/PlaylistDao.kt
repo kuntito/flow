@@ -2,6 +2,7 @@ package com.example.flow.data.local_db.entities.playlist
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.Query
 import androidx.room.Transaction
 
 @Dao
@@ -27,4 +28,10 @@ interface PlaylistDao {
             }
         )
     }
+
+    @Query("SELECT * FROM playlist ORDER BY playlistId DESC")
+    suspend fun getAllPlaylists(): List<PlaylistEntity>
+
+    @Query("SELECT songId FROM playlist_song WHERE playlistId = :playlistId")
+    suspend fun getPlaylistSongIds(playlistId: Int): List<Int>
 }

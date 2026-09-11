@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
+import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
-import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.helper_classes.NextSongManager
@@ -21,8 +21,6 @@ import com.example.flow.player.PlaybackCacheItem
 import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.RepeatSongManager
 import com.example.flow.player.SongPlayer
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.toPlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import com.example.flow.ui.screens.home_screen.models.MoodState
 import com.example.flow.ui.screens.home_screen.models.SavePlaylistState
@@ -53,6 +51,13 @@ class FlowViewModel(
 ): AndroidViewModel(appContext) {
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
+
+    private val _playlists = MutableStateFlow<List<PlaylistItem>>(emptyList())
+    val playlists = _playlists.asStateFlow()
+
+    // VM
+    private val _viewingPlaylistSongs = MutableStateFlow<List<Song>>(emptyList())
+    val viewingPlaylistSongs = _viewingPlaylistSongs.asStateFlow()
 
     private var stopBecauseSleepTimer = false
     fun setStopBecauseSleepTimer(flag: Boolean) {
@@ -238,7 +243,7 @@ class FlowViewModel(
     )
 
     val playNextSongQueue = pnqManager.songQueue
-    val pnqTop: StateFlow<PlayNextSongItem?> = playNextSongQueue
+    val pnqTop: StateFlow<Song?> = playNextSongQueue
         .map{ it.firstOrNull() }
         .stateIn(
             viewModelScope,
@@ -247,11 +252,11 @@ class FlowViewModel(
         )
     val playNextSongExists = pnqManager.hasNextSong
     fun playSongNextFromSearch(
-        searchedSong: SongSearchItem
-    ) = pnqManager.addNext(searchedSong.toPlayNextSongItem())
+        searchedSong: Song
+    ) = pnqManager.addNext(searchedSong)
     fun playSongLaterFromSearch(
-        searchedSong: SongSearchItem
-    ) = pnqManager.addLater(searchedSong.toPlayNextSongItem())
+        searchedSong: Song
+    ) = pnqManager.addLater(searchedSong)
     fun swapSongPlayNextQueue(
         fromIndex: Int,
         toIndex: Int
@@ -300,6 +305,41 @@ class FlowViewModel(
         songPlayer.continuePlayback()
     }
 
+
+    private var playPlaylistJob: Job? = null
+    /**
+     * plays the first song
+     * then adds the rest to the front of the play next queue.
+     */
+    fun onPlayPlaylist(playlist: PlaylistItem) {
+        playPlaylistJob?.cancel()
+        playPlaylistJob = viewModelScope.launch {
+            val songs = flowRepo.getPlaylistSongs(playlist.id)
+            if (songs.isEmpty()) return@launch
+
+            val shuffledSongs = songs.shuffled()
+
+            handleNextSongPlay(shuffledSongs.first().id)
+
+            pnqManager.playTheseNext(
+                shuffledSongs.drop(1)
+            )
+        }
+    }
+
+    // TODO start here, viewingPlaylistSongs should have it's own type,
+    //  or maybe just return regular Song objects.
+    //  the point is i need song durations.
+    fun onViewPlaylistSongs(playlist: PlaylistItem) {
+        viewModelScope.launch {
+            _viewingPlaylistSongs.value = flowRepo.getPlaylistSongs(playlist.id)
+        }
+    }
+
+    fun onDismissPlaylistSongsInView() {
+        _viewingPlaylistSongs.value = emptyList()
+    }
+
     private val notificationBridge = NotificationPlayerVmBridge(
         appContext = appContext,
         playerState = playerState,
@@ -338,6 +378,10 @@ class FlowViewModel(
 
         viewModelScope.launch {
             flowRepo.syncListenCounts()
+        }
+
+        viewModelScope.launch {
+            _playlists.value = flowRepo.getPlaylists()
         }
 
         notificationBridge.start()
@@ -519,7 +563,7 @@ class FlowViewModel(
     val savePlaylistState = _savePlaylistState.asStateFlow()
     fun onSavePlaylist(
         playlistName: String,
-        songs: List<PlayNextSongItem>
+        songs: List<Song>
     ) {
         viewModelScope.launch {
             _savePlaylistState.value = SavePlaylistState.Saving

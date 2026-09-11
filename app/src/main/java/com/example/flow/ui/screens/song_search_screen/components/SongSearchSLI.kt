@@ -15,16 +15,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.R
 import com.example.flow.data.models.DropdownMenuOption
-import com.example.flow.data.models.SongSearchItem
-import com.example.flow.data.models.dummySongSearchItem
+import com.example.flow.data.models.Song
 import com.example.flow.ui.components.general.AppDropdownMenuItem
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.ClickableSurface
-import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.theme.colorAguero
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -33,7 +30,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SongSearchSLI(
     modifier: Modifier = Modifier,
-    song: SongSearchItem,
+    song: Song,
     onPlaySong: () -> Unit,
     playSongNext: () -> Unit,
     playSongLater: () -> Unit,
@@ -131,35 +128,35 @@ fun SongSearchSLI(
     }
 }
 
-@Preview
-@Composable
-private fun SongSearchSLIPreview() {
-    val size = 200
-    val albumArtUrl = "https://picsum.photos/$size/$size"
-    val song = dummySongSearchItem
-        .copy(
-            albumArtUrl = albumArtUrl,
-            title = "deeper than telekinesis, deeper than your "
-        )
-
-    var playNextSongExists by remember { mutableStateOf(false) }
-    val playSongNext = {
-        playNextSongExists = true
-    }
-    PreviewColumn {
-        SongSearchSLI(
-            song = song,
-            onPlaySong = {},
-            playSongNext = playSongNext,
-            playSongLater = {},
-            playNextSongExists = playNextSongExists
-        )
-        SongSearchSLI(
-            song = song,
-            onPlaySong = {},
-            playSongNext = {},
-            playSongLater = {},
-            playNextSongExists = playNextSongExists,
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun SongSearchSLIPreview() {
+//    val size = 200
+//    val albumArtUrl = "https://picsum.photos/$size/$size"
+//    val song = dummySongSearchItem
+//        .copy(
+//            albumArtUrl = albumArtUrl,
+//            title = "deeper than telekinesis, deeper than your "
+//        )
+//
+//    var playNextSongExists by remember { mutableStateOf(false) }
+//    val playSongNext = {
+//        playNextSongExists = true
+//    }
+//    PreviewColumn {
+//        SongSearchSLI(
+//            song = song,
+//            onPlaySong = {},
+//            playSongNext = playSongNext,
+//            playSongLater = {},
+//            playNextSongExists = playNextSongExists
+//        )
+//        SongSearchSLI(
+//            song = song,
+//            onPlaySong = {},
+//            playSongNext = {},
+//            playSongLater = {},
+//            playNextSongExists = playNextSongExists,
+//        )
+//    }
+//}

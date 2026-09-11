@@ -4,7 +4,6 @@ import android.util.Log
 import com.example.flow.data.models.Song
 import com.example.flow.flowDebugTag
 import com.example.flow.player.PlaybackCacheItem
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +44,7 @@ data class NextSongItem(
  */
 class NextSongManager(
     val moodId: StateFlow<Int?>,
-    val pnqTop: StateFlow<PlayNextSongItem?>,
+    val pnqTop: StateFlow<Song?>,
     val popPnqTop: () -> Unit,
     val updateCache: (PlaybackCacheItem) -> Unit,
     val fetchSpecificSong: suspend(songId: Int) -> Song?,
@@ -70,7 +69,7 @@ class NextSongManager(
     private var prepareNextSongJob: Job? = null
     private fun runPrepareNextSongJob(
         moodId: Int?,
-        pnqTop: PlayNextSongItem?
+        pnqTop: Song?
     ) {
         prepareNextSongJob?.cancel()
         prepareNextSongJob = coroutineScope.launch {
@@ -83,7 +82,7 @@ class NextSongManager(
 
     private suspend fun prepareNextSong(
         moodId: Int?,
-        pnqTop: PlayNextSongItem?
+        pnqTop: Song?
     ) {
         // trapping the current state
         val nextSongSnapshot = nextSongItem

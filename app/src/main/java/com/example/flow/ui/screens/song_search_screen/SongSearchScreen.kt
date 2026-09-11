@@ -1,6 +1,6 @@
 package com.example.flow.ui.screens.song_search_screen
 
-import android.util.Log
+import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,20 +11,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.media3.common.util.UnstableApi
 import com.example.flow.FlowViewModel
-import com.example.flow.data.models.SongSearchItem
-import com.example.flow.data.models.dummySearchResults
-import com.example.flow.flowDebugTag
-import com.example.flow.ui.components.general.AppTextButton
+import com.example.flow.data.models.Song
 import com.example.flow.ui.components.util.AppSnackBar
-import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.screens.song_search_screen.components.OngoingSongSearchIndicator
 import com.example.flow.ui.screens.song_search_screen.components.SearchFinishedNoResultIndicator
 import com.example.flow.ui.screens.song_search_screen.components.SearchScreenTopAppBar
@@ -34,6 +28,7 @@ import com.example.flow.ui.theme.colorDebit
 import kotlinx.coroutines.launch
 
 
+@OptIn(UnstableApi::class)
 @Composable
 fun SongSearchScreenRoot(
     flowViewModel: FlowViewModel,
@@ -55,8 +50,8 @@ fun SongSearchScreenRoot(
         onBackButtonClick()
     }
 
-    val onPlaySongNextFromSearch: (SongSearchItem) -> Unit = flowViewModel::playSongNextFromSearch
-    val onPlaySongLaterFromSearch: (SongSearchItem) -> Unit = flowViewModel::playSongLaterFromSearch
+    val onPlaySongNextFromSearch: (Song) -> Unit = flowViewModel::playSongNextFromSearch
+    val onPlaySongLaterFromSearch: (Song) -> Unit = flowViewModel::playSongLaterFromSearch
     val playNextSongExists by flowViewModel.playNextSongExists.collectAsState()
 
     SongSearchScreen(
@@ -79,8 +74,8 @@ fun SongSearchScreen(
     onSongSearchErrorAcknowledged: () -> Unit,
     onBackButtonClick: () -> Unit,
     onPlaySongSearchItem: (Int, String) -> Unit,
-    onPlaySongNext: (SongSearchItem) -> Unit,
-    onPlaySongLater: (SongSearchItem) -> Unit,
+    onPlaySongNext: (Song) -> Unit,
+    onPlaySongLater: (Song) -> Unit,
     playNextSongExists: Boolean,
 ) {
     Scaffold(
@@ -95,8 +90,7 @@ fun SongSearchScreen(
             contentAlignment = Alignment.TopCenter, // for error snackbar
             modifier = modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-            ,
+                .padding(innerPadding),
         ) {
             val snackBarHostState = remember { SnackbarHostState() }
 
@@ -155,52 +149,52 @@ fun SongSearchScreen(
     }
 }
 
-@Preview
-@Composable
-private fun SearchScreenPreview() {
-    PreviewColumn {
-        var songSearchState by remember{
-            mutableStateOf<SongSearchState>(
-                SongSearchState.Idle
-            )
-        }
-        AppTextButton(
-            text = "toggle search screen states"
-        ) {
-            when (songSearchState) {
-                SongSearchState.Idle -> {
-                    songSearchState = SongSearchState.Searching
-                }
-                SongSearchState.Searching -> {
-                    songSearchState = SongSearchState.FinishedWithResults(
-                        songSearchResults = dummySearchResults,
-                        searchQuery = "..."
-                    )
-                }
-                is SongSearchState.FinishedWithResults -> {
-                    songSearchState = SongSearchState.FinishedNoResult
-                }
-                SongSearchState.FinishedNoResult -> {
-                    songSearchState = SongSearchState.Error
-                }
-                SongSearchState.Error -> {
-
-                }
-            }
-        }
-        val playNextSongExists = true
-
-        SongSearchScreen(
-            songSearchState = songSearchState,
-            onSongSearch = {},
-            onSongSearchErrorAcknowledged = {
-                songSearchState = SongSearchState.Idle
-            },
-            onBackButtonClick = {},
-            onPlaySongSearchItem = { _, _ -> },
-            onPlaySongNext = {},
-            onPlaySongLater = {},
-            playNextSongExists = playNextSongExists,
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun SearchScreenPreview() {
+//    PreviewColumn {
+//        var songSearchState by remember{
+//            mutableStateOf<SongSearchState>(
+//                SongSearchState.Idle
+//            )
+//        }
+//        AppTextButton(
+//            text = "toggle search screen states"
+//        ) {
+//            when (songSearchState) {
+//                SongSearchState.Idle -> {
+//                    songSearchState = SongSearchState.Searching
+//                }
+//                SongSearchState.Searching -> {
+//                    songSearchState = SongSearchState.FinishedWithResults(
+//                        songSearchResults = dummySearchResults,
+//                        searchQuery = "..."
+//                    )
+//                }
+//                is SongSearchState.FinishedWithResults -> {
+//                    songSearchState = SongSearchState.FinishedNoResult
+//                }
+//                SongSearchState.FinishedNoResult -> {
+//                    songSearchState = SongSearchState.Error
+//                }
+//                SongSearchState.Error -> {
+//
+//                }
+//            }
+//        }
+//        val playNextSongExists = true
+//
+//        SongSearchScreen(
+//            songSearchState = songSearchState,
+//            onSongSearch = {},
+//            onSongSearchErrorAcknowledged = {
+//                songSearchState = SongSearchState.Idle
+//            },
+//            onBackButtonClick = {},
+//            onPlaySongSearchItem = { _, _ -> },
+//            onPlaySongNext = {},
+//            onPlaySongLater = {},
+//            playNextSongExists = playNextSongExists,
+//        )
+//    }
+//}

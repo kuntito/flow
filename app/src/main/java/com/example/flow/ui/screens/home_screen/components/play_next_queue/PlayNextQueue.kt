@@ -5,23 +5,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.flow.ui.components.util.PreviewColumn
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextQueue
+import com.example.flow.data.models.Song
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun PlayNextQueue(
     modifier: Modifier = Modifier,
-    songQueue: List<PlayNextSongItem>,
+    songQueue: List<Song>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
 ) {
@@ -45,6 +38,8 @@ fun PlayNextQueue(
     ) {
         itemsIndexed(
             items = songQueue,
+            // TODO, since song.id is the key, the same song can't appear in the lazy column
+            //  without crashing it.
             key = { index, song -> song.id }
         ) { index, song ->
             ReorderableItem(
@@ -57,7 +52,7 @@ fun PlayNextQueue(
                         // this modifier is applied to the drag icon.
                         // holding the icon triggers the drag.
                         .draggableHandle(),
-                    onClick = {
+                    onPlaySong = {
                         onPlaySongPNQ(index)
                     },
                 )
@@ -66,21 +61,21 @@ fun PlayNextQueue(
     }
 }
 
-@Preview
-@Composable
-private fun PlayNextQueuePreview() {
-    var songQueue by remember { mutableStateOf(dummyPlayNextQueue) }
-    val onMoveSongInQueue: (Int, Int) -> Unit = { fromIdx, toIdx ->
-        songQueue = songQueue.toMutableList().apply {
-            add(toIdx, removeAt(fromIdx))
-        }
-    }
-    val onPlaySongPNQ: (Int) -> Unit = {}
-    PreviewColumn {
-        PlayNextQueue(
-            songQueue = songQueue,
-            onMoveSongInQueue = onMoveSongInQueue,
-            onPlaySongPNQ = onPlaySongPNQ,
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun PlayNextQueuePreview() {
+//    var songQueue by remember { mutableStateOf(dummyPlayNextQueue) }
+//    val onMoveSongInQueue: (Int, Int) -> Unit = { fromIdx, toIdx ->
+//        songQueue = songQueue.toMutableList().apply {
+//            add(toIdx, removeAt(fromIdx))
+//        }
+//    }
+//    val onPlaySongPNQ: (Int) -> Unit = {}
+//    PreviewColumn {
+//        PlayNextQueue(
+//            songQueue = songQueue,
+//            onMoveSongInQueue = onMoveSongInQueue,
+//            onPlaySongPNQ = onPlaySongPNQ,
+//        )
+//    }
+//}

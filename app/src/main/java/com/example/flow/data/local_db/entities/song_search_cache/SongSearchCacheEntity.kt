@@ -3,7 +3,6 @@ package com.example.flow.data.local_db.entities.song_search_cache
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.flow.data.models.Song
-import com.example.flow.data.models.SongSearchItem
 
 @Entity(tableName = "song_search_cache")
 data class SongSearchCacheEntity(
@@ -44,13 +43,6 @@ fun normalizeForSongSearch(text: String): String {
         .lowercase()
 }
 
-fun SongSearchCacheEntity.toSongSearchItem() = SongSearchItem(
-    id = songId,
-    title = songTitle,
-    artistStr = songArtistName,
-    albumArtUrl = albumArtUrl,
-    durationMillis = durationMillis ?: 0,
-)
 
 /**
  * maps a cache entity to a Song.
@@ -59,7 +51,7 @@ fun SongSearchCacheEntity.toSongSearchItem() = SongSearchItem(
  * since a Song without duration can't drive playback.
  */
 fun SongSearchCacheEntity.toSong(
-    cachedFilePath: String?
+    cachedFilePath: String? = null
 ):Song? {
     // the ROOM schema for duration millis is nullable
     val duration = durationMillis ?: return null

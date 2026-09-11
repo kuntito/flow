@@ -1,9 +1,7 @@
 package com.example.flow.helper_classes
 
 
-import android.util.Log
-import com.example.flow.data.models.SongSearchItem
-import com.example.flow.flowDebugTag
+import com.example.flow.data.models.Song
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -14,7 +12,7 @@ import kotlinx.coroutines.launch
 
 
 class SongSearchManager(
-    private val searchSong: suspend (String) -> List<SongSearchItem>?,
+    private val searchSong: suspend (String) -> List<Song>?,
     private val coroutineScope: CoroutineScope
 ) {
     private val _songSearchState = MutableStateFlow<SongSearchState>(

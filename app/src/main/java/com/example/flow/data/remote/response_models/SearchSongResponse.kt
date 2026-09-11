@@ -2,7 +2,6 @@ package com.example.flow.data.remote.response_models
 
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheEntity
 import com.example.flow.data.local_db.entities.song_search_cache.normalizeForSongSearch
-import com.example.flow.data.models.SongSearchItem
 
 data class SongSearchItemApi(
     val id: Int,
@@ -14,13 +13,6 @@ data class SongSearchItemApi(
     val recency: Long,
 )
 
-fun SongSearchItemApi.toSongSearchItem() = SongSearchItem(
-    id = id,
-    title = title,
-    artistStr = artistStr,
-    albumArtUrl = albumArtUrl,
-    durationMillis = durationMillis,
-)
 
 fun SongSearchItemApi.toSongSearchCacheEntity() = SongSearchCacheEntity(
     songId = id,

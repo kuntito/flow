@@ -8,26 +8,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.R
+import com.example.flow.data.models.Song
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.ClickableSurface
-import com.example.flow.ui.components.util.PreviewColumn
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.dummyPlayNextSongItem
 import com.example.flow.ui.screens.song_search_screen.components.AlbumArtSongListItem
 import com.example.flow.ui.screens.song_search_screen.components.SongTitleAndArtistSLI
 
 @Composable
 fun PlayNextQueueSLI(
     modifier: Modifier = Modifier,
-    song: PlayNextSongItem,
+    song: Song,
     dragHandleModifier: Modifier,
-    onClick: () -> Unit,
+    onPlaySong: () -> Unit,
 ) {
     ClickableSurface(
-        onClick = onClick,
+        onClick = {},
+        onDoubleClick = onPlaySong,
         isRippleBounded = true,
         modifier = modifier
         ,
@@ -63,18 +61,18 @@ fun PlayNextQueueSLI(
     }
 }
 
-@Preview
-@Composable
-private fun PlayNextQueueSLIPreview() {
-    val song = dummyPlayNextSongItem
-    val dragHandleModifier = Modifier
-    val onClick = {}
-
-    PreviewColumn {
-        PlayNextQueueSLI(
-            song = song,
-            dragHandleModifier = dragHandleModifier,
-            onClick = onClick,
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun PlayNextQueueSLIPreview() {
+//    val song = dummyPlayNextSongItem
+//    val dragHandleModifier = Modifier
+//    val onClick = {}
+//
+//    PreviewColumn {
+//        PlayNextQueueSLI(
+//            song = song,
+//            dragHandleModifier = dragHandleModifier,
+//            onPlaySong = onClick,
+//        )
+//    }
+//}

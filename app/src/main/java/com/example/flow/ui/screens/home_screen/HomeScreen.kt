@@ -30,8 +30,8 @@ import kotlinx.coroutines.launch
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
+import com.example.flow.data.models.Song
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.select_mood_dialog.SelectMoodDialog
 import com.example.flow.ui.screens.home_screen.components.sleep_timer.SleepTimerDialog
@@ -110,11 +110,11 @@ fun HomeScreen(
     albumArtBitmap: Bitmap?,
     goToSongSearchScreen: () -> Unit,
     goToPlaylistScreen: () -> Unit,
-    playNextQueue: List<PlayNextSongItem>,
+    playNextQueue: List<Song>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     savePlaylistState: SavePlaylistState,
-    onSavePlaylist: (String, List<PlayNextSongItem>) -> Unit,
+    onSavePlaylist: (String, List<Song>) -> Unit,
     appEventsFlow: Flow<AppEvent>,
     moodList: List<Mood>,
     moodState: MoodState,

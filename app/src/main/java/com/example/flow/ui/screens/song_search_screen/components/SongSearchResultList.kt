@@ -1,26 +1,18 @@
 package com.example.flow.ui.screens.song_search_screen.components
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.example.flow.data.models.SongSearchItem
-import com.example.flow.data.models.dummySearchResults
-import com.example.flow.ui.components.util.PreviewColumn
+import com.example.flow.data.models.Song
 import com.example.flow.ui.components.util.ShrinkableList
 
 @Composable
 fun SongSearchResultList(
     modifier: Modifier = Modifier,
-    songSearchItems: List<SongSearchItem>,
+    songSearchItems: List<Song>,
     onPlaySongSearchItem: (songId: Int) -> Unit,
-    onPlaySongNext: (SongSearchItem) -> Unit,
-    onPlaySongLater: (SongSearchItem) -> Unit,
+    onPlaySongNext: (Song) -> Unit,
+    onPlaySongLater: (Song) -> Unit,
     playNextSongExists: Boolean,
 ) {
     ShrinkableList(
@@ -47,17 +39,17 @@ fun SongSearchResultList(
     }
 }
 
-@Preview
-@Composable
-private fun SongSearchResultListPreview() {
-    val playNextSongExists = true
-    PreviewColumn {
-        SongSearchResultList(
-            songSearchItems = dummySearchResults,
-            onPlaySongSearchItem = {},
-            onPlaySongNext = {},
-            onPlaySongLater = {},
-            playNextSongExists = playNextSongExists,
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun SongSearchResultListPreview() {
+//    val playNextSongExists = true
+//    PreviewColumn {
+//        SongSearchResultList(
+//            songSearchItems = dummySearchResults,
+//            onPlaySongSearchItem = {},
+//            onPlaySongNext = {},
+//            onPlaySongLater = {},
+//            playNextSongExists = playNextSongExists,
+//        )
+//    }
+//}

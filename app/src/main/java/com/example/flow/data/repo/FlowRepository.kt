@@ -12,10 +12,9 @@ import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
 import com.example.flow.data.local_db.entities.song_search_cache.normalizeForSongSearch
 import com.example.flow.data.local_db.entities.song_search_cache.toSong
-import com.example.flow.data.local_db.entities.song_search_cache.toSongSearchItem
 import com.example.flow.data.models.Mood
+import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
-import com.example.flow.data.models.SongSearchItem
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.ListenCountItemApi
@@ -24,7 +23,6 @@ import com.example.flow.data.remote.response_models.toMood
 import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
-import com.example.flow.ui.screens.home_screen.components.play_next_queue.models.PlayNextSongItem
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -67,7 +65,7 @@ class FlowRepository(
 
     suspend fun searchSong(
         query: String
-    ): List<SongSearchItem>? {
+    ): List<Song>? {
         // TODO typing '?' shows all songs, same with '*'
         //  chances are, the asterisk never worked as expected from the jump
         val searchResults = if (query == "*") {
@@ -81,7 +79,7 @@ class FlowRepository(
 
         return searchResults
             .sortedByDescending { it.listenCount ?: 0 }
-            .map { it.toSongSearchItem() }
+            .mapNotNull { it.toSong() }
     }
 
     /**
@@ -235,7 +233,7 @@ class FlowRepository(
 
     suspend fun savePlaylist(
         playlistName: String?,
-        songs: List<PlayNextSongItem>,
+        songs: List<Song>,
     ): Boolean {
         if (songs.size < 2) return false
 
@@ -255,5 +253,24 @@ class FlowRepository(
             e.printStackTrace()
             false
         }
+    }
+
+    suspend fun getPlaylists(): List<PlaylistItem> {
+        return playlistDao.getAllPlaylists().map {
+            PlaylistItem(
+                id = it.playlistId,
+                name = it.name,
+            )
+        }
+    }
+
+    suspend fun getPlaylistSongs(
+        playlistId: Int
+    ): List<Song> {
+        val songIds = playlistDao.getPlaylistSongIds(playlistId)
+        return songSearchCacheDao.getSongsByIds(songIds)
+            .mapNotNull {
+                it.toSong()
+            }
     }
 }
