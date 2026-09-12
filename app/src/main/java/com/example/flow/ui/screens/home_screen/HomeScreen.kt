@@ -59,6 +59,7 @@ fun HomeScreenRoot(
     val onMoveSongInQueue = flowViewModel::swapSongPlayNextQueue
     val onPlaySongPNQ: (Int) -> Unit = flowViewModel::onPlaySongPNQ
     val clearPlayNextQueue: () -> Unit = flowViewModel::onClearPnq
+    val onRemoveFromPnq: (String) -> Unit = flowViewModel::onRemoveFromPnq
     val savePlaylistState by flowViewModel.savePlaylistState.collectAsState()
     val onSavePlaylist = flowViewModel::onSavePlaylist
 
@@ -92,6 +93,7 @@ fun HomeScreenRoot(
         onMoveSongInQueue = onMoveSongInQueue,
         onPlaySongPNQ = onPlaySongPNQ,
         clearPnq = clearPlayNextQueue,
+        onRemoveFromQueue = onRemoveFromPnq,
         savePlaylistState = savePlaylistState,
         onSavePlaylist = onSavePlaylist,
         appEventsFlow = appEventsFlow,
@@ -123,6 +125,7 @@ fun HomeScreen(
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     clearPnq: () -> Unit,
+    onRemoveFromQueue: (String) -> Unit,
     savePlaylistState: SavePlaylistState,
     onSavePlaylist: (String, List<Song>) -> Unit,
     appEventsFlow: Flow<AppEvent>,
@@ -241,6 +244,7 @@ fun HomeScreen(
                             onMoveSongInQueue = onMoveSongInQueue,
                             onPlaySongPNQ = onPlaySongPNQ,
                             clearPnq = clearPnq,
+                            onRemoveFromQueue = onRemoveFromQueue,
                             savePlaylistState = savePlaylistState,
                             onSavePlaylist = onSavePlaylist,
                             appEventsFlow = appEventsFlow,

@@ -1,13 +1,16 @@
 package com.example.flow.ui.screens.home_screen.components.play_next_queue
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.flow.player.PnqItem
+import com.example.flow.ui.components.util.AppSwipeToDismiss
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -16,7 +19,9 @@ fun PlayNextQueue(
     modifier: Modifier = Modifier,
     songQueue: List<PnqItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
+    onRemoveFromQueue: (String) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
+    itemBg: Color,
 ) {
     val lazyListState = rememberLazyListState()
 
@@ -44,16 +49,25 @@ fun PlayNextQueue(
                 reorderableListState,
                 key = item.key,
             ) { isDragging ->
-                PlayNextQueueSLI(
-                    song = item.song,
-                    dragHandleModifier = Modifier
-                        // this modifier is applied to the drag icon.
-                        // holding the icon triggers the drag.
-                        .draggableHandle(),
-                    onPlaySong = {
-                        onPlaySongPNQ(index)
-                    },
-                )
+                AppSwipeToDismiss (
+                    onSwipeComplete = {
+                        onRemoveFromQueue(item.key)
+                    }
+                ) {
+                    PlayNextQueueSLI(
+                        song = item.song,
+                        dragHandleModifier = Modifier
+                            // this modifier is applied to the drag icon.
+                            // holding the icon triggers the drag.
+                            .draggableHandle(),
+                        onPlaySong = {
+                            onPlaySongPNQ(index)
+                        },
+                        modifier = Modifier
+                            .background(itemBg)
+                        ,
+                    )
+                }
             }
         }
     }

@@ -39,7 +39,7 @@ fun AppDraggableSheet(
     sheetCollapsedHeight: Int,
     sheetMaxHeight: Int,
     appDraggableSheetState: AppDraggableSheetState,
-    sheetActiveColor: Color = colorAguero,
+    sheetBg: Color,
     leadingIconItem: @Composable (() -> Unit)? = null,
     trailingIconItem: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,
@@ -51,7 +51,7 @@ fun AppDraggableSheet(
     }
 
     val sheetColor = if (appDraggableSheetState.isNotCollapsed || isSheetHandlePressed ) {
-        sheetActiveColor
+        sheetBg
     } else {
         Color.Transparent
     }
@@ -137,6 +137,7 @@ private fun AppDraggableSheetPreview() {
                 sheetCollapsedHeight = sheetCollapsedHeight,
                 sheetMaxHeight = sheetMaxHeight,
                 appDraggableSheetState = appDraggableSheetState,
+                sheetBg = colorAguero,
             ) {
                 // some random box representing sheet content
                 Box(

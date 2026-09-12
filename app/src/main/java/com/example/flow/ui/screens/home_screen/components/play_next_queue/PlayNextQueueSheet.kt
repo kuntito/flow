@@ -14,7 +14,7 @@ import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.general.draggable_sheet.AppDraggableSheet
 import com.example.flow.ui.components.general.draggable_sheet.rememberAppDraggableSheetState
 import com.example.flow.ui.screens.home_screen.models.SavePlaylistState
-import com.example.flow.ui.theme.colorTelli
+import com.example.flow.ui.theme.colorAguero
 
 @Composable
 fun PlayNextQueueSheet(
@@ -23,6 +23,7 @@ fun PlayNextQueueSheet(
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     clearPnq: () -> Unit,
+    onRemoveFromQueue: (String) -> Unit,
     savePlaylistState: SavePlaylistState,
     onSavePlaylist: (String, List<Song>) -> Unit,
 ) {
@@ -53,9 +54,11 @@ fun PlayNextQueueSheet(
     }
 
     val iconSize = 16
+    val sheetBg = colorAguero
 
     AppDraggableSheet(
         modifier = modifier,
+        sheetBg = sheetBg,
         sheetCollapsedHeight = sheetCollapsedHeight,
         sheetMaxHeight = sheetMaxHeight,
         appDraggableSheetState = appDraggableSheetState,
@@ -79,7 +82,9 @@ fun PlayNextQueueSheet(
         PlayNextQueue(
             songQueue = songQueue,
             onMoveSongInQueue = onMoveSongInQueue,
+            onRemoveFromQueue = onRemoveFromQueue,
             onPlaySongPNQ = playNextSongAndCollapseSheet,
+            itemBg = sheetBg,
             modifier = Modifier
             ,
         )

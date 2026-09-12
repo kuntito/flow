@@ -122,6 +122,11 @@ class PlayNextQueueManager(
     fun clearPnq() {
         _playNextQueue.value = emptyList()
     }
+
+    fun removeAt(key: String) {
+        _playNextQueue.value = _playNextQueue.value
+            .filter { it.key != key }
+    }
 }
 
 /**
