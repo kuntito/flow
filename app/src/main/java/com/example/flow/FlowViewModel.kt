@@ -640,8 +640,16 @@ class FlowViewModel(
                 playlistName,
                 songs
             )
-            _savePlaylistState.value = if (success) SavePlaylistState.Saved else SavePlaylistState.Failed
+            _savePlaylistState.value = if (success)
+                SavePlaylistState.Saved
+            else SavePlaylistState.Failed
+
+            if (success) {
+                _playlists.value = flowRepo.getPlaylists()
+            }
+
             delay(1000)
+
             _savePlaylistState.value = SavePlaylistState.Idle
         }
     }
