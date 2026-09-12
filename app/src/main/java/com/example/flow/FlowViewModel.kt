@@ -255,7 +255,7 @@ class FlowViewModel(
 
     val playNextSongQueue = pnqManager.songQueue
     val pnqTop: StateFlow<Song?> = playNextSongQueue
-        .map{ it.firstOrNull() }
+        .map{ it.firstOrNull()?.song }
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,

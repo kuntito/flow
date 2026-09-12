@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import com.example.flow.R
 import com.example.flow.data.models.Song
+import com.example.flow.player.PnqItem
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.general.draggable_sheet.AppDraggableSheet
 import com.example.flow.ui.components.general.draggable_sheet.rememberAppDraggableSheetState
@@ -18,7 +19,7 @@ import com.example.flow.ui.theme.colorTelli
 @Composable
 fun PlayNextQueueSheet(
     modifier: Modifier = Modifier,
-    songQueue: List<Song>,
+    songQueue: List<PnqItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     clearPnq: () -> Unit,
@@ -42,7 +43,7 @@ fun PlayNextQueueSheet(
     if (showNamePlaylistDialog) {
         DialogNamePlaylist(
             onSavePlaylistName = { name ->
-                onSavePlaylist(name, songQueue)
+                onSavePlaylist(name, songQueue.map { it.song })
             },
             onDismiss = {
                 showNamePlaylistDialog = false

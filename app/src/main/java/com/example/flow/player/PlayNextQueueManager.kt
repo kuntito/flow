@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.util.UUID
 
 
 /**
@@ -25,8 +26,8 @@ class PlayNextQueueManager(
     coroutineScope: CoroutineScope,
     val onSongAdded: (songId: Int) -> Unit,
 ) {
-    private val _playNextQueue = MutableStateFlow<List<Song>>(emptyList())
-    val songQueue: StateFlow<List<Song>> = _playNextQueue.asStateFlow()
+    private val _playNextQueue = MutableStateFlow<List<PnqItem>>(emptyList())
+    val songQueue: StateFlow<List<PnqItem>> = _playNextQueue.asStateFlow()
 
     val hasNextSong: StateFlow<Boolean> = _playNextQueue
         .map { it.isNotEmpty() }
@@ -41,11 +42,11 @@ class PlayNextQueueManager(
         _playNextQueue.value.let { queue ->
             if (queue.isEmpty()) return null
 
-            val nextSong = queue.first()
+            val nextInQueue = queue.first()
 
             _playNextQueue.value = queue.drop(1)
 
-            return nextSong
+            return nextInQueue.song
         }
     }
 
@@ -55,7 +56,9 @@ class PlayNextQueueManager(
     fun addNext(
         songToPlayNext: Song
     ) {
-        _playNextQueue.value = listOf(songToPlayNext) + _playNextQueue.value
+        _playNextQueue.value = listOf(
+            PnqItem(songToPlayNext)
+        ) + _playNextQueue.value
         onSongAdded(songToPlayNext.id)
     }
 
@@ -69,7 +72,9 @@ class PlayNextQueueManager(
         val snapshotQueue = _playNextQueue.value
 
         if (snapshotQueue.isEmpty()) {
-            _playNextQueue.value = listOf(song)
+            _playNextQueue.value = listOf(
+                PnqItem(song)
+            )
             return
         }
 
@@ -78,7 +83,7 @@ class PlayNextQueueManager(
         _playNextQueue.value = snapshotQueue.toMutableList().apply {
             add(
                 insertIndex,
-                song
+                PnqItem(song)
             )
         }
     }
@@ -87,7 +92,8 @@ class PlayNextQueueManager(
      * adds songs to the front of the queue.
      */
     fun playTheseNext(songs: List<Song>) {
-        _playNextQueue.value = songs + _playNextQueue.value
+        val newEntries = songs.map { PnqItem(it) }
+        _playNextQueue.value = newEntries + _playNextQueue.value
     }
 
     fun swapSongs(fromIndex: Int, toIndex: Int) {
@@ -110,10 +116,22 @@ class PlayNextQueueManager(
         maybeItem?.let {
             _playNextQueue.value = queue.drop(itemIndex + 1)
         }
-        return maybeItem
+        return maybeItem?.song
     }
 
     fun clearPnq() {
         _playNextQueue.value = emptyList()
     }
 }
+
+/**
+ * a song in the play-next queue.
+ *
+ * [key] is unique per queue entry,
+ * so the same song can appear twice
+ * without conflicting keys in the UI.
+ */
+data class PnqItem(
+    val song: Song,
+    val key: String = UUID.randomUUID().toString(),
+)

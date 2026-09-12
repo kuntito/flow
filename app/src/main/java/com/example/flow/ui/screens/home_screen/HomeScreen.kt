@@ -31,6 +31,7 @@ import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Mood
 import com.example.flow.data.models.Song
+import com.example.flow.player.PnqItem
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
 import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.select_mood_dialog.SelectMoodDialog
@@ -118,7 +119,7 @@ fun HomeScreen(
     albumArtBitmap: Bitmap?,
     goToSongSearchScreen: () -> Unit,
     goToPlaylistScreen: () -> Unit,
-    playNextQueue: List<Song>,
+    playNextQueue: List<PnqItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     clearPnq: () -> Unit,

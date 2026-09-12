@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Song
 import com.example.flow.player.PlaybackUiState
+import com.example.flow.player.PnqItem
 import com.example.flow.ui.components.util.AppSnackBar
 import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.play_next_queue.PlayNextQueueSheet
@@ -32,7 +33,7 @@ fun SongPlayingWithPlayNextSheet(
     playbackUiState: PlaybackUiState,
     playbackRepeatMode: PlaybackRepeatMode,
     albumArtBitmap: Bitmap?,
-    playNextQueue: List<Song>,
+    playNextQueue: List<PnqItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
     clearPnq: () -> Unit,

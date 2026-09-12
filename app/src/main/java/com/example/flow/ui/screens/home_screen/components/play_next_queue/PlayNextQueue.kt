@@ -7,14 +7,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.flow.data.models.Song
+import com.example.flow.player.PnqItem
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun PlayNextQueue(
     modifier: Modifier = Modifier,
-    songQueue: List<Song>,
+    songQueue: List<PnqItem>,
     onMoveSongInQueue: (Int, Int) -> Unit,
     onPlaySongPNQ: (Int) -> Unit,
 ) {
@@ -38,16 +38,14 @@ fun PlayNextQueue(
     ) {
         itemsIndexed(
             items = songQueue,
-            // TODO, since song.id is the key, the same song can't appear in the lazy column
-            //  without crashing it.
-            key = { index, song -> song.id }
-        ) { index, song ->
+            key = { index, item -> item.key }
+        ) { index, item ->
             ReorderableItem(
                 reorderableListState,
-                key = song.id
+                key = item.key,
             ) { isDragging ->
                 PlayNextQueueSLI(
-                    song = song,
+                    song = item.song,
                     dragHandleModifier = Modifier
                         // this modifier is applied to the drag icon.
                         // holding the icon triggers the drag.
