@@ -36,7 +36,7 @@ fun SongPlaying(
     albumArtBitmap: Bitmap?,
     showSleepTimerDialog: () -> Unit,
 ) {
-    val sectionWidth = 300
+    val sectionWidth = 256
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
