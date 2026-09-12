@@ -67,7 +67,7 @@ class FlowRepository(
         query: String
     ): List<Song>? {
         val searchResults = if (query == "*") {
-            songSearchCacheDao.getAll()
+            songSearchCacheDao.getAll().shuffled()
         } else if (query == "÷") {
             songSearchCacheDao.getAllByLeastRecent()
         } else {
