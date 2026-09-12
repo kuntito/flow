@@ -66,19 +66,21 @@ class FlowRepository(
     suspend fun searchSong(
         query: String
     ): List<Song>? {
-        // TODO typing '?' shows all songs, same with '*'
-        //  chances are, the asterisk never worked as expected from the jump
         val searchResults = if (query == "*") {
             songSearchCacheDao.getAll()
         } else if (query == "÷") {
             songSearchCacheDao.getAllByLeastRecent()
         } else {
             val normalizedQuery = normalizeForSongSearch(query)
-            songSearchCacheDao.search(normalizedQuery)
+            if (normalizedQuery.isNotBlank()) {
+                songSearchCacheDao.search(normalizedQuery)
+                    .sortedByDescending { it.listenCount ?: 0 }
+            } else {
+                emptyList()
+            }
         }
 
         return searchResults
-            .sortedByDescending { it.listenCount ?: 0 }
             .mapNotNull { it.toSong() }
     }
 
