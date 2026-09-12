@@ -41,6 +41,7 @@ fun AudioControlButtons(
             repeatMode = repeatMode,
             toggleRepeatMode = playbackUiState.playbackActions.toggleRepeatMode,
             repeatForAMinute = playbackUiState.playbackActions.repeatForAMinute,
+            resetRepeat = playbackUiState.playbackActions.resetRepeat,
             size = repeatButtonSize,
         )
     }

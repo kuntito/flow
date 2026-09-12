@@ -8,6 +8,7 @@ data class PlaybackActions (
     val prevSong: () -> Unit,
     val toggleRepeatMode: () -> Unit,
     val repeatForAMinute: () -> Unit,
+    val resetRepeat: () -> Unit,
 )
 
 val dummyPlaybackActions = PlaybackActions(
@@ -18,4 +19,5 @@ val dummyPlaybackActions = PlaybackActions(
     prevSong = {},
     toggleRepeatMode = {},
     repeatForAMinute = {},
+    resetRepeat = {},
 )

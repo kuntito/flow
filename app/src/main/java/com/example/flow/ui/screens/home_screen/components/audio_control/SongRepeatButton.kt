@@ -20,6 +20,7 @@ fun SongRepeatButton(
     repeatMode: PlaybackRepeatMode,
     toggleRepeatMode: () -> Unit,
     repeatForAMinute: () -> Unit,
+    resetRepeat: () -> Unit,
     size: Int = 18,
 ) {
     val iconRes = when (repeatMode) {
@@ -38,6 +39,7 @@ fun SongRepeatButton(
     AppIconButton(
         iconRes = iconRes,
         onClick = toggleRepeatMode,
+        onDoubleClick = resetRepeat,
         onLongClick = repeatForAMinute,
         size = size,
         modifier = modifier,
@@ -85,6 +87,7 @@ private fun SongRepeatButtonPreview() {
             repeatMode = repeatMode,
             toggleRepeatMode = toggleRepeat,
             repeatForAMinute = {},
+            resetRepeat = {},
             size = 100,
         )
     }

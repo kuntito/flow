@@ -490,7 +490,8 @@ class FlowViewModel(
         nextSong = ::handleNextSongPlay,
         prevSong = ::onPrevClick,
         toggleRepeatMode = repeatSongManager::toggleRepeatMode,
-        repeatForAMinute = repeatSongManager::repeatForAMinute
+        repeatForAMinute = repeatSongManager::repeatForAMinute,
+        resetRepeat = repeatSongManager::reset,
     )
 
     private val _flowPlaybackState = MutableStateFlow<FlowPlaybackState>(
