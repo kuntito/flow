@@ -31,9 +31,12 @@ fun FlowTopAppBar(
     inAMood: MoodState.InAMood? = null,
     endMood: () -> Unit,
     isSleepTimerActive: Boolean,
+    isOfflinePlay: Boolean,
+    toggleOfflinePlay: () -> Unit,
     goToPlaylistScreen: () -> Unit,
 ) {
     val iconSize = 24
+    val iconGap = 24
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -43,6 +46,11 @@ fun FlowTopAppBar(
             .padding(horizontal = 16.dp)
     ) {
         Row(
+            horizontalArrangement = Arrangement
+                .spacedBy(
+                    space = iconGap.dp,
+                    alignment = Alignment.Start
+                ),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .weight(1f),
@@ -51,6 +59,13 @@ fun FlowTopAppBar(
                 iconRes = R.drawable.ic_list,
                 size = iconSize,
                 onClick = goToPlaylistScreen,
+            )
+            AppIconButton(
+                iconRes = if (isOfflinePlay)
+                    R.drawable.ic_bulb_off
+                    else R.drawable.ic_bulb_on,
+                size = iconSize,
+                onClick = toggleOfflinePlay,
             )
         }
 
@@ -76,7 +91,7 @@ fun FlowTopAppBar(
         Row(
             horizontalArrangement = Arrangement
                 .spacedBy(
-                    space = 16.dp,
+                    space = iconGap.dp,
                     alignment = Alignment.End
                 ),
             verticalAlignment = Alignment.CenterVertically,
@@ -116,17 +131,17 @@ fun FlowTopAppBar(
     }
 }
 
-@Preview
-@Composable
-private fun FlowTopAppBarPreview() {
-    PreviewColumn {
-        FlowTopAppBar(
-            onSearchIconClick = {},
-            onMoodIconClick = {},
-            inAMood = null,
-            endMood = {},
-            isSleepTimerActive = true,
-            goToPlaylistScreen = {},
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun FlowTopAppBarPreview() {
+//    PreviewColumn {
+//        FlowTopAppBar(
+//            onSearchIconClick = {},
+//            onMoodIconClick = {},
+//            inAMood = null,
+//            endMood = {},
+//            isSleepTimerActive = true,
+//            goToPlaylistScreen = {},
+//        )
+//    }
+//}

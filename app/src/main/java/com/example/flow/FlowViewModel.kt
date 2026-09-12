@@ -14,6 +14,7 @@ import com.example.flow.helper_classes.AlbumArtLoader
 import com.example.flow.helper_classes.NextSongManager
 import com.example.flow.helper_classes.SongSearchManager
 import com.example.flow.player.NotificationPlayerVmBridge
+import com.example.flow.player.OfflinePlayManager
 import com.example.flow.player.PlayNextQueueManager
 import com.example.flow.player.PlaybackActions
 import com.example.flow.player.PlaybackCache
@@ -52,6 +53,13 @@ class FlowViewModel(
 ): AndroidViewModel(appContext) {
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
+
+    private val offlinePlayManager = OfflinePlayManager(
+        appContext = appContext,
+        coroutineScope = viewModelScope,
+    )
+    val isOfflinePlay = offlinePlayManager.isOfflinePlay
+    fun toggleOfflinePlay() = offlinePlayManager.toggle()
 
     private val _playlists = MutableStateFlow<List<PlaylistItem>>(emptyList())
     val playlists = _playlists.asStateFlow()
@@ -283,6 +291,7 @@ class FlowViewModel(
         fetchNextSong = flowRepo::fetchNextSong,
         fetchMoodSong =  flowRepo::fetchMoodSong,
         coroutineScope = viewModelScope,
+        isOfflinePlay = isOfflinePlay,
     )
 
     /*

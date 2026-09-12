@@ -103,13 +103,22 @@ class FlowRepository(
     }
 
     /**
-     * fetches the next song from API.
+     * fetches the next song.
      *
-     * if it fails, fetches from local cache.
+     * if useCache is true, plays from local cache.
      *
-     * if that fails, it returns `null`.
+     * else fetches from API.
+     * falls back to cache if API fails.
+     *
+     * returns null if all fails.
      */
-    suspend fun fetchNextSong(): Song? {
+    suspend fun fetchNextSong(
+        useCache: Boolean = false
+    ): Song? {
+        if (useCache) {
+            return fetchNextSongFromCache()
+        }
+
         val songFromApi = flowDs
             .safeFetchNextSong()
             ?.songWithUrl

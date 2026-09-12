@@ -75,6 +75,9 @@ fun HomeScreenRoot(
     val onCancelSleepTimer = flowViewModel::cancelSleepTimer
     val onRestartSleepTimer = flowViewModel::restartSleepTimer
 
+    val isOfflinePlay by flowViewModel.isOfflinePlay.collectAsState()
+    val toggleOfflinePlay = flowViewModel::toggleOfflinePlay
+
 
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
@@ -100,6 +103,8 @@ fun HomeScreenRoot(
         onStartSleepTimer = onStartSleepTimer,
         onRestartSleepTimer = onRestartSleepTimer,
         onCancelSleepTimer = onCancelSleepTimer,
+        isOfflinePlay = isOfflinePlay,
+        toggleOfflinePlay = toggleOfflinePlay,
     )
 }
 
@@ -130,6 +135,8 @@ fun HomeScreen(
     onStartSleepTimer: (SleepTimerDuration) -> Unit,
     onRestartSleepTimer: () -> Unit,
     onCancelSleepTimer: () -> Unit,
+    isOfflinePlay: Boolean,
+    toggleOfflinePlay: () -> Unit,
 ) {
     var isSelectMoodDialogOpen by remember { mutableStateOf(false) }
     val showSelectMoodDialog = { isSelectMoodDialogOpen = true }
@@ -191,6 +198,8 @@ fun HomeScreen(
                 endMood = handleEndMood,
                 isSleepTimerActive = sleepTimerState is SleepTimerState.Active,
                 goToPlaylistScreen = goToPlaylistScreen,
+                isOfflinePlay = isOfflinePlay,
+                toggleOfflinePlay = toggleOfflinePlay,
             )
         },
         modifier = modifier

@@ -91,4 +91,7 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // for persisting app preferences across launches i.e. isOfflinePlay
+    implementation(libs.datastore.preferences)
+
 }

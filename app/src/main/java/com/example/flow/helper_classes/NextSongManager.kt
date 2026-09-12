@@ -47,8 +47,11 @@ class NextSongManager(
     val pnqTop: StateFlow<Song?>,
     val popPnqTop: () -> Unit,
     val updateCache: (PlaybackCacheItem) -> Unit,
+    val isOfflinePlay: StateFlow<Boolean>,
     val fetchSpecificSong: suspend(songId: Int) -> Song?,
-    val fetchNextSong: suspend() -> Song?,
+    val fetchNextSong: suspend(
+        isOffline: Boolean
+    ) -> Song?,
     val fetchMoodSong: suspend(moodId: Int) -> Song?,
     private val coroutineScope: CoroutineScope,
 ) {
@@ -111,7 +114,7 @@ class NextSongManager(
                 }
             }
             else -> {
-                fetchNextSong()?.let {
+                fetchNextSong(isOfflinePlay.value)?.let {
                     NextSongItem(
                         song = it,
                         source = NextSongSource.API_DEFAULT
