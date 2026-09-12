@@ -40,6 +40,7 @@ fun PrevPlayPauseNextButtons(
     ) {
         AppIconButton(
             iconRes = R.drawable.ic_prev,
+            isClickable = playbackUiState.previousSong != null,
             onClick = playbackActions.prevSong,
         )
         Spacer(modifier = Modifier.width(leftSpacer.dp))

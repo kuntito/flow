@@ -8,6 +8,7 @@ data class PlaybackUiState(
     val playProgress: Float,
     val isPlaying: Boolean,
     val playbackActions: PlaybackActions,
+    val previousSong: Song?,
 ) {
     companion object {
         fun onNextSongLoading() = PlaybackUiState(
@@ -21,7 +22,8 @@ data class PlaybackUiState(
             ),
             playProgress = 0f,
             isPlaying = true, // need the pause icon to remain
-            playbackActions = dummyPlaybackActions
+            playbackActions = dummyPlaybackActions,
+            previousSong = null,
         )
     }
 }
@@ -31,4 +33,5 @@ val dummyPlaybackUiState = PlaybackUiState(
     playProgress = 0.2f,
     isPlaying = true,
     playbackActions = dummyPlaybackActions,
+    previousSong = null,
 )

@@ -54,6 +54,8 @@ class FlowViewModel(
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
 
+    private val _previousSong = MutableStateFlow<Song?>(null)
+
     private val offlinePlayManager = OfflinePlayManager(
         appContext = appContext,
         coroutineScope = viewModelScope,
@@ -402,13 +404,16 @@ class FlowViewModel(
     private var nextSongJob: Job? = null
 
     /**
-     * the next song is usually determined by the flow API.
+     * this decides what song gets played next.
+     * it uses [NextSongManager] to decide what song.
      *
-     * sometimes, user specifies a song with [prioritySongId]
-     * this overrides the flow API route.
+     * user can specify a song with [prioritySongId]
+     *
+     * it caches the previously loaded song by default.
      */
     private fun handleNextSongPlay(
         prioritySongId: Int? = null,
+        savePreviousSong: Boolean = true,
     ) {
         if (stopBecauseSleepTimer) {
             resetStopBecauseSleepTimer()
@@ -442,6 +447,11 @@ class FlowViewModel(
                     songFilePath = nextSong.cachedFilePath,
                     aaUrl = nextSong.albumArtUrl
                 )
+
+                if (savePreviousSong) {
+                    _previousSong.value = songPlayer.playerState.value.loadedSong
+                }
+
                 onPlayFromStart(
                     song = nextSong,
                 )
@@ -449,7 +459,15 @@ class FlowViewModel(
         }
     }
 
-    fun onPrevClick() {}
+    fun onPrevClick() {
+        val snapshotPrevSong = _previousSong.value ?: return
+        _previousSong.value = null
+
+        handleNextSongPlay(
+            prioritySongId = snapshotPrevSong.id,
+            savePreviousSong = false,
+        )
+    }
 
     fun onPause() {
         songPlayer.pause()
@@ -511,6 +529,7 @@ class FlowViewModel(
             isPlaying = playerState.value.isPlaying,
             playProgress = playerState.value.playProgress,
             playbackActions = playbackActions,
+            previousSong = _previousSong.value
         )
     }
 
