@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -35,16 +36,21 @@ fun SongPlaying(
     albumArtBitmap: Bitmap?,
     showSleepTimerDialog: () -> Unit,
 ) {
+    val sectionWidth = 300
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
+            .width(width = sectionWidth.dp)
+        ,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AlbumArtSP(
-               albumArtBitmap = albumArtBitmap,
+                albumArtBitmap = albumArtBitmap,
                 onLongClick = showSleepTimerDialog,
+                size = sectionWidth.toFloat(),
             )
             Spacer(
                 modifier = Modifier
@@ -60,6 +66,7 @@ fun SongPlaying(
         AudioControlSection(
             playbackUiState = playbackUiState,
             repeatMode = playbackRepeatMode,
+            width = sectionWidth.toFloat(),
         )
     }
 }

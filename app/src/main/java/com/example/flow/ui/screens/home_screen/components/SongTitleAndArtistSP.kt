@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.ui.components.util.PreviewColumn
@@ -29,6 +30,8 @@ fun SongTitleAndArtistSP(
     ) {
         Text(
             text = songTitle,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
             style = tsOrion
                 .copy(
                     fontWeight = FontWeight.SemiBold
@@ -37,6 +40,8 @@ fun SongTitleAndArtistSP(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = artistStr,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
             style = tsTodd
                 .copy(
                     color = colorTelli

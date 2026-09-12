@@ -27,10 +27,10 @@ import com.example.flow.ui.theme.colorTelli
 @Composable
 fun AlbumArtSP(
     modifier: Modifier = Modifier,
+    size: Float,
     albumArtBitmap: Bitmap?,
     onLongClick: () -> Unit,
 ) {
-    val size = 256f
     val boxShape = RoundedCornerShape(8.dp)
     Box(
         modifier = modifier
@@ -76,6 +76,7 @@ private fun AlbumArtSPPreview() {
 
         AlbumArtSP(
             albumArtBitmap = imageBitmap,
+            size = 256f,
             onLongClick = {},
         )
     }

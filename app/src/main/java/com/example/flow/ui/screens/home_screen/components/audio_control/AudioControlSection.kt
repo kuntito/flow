@@ -24,7 +24,7 @@ import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 @Composable
 fun AudioControlSection(
     modifier: Modifier = Modifier,
-    width: Float = 256f,
+    width: Float,
     playbackUiState: PlaybackUiState,
     repeatMode: PlaybackRepeatMode,
 ) {
@@ -117,6 +117,7 @@ private fun AudioControlSectionPreview() {
 
         AudioControlSection(
             playbackUiState = playbackUiState,
+            width = 256f,
             repeatMode = repeatMode,
         )
     }
