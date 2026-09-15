@@ -73,6 +73,13 @@ class FlowRepository(
         } else if (query == "%") {
             songSearchCacheDao.getAll()
                 .sortedByDescending { it.listenCount }
+        } else if (query == "@") {
+            val days = 3
+            val since = System.currentTimeMillis() - (days * 24 * 60 * 60 * 1000L)
+            val hotSongIds = listenHistoryDao
+                .getHottestSongs(since)
+                .map { it.songId }
+            songSearchCacheDao.getSongsByIds(hotSongIds)
         } else {
             val normalizedQuery = normalizeForSongSearch(query)
             if (normalizedQuery.isNotBlank()) {
