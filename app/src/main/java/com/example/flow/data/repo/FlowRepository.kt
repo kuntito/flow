@@ -70,6 +70,9 @@ class FlowRepository(
             songSearchCacheDao.getAll().shuffled()
         } else if (query == "÷") {
             songSearchCacheDao.getAllByLeastRecent()
+        } else if (query == "%") {
+            songSearchCacheDao.getAll()
+                .sortedByDescending { it.listenCount }
         } else {
             val normalizedQuery = normalizeForSongSearch(query)
             if (normalizedQuery.isNotBlank()) {
