@@ -13,7 +13,6 @@ fun SongSearchResultList(
     onPlaySongSearchItem: (songId: Int) -> Unit,
     onPlaySongNext: (Song) -> Unit,
     onPlaySongLater: (Song) -> Unit,
-    playNextSongExists: Boolean,
 ) {
     ShrinkableList(
         items = songSearchItems,
@@ -33,7 +32,6 @@ fun SongSearchResultList(
                 removeFromList()
                 onPlaySongLater(song)
             },
-            playNextSongExists = playNextSongExists,
         )
 
     }

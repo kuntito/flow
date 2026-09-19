@@ -52,7 +52,6 @@ fun SongSearchScreenRoot(
 
     val onPlaySongNextFromSearch: (Song) -> Unit = flowViewModel::playSongNextFromSearch
     val onPlaySongLaterFromSearch: (Song) -> Unit = flowViewModel::playSongLaterFromSearch
-    val playNextSongExists by flowViewModel.playNextSongExists.collectAsState()
 
     SongSearchScreen(
         songSearchState = songSearchState,
@@ -62,7 +61,6 @@ fun SongSearchScreenRoot(
         onPlaySongSearchItem = onPlaySongSearchItem,
         onPlaySongNext = onPlaySongNextFromSearch,
         onPlaySongLater = onPlaySongLaterFromSearch,
-        playNextSongExists = playNextSongExists,
     )
 }
 
@@ -76,7 +74,6 @@ fun SongSearchScreen(
     onPlaySongSearchItem: (Int, String) -> Unit,
     onPlaySongNext: (Song) -> Unit,
     onPlaySongLater: (Song) -> Unit,
-    playNextSongExists: Boolean,
 ) {
     Scaffold(
         topBar = {
@@ -124,7 +121,6 @@ fun SongSearchScreen(
                             },
                             onPlaySongNext = onPlaySongNext,
                             onPlaySongLater = onPlaySongLater,
-                            playNextSongExists = playNextSongExists,
                         )
                     }
                     SongSearchState.FinishedNoResult -> {

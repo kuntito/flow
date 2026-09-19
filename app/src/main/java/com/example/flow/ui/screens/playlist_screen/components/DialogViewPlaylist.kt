@@ -42,7 +42,6 @@ fun DialogViewPlaylist(
     playSong: (Song) -> Unit,
     playSongNext: (Song) -> Unit,
     playSongLater: (Song) -> Unit,
-    playNextSongExists: Boolean,
 ) {
     val shape = RoundedCornerShape(16.dp)
 
@@ -132,7 +131,6 @@ fun DialogViewPlaylist(
                             playSongLater = {
                                 playSongLater(it)
                             },
-                            playNextSongExists = playNextSongExists,
                         )
                     }
                 }

@@ -35,7 +35,6 @@ fun SongLi(
     onPlaySong: () -> Unit,
     playSongNext: () -> Unit,
     playSongLater: () -> Unit,
-    playNextSongExists: Boolean,
 ) {
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
@@ -50,14 +49,6 @@ fun SongLi(
     )}
     val showDropdownMenu: () -> Unit = {
         dropDownOptions = buildList {
-            if (playNextSongExists) {
-                add(
-                    DropdownMenuOption(
-                        label = "play later",
-                        onClick = playSongLater,
-                    )
-                )
-            }
             add(
                 DropdownMenuOption(
                     label = "play next",
