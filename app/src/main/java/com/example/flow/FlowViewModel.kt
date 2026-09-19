@@ -67,8 +67,8 @@ class FlowViewModel(
     val playlists = _playlists.asStateFlow()
 
     // VM
-    private val _viewingPlaylistSongs = MutableStateFlow<List<Song>>(emptyList())
-    val viewingPlaylistSongs = _viewingPlaylistSongs.asStateFlow()
+    private val _playlistSongs = MutableStateFlow<List<Song>>(emptyList())
+    val viewingPlaylistSongs = _playlistSongs.asStateFlow()
 
     private var stopBecauseSleepTimer = false
     fun setStopBecauseSleepTimer(flag: Boolean) {
@@ -261,7 +261,7 @@ class FlowViewModel(
             SharingStarted.Eagerly,
             null,
         )
-    val playNextSongExists = pnqManager.hasNextSong
+
     fun playSongNextFromSearch(
         searchedSong: Song
     ) = pnqManager.addNext(searchedSong)
@@ -343,17 +343,16 @@ class FlowViewModel(
         }
     }
 
-    // TODO start here, viewingPlaylistSongs should have it's own type,
-    //  or maybe just return regular Song objects.
-    //  the point is i need song durations.
-    fun onViewPlaylistSongs(playlist: PlaylistItem) {
+    fun loadPlaylistSongs(playlist: PlaylistItem) {
+        _playlistSongs.value = emptyList()
+
         viewModelScope.launch {
-            _viewingPlaylistSongs.value = flowRepo.getPlaylistSongs(playlist.id)
+            _playlistSongs.value = flowRepo.getPlaylistSongs(playlist.id)
         }
     }
 
     fun onDismissPlaylistSongsInView() {
-        _viewingPlaylistSongs.value = emptyList()
+        _playlistSongs.value = emptyList()
     }
 
     private val notificationBridge = NotificationPlayerVmBridge(

@@ -1,14 +1,11 @@
 package com.example.flow.ui.screens.playlist_screen.components
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,36 +29,37 @@ import com.example.flow.ui.theme.tsOrion
 fun ListItemPlaylist(
     modifier: Modifier = Modifier,
     item: PlaylistItem,
-    onPlay: () -> Unit,
-    onViewSongs: () -> Unit,
+    onSelect: () -> Unit,
+    onPeekSongs: () -> Unit,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    ClickableSurface(
+        onClick = onSelect,
+        isRippleBounded = true,
         modifier = modifier
-            .padding(horizontal = 16.dp)
-            .height(48.dp)
-            .fillMaxWidth()
+        ,
     ) {
-        Icon(
-            painter = painterResource(
-                R.drawable.ic_twirl,
-            ),
-            contentDescription = null,
-            tint = colorTelli,
-            modifier = Modifier
-                .size(24.dp)
-        )
         Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .weight(1f)
-            ,
+                .padding(horizontal = 16.dp)
+                .height(48.dp)
+                .fillMaxWidth()
         ) {
-            ClickableSurface(
-                onClick = {},
-                onDoubleClick = onPlay,
-                isRippleBounded = true,
+            Icon(
+                painter = painterResource(
+                    R.drawable.ic_twirl,
+                ),
+                contentDescription = null,
+                tint = colorTelli,
+                modifier = Modifier
+                    .size(24.dp)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+                ,
             ) {
                 Text(
                     text = item.name,
@@ -73,23 +71,18 @@ fun ListItemPlaylist(
                 )
             }
         }
-        AppIconButton(
-            iconRes = R.drawable.ic_eye,
-            size = 20,
-            onClick = onViewSongs,
-        )
     }
 }
 
-@Preview
-@Composable
-private fun PreviewListItemPlaylist() {
-    val playlistItem = genSamplePlaylistItems(1)[0]
-    PreviewColumn {
-        ListItemPlaylist(
-            item = playlistItem,
-            onPlay = {},
-            onViewSongs = {},
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun PreviewListItemPlaylist() {
+//    val playlistItem = genSamplePlaylistItems(1)[0]
+//    PreviewColumn {
+//        ListItemPlaylist(
+//            item = playlistItem,
+//            onPlay = {},
+//            onPeekSongs = {},
+//        )
+//    }
+//}

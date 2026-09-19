@@ -18,7 +18,8 @@ fun ListPlaylist(
     modifier: Modifier = Modifier,
     items: List<PlaylistItem>,
     onPlayPlaylist: (PlaylistItem) -> Unit,
-    onViewPlaylistSongs: (PlaylistItem) -> Unit,
+    onPeekSongs: (PlaylistItem) -> Unit,
+    viewPlaylist: (PlaylistItem) -> Unit,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -35,26 +36,26 @@ fun ListPlaylist(
         ) { playlist ->
            ListItemPlaylist(
                item = playlist,
-               onPlay = {
-                   onPlayPlaylist(playlist)
+               onSelect = {
+                   viewPlaylist(playlist)
                },
-               onViewSongs = {
-                   onViewPlaylistSongs(playlist)
+               onPeekSongs = {
+                   onPeekSongs(playlist)
                }
            )
         }
     }
 }
 
-@Preview
-@Composable
-private fun PreviewListPlaylist() {
-    val items = genSamplePlaylistItems(10)
-    PreviewColumn {
-        ListPlaylist(
-            items = items,
-            onPlayPlaylist = {},
-            onViewPlaylistSongs = {},
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun PreviewListPlaylist() {
+//    val items = genSamplePlaylistItems(10)
+//    PreviewColumn {
+//        ListPlaylist(
+//            items = items,
+//            onPlayPlaylist = {},
+//            onPeekSongs = {},
+//        )
+//    }
+//}

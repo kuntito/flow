@@ -26,8 +26,6 @@ import com.example.flow.ui.components.util.AppCenter
 import com.example.flow.ui.components.util.AppSnackBar
 import com.example.flow.ui.components.util.AppSnackBarVisuals
 import com.example.flow.ui.screens.home_screen.models.ObserveAsEvents
-import com.example.flow.ui.screens.home_screen.models.SleepTimerEvent
-import com.example.flow.ui.screens.home_screen.models.SongPlayingEvent
 import com.example.flow.ui.screens.playlist_screen.components.DialogViewPlaylist
 import com.example.flow.ui.screens.playlist_screen.components.ListPlaylist
 import com.example.flow.ui.screens.playlist_screen.components.TopBarPlaylistScreen
@@ -43,17 +41,17 @@ import kotlinx.coroutines.launch
 fun PlaylistScreenRoot(
     flowViewModel: FlowViewModel,
     navBack: () -> Unit,
+    goToViewPlaylist: (PlaylistItem) -> Unit,
 ) {
     val playlistItems by flowViewModel.playlists.collectAsState()
     val onPlayPlaylist = flowViewModel::onPlayPlaylist
     val playlistSongsInView by flowViewModel.viewingPlaylistSongs.collectAsState()
-    val onViewPlaylistSongs = flowViewModel::onViewPlaylistSongs
+    val loadPlaylistSongs = flowViewModel::loadPlaylistSongs
     val onClearViewPlaylistSongs = flowViewModel::onDismissPlaylistSongsInView
 
     val playSong: (Song) -> Unit = flowViewModel::playSongFromPlaylist
     val playSongNext: (Song) -> Unit = flowViewModel::playSongNextFromPlaylist
     val playSongLater: (Song) -> Unit = flowViewModel::playSongLaterFromPlaylist
-    val playNextSongExists by flowViewModel.playNextSongExists.collectAsState()
 
     val appEventsFlow = flowViewModel.appEventsFlow
 
@@ -62,13 +60,13 @@ fun PlaylistScreenRoot(
         playlistItems = playlistItems,
         onPlayPlaylist = onPlayPlaylist,
         playlistSongsInView = playlistSongsInView,
-        onViewPlaylistSongs = onViewPlaylistSongs,
+        onViewPlaylistSongs = loadPlaylistSongs,
         onClearViewPlaylistSongs = onClearViewPlaylistSongs,
         playSong = playSong,
         playSongNext = playSongNext,
         playSongLater = playSongLater,
-        playNextSongExists = playNextSongExists,
         appEventsFlow = appEventsFlow,
+        viewPlaylist = goToViewPlaylist,
     )
 }
 
@@ -84,8 +82,8 @@ fun PlaylistScreen(
     playSong: (Song) -> Unit,
     playSongNext: (Song) -> Unit,
     playSongLater: (Song) -> Unit,
-    playNextSongExists: Boolean,
     appEventsFlow: Flow<AppEvent>,
+    viewPlaylist: (PlaylistItem) -> Unit,
 ) {
     BackHandler(enabled = true) {
         navBack()
@@ -104,45 +102,6 @@ fun PlaylistScreen(
     }
 
 
-    val snackBarHostState = remember {
-        SnackbarHostState()
-    }
-    val scope = rememberCoroutineScope()
-
-    ObserveAsEvents<AppEvent>(
-        flow = appEventsFlow
-    ) { event ->
-        when (event) {
-            is PlaylistEvent.OnAddPlayNext -> {
-                val message = "next, ${event.song.title}"
-
-                scope.launch {
-                    snackBarHostState.showSnackbar(
-                        AppSnackBarVisuals(
-                            message = message,
-                            bgColor = colorRaze,
-                        )
-                    )
-                }
-            }
-            is PlaylistEvent.OnAddPlayLater -> {
-                val message = "later, ${event.song.title}"
-
-                scope.launch {
-                    snackBarHostState.showSnackbar(
-                        AppSnackBarVisuals(
-                            message = message,
-                            bgColor = colorRaze,
-                        )
-                    )
-                }
-
-            }
-            else -> {}
-        }
-    }
-
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -151,39 +110,26 @@ fun PlaylistScreen(
         TopBarPlaylistScreen(
             navBack = navBack
         )
-        Box(
-            contentAlignment = Alignment.TopCenter, // for snack bar
-        ) {
-            if (playlistItems.isEmpty()) {
-                AppCenter {
-                    Text(
-                        text = "none, create some.",
-                        style = tsOrion,
-                        color = colorTelli
-                            .copy(
-                                alpha = 0.5f
-                            ),
-                    )
-                }
-            } else {
-                ListPlaylist(
-                    items = playlistItems,
-                    onPlayPlaylist = onPlayPlaylist,
-                    onViewPlaylistSongs = handleOnViewPlaylist,
+        if (playlistItems.isEmpty()) {
+            AppCenter {
+                Text(
+                    text = "none, create some.",
+                    style = tsOrion,
+                    color = colorTelli
+                        .copy(
+                            alpha = 0.5f
+                        ),
                 )
             }
-            SnackbarHost(
-                hostState = snackBarHostState,
-                snackbar = { data ->
-                    val visuals = data.visuals as? AppSnackBarVisuals
-                    AppSnackBar(
-                        text = data.visuals.message,
-                        bgColor = visuals?.bgColor
-                    )
-                }
+        } else {
+            ListPlaylist(
+                items = playlistItems,
+                onPlayPlaylist = onPlayPlaylist,
+                viewPlaylist = viewPlaylist,
+                onPeekSongs = handleOnViewPlaylist,
             )
         }
-    }
+}
     playlistInView?.let { playlist ->
         DialogViewPlaylist(
             songs = playlistSongsInView,
@@ -192,7 +138,6 @@ fun PlaylistScreen(
             playSong = playSong,
             playSongNext = playSongNext,
             playSongLater = playSongLater,
-            playNextSongExists = playNextSongExists,
         )
     }
 }
