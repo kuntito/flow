@@ -35,6 +35,7 @@ fun SongLi(
     onPlaySong: () -> Unit,
     playSongNext: () -> Unit,
     playSongLater: () -> Unit,
+    dropdowns: List<DropdownMenuOption> = emptyList(),
 ) {
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
@@ -55,6 +56,8 @@ fun SongLi(
                     onClick = playSongNext
                 )
             )
+
+            addAll(dropdowns)
         }
         isDropdownMenuVisible = true
     }

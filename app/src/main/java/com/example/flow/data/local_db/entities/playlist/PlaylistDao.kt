@@ -1,6 +1,7 @@
 package com.example.flow.data.local_db.entities.playlist
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -39,4 +40,7 @@ interface PlaylistDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addSong(song: PlaylistSongEntity)
+
+    @Delete
+    suspend fun removeSong(song: PlaylistSongEntity)
 }

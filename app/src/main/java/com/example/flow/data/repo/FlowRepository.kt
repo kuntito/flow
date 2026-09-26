@@ -315,4 +315,16 @@ class FlowRepository(
 
         playlistDao.addSong(playlistSong)
     }
+
+    suspend fun removeSongFromPlaylist(
+        playlistId: Int,
+        songId: Int,
+    ) {
+        val playlistSong = PlaylistSongEntity(
+            playlistId = playlistId,
+            songId = songId,
+        )
+
+        playlistDao.removeSong(playlistSong)
+    }
 }

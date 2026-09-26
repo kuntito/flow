@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.example.flow.data.models.Song
 import com.example.flow.getTotalMinutes
-import com.example.flow.ui.screens.song_search_screen.components.SongLi
 import com.example.flow.ui.theme.colorKDB
 import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsHush
@@ -30,6 +29,7 @@ fun ListPlaylistSongs(
     playSong: (Song) -> Unit,
     playSongNext: (Song) -> Unit,
     playSongLater: (Song) -> Unit,
+    removeSong: (Song) -> Unit,
 ) {
     val totalMinutes = getTotalMinutes(songs)
     val durationText = when(totalMinutes) {
@@ -89,7 +89,7 @@ fun ListPlaylistSongs(
             items = songs,
             key = { it.id }
         ) {
-            SongLi(
+            PlaylistSongLi(
                 song = it,
                 onPlaySong = { playSong(it) },
                 playSongNext = {
@@ -98,6 +98,9 @@ fun ListPlaylistSongs(
                 playSongLater = {
                     playSongLater(it)
                 },
+                removeFromPlaylist = {
+                    removeSong(it)
+                }
             )
         }
     }

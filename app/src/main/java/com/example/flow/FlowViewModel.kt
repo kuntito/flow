@@ -674,6 +674,18 @@ class FlowViewModel(
         }
     }
 
+    fun removeSongFromPlaylist(
+        song: Song,
+        playlist: PlaylistItem,
+    ) {
+        viewModelScope.launch {
+            flowRepo.removeSongFromPlaylist(
+                playlistId = playlist.id,
+                songId = song.id,
+            )
+        }
+    }
+
     @OptIn(UnstableApi::class)
     fun updateCache(
         cacheItem: PlaybackCacheItem,

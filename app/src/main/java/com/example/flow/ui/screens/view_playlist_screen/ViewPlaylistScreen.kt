@@ -54,6 +54,8 @@ fun ViewPlaylistScreenRoot(
     val playSongNext: (Song) -> Unit = flowViewModel::playSongNextFromPlaylist
     val playSongLater: (Song) -> Unit = flowViewModel::playSongLaterFromPlaylist
 
+    val removeSongFromPlaylist = flowViewModel::removeSongFromPlaylist
+
     val appEventsFlow = flowViewModel.appEventsFlow
 
     val onPlayPlaylist = {
@@ -74,6 +76,7 @@ fun ViewPlaylistScreenRoot(
         appEventsFlow = appEventsFlow,
         onPlayPlaylist = onPlayPlaylist,
         goToEditPlaylist = goToEditPlaylist,
+        removeSongFromPlaylist = removeSongFromPlaylist,
     )
 }
 
@@ -89,6 +92,7 @@ fun ViewPlaylistScreen(
     appEventsFlow: Flow<AppEvent>,
     onPlayPlaylist: () -> Unit,
     goToEditPlaylist: () -> Unit,
+    removeSongFromPlaylist: (Song, PlaylistItem) -> Unit,
 ) {
     val snackBarHostState = remember {
         SnackbarHostState()
@@ -150,6 +154,12 @@ fun ViewPlaylistScreen(
                 playSong = playSong,
                 playSongNext = playSongNext,
                 playSongLater = playSongLater,
+                removeSong = { song ->
+                    removeSongFromPlaylist(
+                        song,
+                        playlist,
+                    )
+                }
             )
             SnackbarHost(
                 hostState = snackBarHostState,
