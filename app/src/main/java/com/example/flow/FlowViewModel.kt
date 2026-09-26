@@ -67,6 +67,11 @@ class FlowViewModel(
 
     private val _playlists = MutableStateFlow<List<PlaylistItem>>(emptyList())
     val playlists = _playlists.asStateFlow()
+    fun loadPlaylists() {
+        viewModelScope.launch {
+            _playlists.value = flowRepo.getPlaylists()
+        }
+    }
 
     // VM
     private val _playlistSongs = MutableStateFlow<List<Song>>(emptyList())
@@ -404,9 +409,7 @@ class FlowViewModel(
             flowRepo.syncListenCounts()
         }
 
-        viewModelScope.launch {
-            _playlists.value = flowRepo.getPlaylists()
-        }
+        loadPlaylists()
 
         notificationBridge.start()
     }
@@ -653,7 +656,7 @@ class FlowViewModel(
             else SavePlaylistState.Failed
 
             if (success) {
-                _playlists.value = flowRepo.getPlaylists()
+                loadPlaylists()
             }
 
             delay(1000)
@@ -683,6 +686,16 @@ class FlowViewModel(
                 playlistId = playlist.id,
                 songId = song.id,
             )
+        }
+    }
+
+    fun deletePlaylist(playlist: PlaylistItem) {
+        viewModelScope.launch {
+            flowRepo.deletePlaylist(
+                playlistId = playlist.id,
+            )
+
+            loadPlaylists()
         }
     }
 

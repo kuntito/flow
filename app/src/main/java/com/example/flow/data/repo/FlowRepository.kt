@@ -327,4 +327,8 @@ class FlowRepository(
 
         playlistDao.removeSong(playlistSong)
     }
+
+    suspend fun deletePlaylist(playlistId: Int) {
+        playlistDao.deletePlaylist(playlistId)
+    }
 }

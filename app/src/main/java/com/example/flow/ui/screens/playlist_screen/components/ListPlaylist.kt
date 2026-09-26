@@ -17,9 +17,8 @@ import com.example.flow.ui.components.util.PreviewColumn
 fun ListPlaylist(
     modifier: Modifier = Modifier,
     items: List<PlaylistItem>,
-    onPlayPlaylist: (PlaylistItem) -> Unit,
-    onPeekSongs: (PlaylistItem) -> Unit,
     viewPlaylist: (PlaylistItem) -> Unit,
+    triggerDeletePlaylist: (PlaylistItem) -> Unit,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -39,8 +38,8 @@ fun ListPlaylist(
                onSelect = {
                    viewPlaylist(playlist)
                },
-               onPeekSongs = {
-                   onPeekSongs(playlist)
+               onDeletePlaylist = {
+                   triggerDeletePlaylist(playlist)
                }
            )
         }

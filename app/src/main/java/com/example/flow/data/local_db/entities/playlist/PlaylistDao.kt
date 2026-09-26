@@ -43,4 +43,7 @@ interface PlaylistDao {
 
     @Delete
     suspend fun removeSong(song: PlaylistSongEntity)
+
+    @Query("DELETE FROM playlist WHERE playlistId = :playlistId")
+    suspend fun deletePlaylist(playlistId: Int)
 }
