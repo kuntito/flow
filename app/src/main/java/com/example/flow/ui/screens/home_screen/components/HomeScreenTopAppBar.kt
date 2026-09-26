@@ -19,7 +19,6 @@ import com.example.flow.R
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.PreviewColumn
 import com.example.flow.ui.components.util.blinkable
-import com.example.flow.ui.screens.home_screen.models.MoodState
 import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsBlazeMono
 
@@ -27,9 +26,6 @@ import com.example.flow.ui.theme.tsBlazeMono
 fun FlowTopAppBar(
     modifier: Modifier = Modifier,
     onSearchIconClick: () -> Unit,
-    onMoodIconClick: () -> Unit,
-    inAMood: MoodState.InAMood? = null,
-    endMood: () -> Unit,
     isSleepTimerActive: Boolean,
     isOfflinePlay: Boolean,
     toggleOfflinePlay: () -> Unit,
@@ -56,37 +52,32 @@ fun FlowTopAppBar(
                 .weight(1f),
         ) {
             AppIconButton(
-                iconRes = R.drawable.ic_list,
-                size = iconSize,
-                onClick = goToPlaylistScreen,
-            )
-            AppIconButton(
                 iconRes = if (isOfflinePlay)
                     R.drawable.ic_bulb_off
                     else R.drawable.ic_bulb_on,
                 size = iconSize,
                 onClick = toggleOfflinePlay,
             )
+            if (isSleepTimerActive) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_hourglass),
+                    contentDescription = null,
+                    tint = colorTelli,
+                    modifier = Modifier
+                        .size(iconSize.dp),
+                )
+            }
         }
 
-        if (inAMood == null) {
-            Icon(
-                painter = painterResource(R.drawable.ic_flow),
-                contentDescription = null,
-                tint = colorTelli,
-                modifier = Modifier
-                    .height(48.dp) // TODO why doesn't the height reflect?
-                ,
-            )
-        } else {
-            Text(
-                text = inAMood.moodName,
-                style = tsBlazeMono,
-                modifier = Modifier
-                    .blinkable()
-                ,
-            )
-        }
+        Icon(
+            painter = painterResource(R.drawable.ic_flow),
+            contentDescription = null,
+            tint = colorTelli,
+            modifier = Modifier
+                .height(48.dp) // TODO why doesn't the height reflect?
+            ,
+        )
+
 
         Row(
             horizontalArrangement = Arrangement
@@ -99,28 +90,11 @@ fun FlowTopAppBar(
                 .weight(1f)
             ,
         ) {
-            if (inAMood == null) {
-                AppIconButton(
-                    iconRes = R.drawable.ic_helm,
-                    size = iconSize,
-                    onClick = onMoodIconClick,
-                )
-            } else {
-                AppIconButton(
-                    iconRes = R.drawable.ic_curtains,
-                    size = iconSize,
-                    onClick = endMood,
-                )
-            }
-            if (isSleepTimerActive) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_hourglass),
-                    contentDescription = null,
-                    tint = colorTelli,
-                    modifier = Modifier
-                        .size(iconSize.dp),
-                )
-            }
+            AppIconButton(
+                iconRes = R.drawable.ic_list,
+                size = iconSize,
+                onClick = goToPlaylistScreen,
+            )
             AppIconButton(
                 iconRes = R.drawable.ic_search,
                 size = iconSize,
@@ -130,18 +104,3 @@ fun FlowTopAppBar(
         }
     }
 }
-
-//@Preview
-//@Composable
-//private fun FlowTopAppBarPreview() {
-//    PreviewColumn {
-//        FlowTopAppBar(
-//            onSearchIconClick = {},
-//            onMoodIconClick = {},
-//            inAMood = null,
-//            endMood = {},
-//            isSleepTimerActive = true,
-//            goToPlaylistScreen = {},
-//        )
-//    }
-//}

@@ -3,8 +3,6 @@ package com.example.flow.data.remote
 import com.example.flow.data.remote.helpers.ApiCallInfo
 import com.example.flow.data.remote.helpers.safeApiCall
 import com.example.flow.data.remote.response_models.GetCacheItemsSongSearchResponse
-import com.example.flow.data.remote.response_models.GetMoodNextSongResponse
-import com.example.flow.data.remote.response_models.GetMoodsResponse
 import com.example.flow.data.remote.response_models.GetNextSongResponse
 import com.example.flow.data.remote.response_models.GetSongByIdResponse
 import com.example.flow.data.remote.response_models.ListenCountItemApi
@@ -33,15 +31,6 @@ interface FlowApiService {
         @Path("songId")
         songId: Int
     ): GetSongByIdResponse
-
-    @GET("api/flow/moods")
-    suspend fun getMoods(): GetMoodsResponse
-
-    @GET("api/flow/next-song/{tagId}")
-    suspend fun getMoodSong(
-        @Path("tagId")
-        tagId: Int
-    ): GetMoodNextSongResponse
 
     @GET("api/flow/cache-song-search")
     suspend fun getCacheItemsSongSearch(): GetCacheItemsSongSearchResponse
@@ -92,24 +81,6 @@ class FlowApiDataSource(
             "fetches song by id",
             fn = {
                 api.getSongById(songId)
-            }
-        )
-    )
-
-    suspend fun safeGetMoods() = safeApiCall(
-        ApiCallInfo(
-            "fetches all the moods",
-            fn = {
-                api.getMoods()
-            }
-        )
-    )
-
-    suspend fun safeFetchMoodSong(tagId: Int) = safeApiCall(
-        ApiCallInfo(
-            "fetches song by mood",
-            fn = {
-                api.getMoodSong(tagId)
             }
         )
     )

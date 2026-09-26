@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 
 enum class NextSongSource {
     PNQ,
-    MOOD,
     API_DEFAULT,
     USER_CHOICE
 }
@@ -26,24 +25,21 @@ data class NextSongItem(
  * holds the next song for playback.
  * it prefetches the song for cache.
  *
- * observes play-next-queue and mood.
+ * observes the play-next-queue.
  *
- * when either changes,
+ * when it changes,
  * it updates what it holds as the next song.
  *
- * play next queue takes precedence over mood.
- * mood takes precedence over default flow.
+ * play next queue takes precedence over default flow.
  *
  * default flow is whatever the API is designed to return
- * on getNextSong
+ * on getNextSong.
  *
- * once, next song is consumed,
- * via the `getNextSong` call.
- *
+ * once the next song is consumed,
+ * via the `getNextSong` call,
  * it automatically prepares the next one.
  */
 class NextSongManager(
-    val moodId: StateFlow<Int?>,
     val pnqTop: StateFlow<Song?>,
     val popPnqTop: () -> Unit,
     val updateCache: (PlaybackCacheItem) -> Unit,
@@ -52,17 +48,14 @@ class NextSongManager(
     val fetchNextSong: suspend(
         isOffline: Boolean
     ) -> Song?,
-    val fetchMoodSong: suspend(moodId: Int) -> Song?,
     private val coroutineScope: CoroutineScope,
 ) {
     private var nextSongItem: NextSongItem? = null
 
     init {
         coroutineScope.launch {
-            combine(moodId, pnqTop, ::Pair)
-            .collect { (moodId, pnqTop) ->
+            pnqTop.collect { pnqTop ->
                 runPrepareNextSongJob(
-                    moodId = moodId,
                     pnqTop = pnqTop,
                 )
             }
@@ -71,20 +64,17 @@ class NextSongManager(
 
     private var prepareNextSongJob: Job? = null
     private fun runPrepareNextSongJob(
-        moodId: Int?,
         pnqTop: Song?
     ) {
         prepareNextSongJob?.cancel()
         prepareNextSongJob = coroutineScope.launch {
             prepareNextSong(
-                moodId = moodId,
                 pnqTop = pnqTop,
             )
         }
     }
 
     private suspend fun prepareNextSong(
-        moodId: Int?,
         pnqTop: Song?
     ) {
         // trapping the current state
@@ -102,17 +92,6 @@ class NextSongManager(
                     nextSongSnapshot
                 }
             }
-            moodId != null -> {
-                // FIXME, this branch assumes `pnqTop != null` is the only branch above it
-                //  adding a new branch needs to consider this
-                //  currently it reads, if pnqTop is missing and there's a mood, use mood.
-                fetchMoodSong(moodId)?.let {
-                    NextSongItem(
-                        song = it,
-                        source = NextSongSource.MOOD,
-                    )
-                }
-            }
             else -> {
                 fetchNextSong(isOfflinePlay.value)?.let {
                     NextSongItem(
@@ -128,7 +107,7 @@ class NextSongManager(
             val song = nsi.song
             Log.d(
                 flowDebugTag,
-                "prepareNextSong: ${song.title}-${song.id}, mood=${moodId}, pnqTop=${pnqTop}"
+                "prepareNextSong: ${song.title}-${song.id}, pnqTop=${pnqTop}"
             )
 
             nextSongItem = nsi
@@ -185,7 +164,6 @@ class NextSongManager(
         //  and so, i should re-check the cache.
         if (nextSongItem == null && prepareNextSongJob?.isActive != true) {
             runPrepareNextSongJob(
-                moodId = moodId.value,
                 pnqTop = pnqTop.value,
             )
         }

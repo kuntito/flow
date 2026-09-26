@@ -13,14 +13,12 @@ import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
 import com.example.flow.data.local_db.entities.song_search_cache.normalizeForSongSearch
 import com.example.flow.data.local_db.entities.song_search_cache.toSong
-import com.example.flow.data.models.Mood
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.ListenCountItemApi
 import com.example.flow.data.remote.response_models.SongWithUrl
-import com.example.flow.data.remote.response_models.toMood
 import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
@@ -185,22 +183,6 @@ class FlowRepository(
             )
             ?.songWithUrl
             ?.let { enrichSongWithCache(it) }
-    }
-
-    suspend fun fetchMoodSong(tagId: Int): Song? {
-        return flowDs
-            .safeFetchMoodSong(tagId)
-            ?.songWithUrl
-            ?.let { enrichSongWithCache(it) }
-    }
-
-    suspend fun getMoods(): List<Mood>? {
-        return flowDs
-            .safeGetMoods()
-            ?.moods
-            ?.map {
-                it.toMood()
-            }
     }
 
     suspend fun syncSongSearchCache() {

@@ -6,7 +6,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
-import com.example.flow.data.models.Mood
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
 import com.example.flow.data.repo.FlowRepository
@@ -23,7 +22,6 @@ import com.example.flow.player.PlaybackUiState
 import com.example.flow.player.RepeatSongManager
 import com.example.flow.player.SongPlayer
 import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
-import com.example.flow.ui.screens.home_screen.models.MoodState
 import com.example.flow.ui.screens.home_screen.models.SavePlaylistState
 import com.example.flow.ui.screens.home_screen.models.SleepTimerDuration
 import com.example.flow.ui.screens.home_screen.models.SleepTimerEvent
@@ -176,43 +174,6 @@ class FlowViewModel(
         _sleepTimerState.value = SleepTimerState.Inactive
     }
 
-
-    private val _moodList = MutableStateFlow<List<Mood>>(emptyList())
-    val moodList = _moodList.asStateFlow()
-    private val _moodState = MutableStateFlow<MoodState>(
-        MoodState.Neutral
-    )
-    val moodState = _moodState.asStateFlow()
-    val moodIdObservable: StateFlow<Int?> = moodState
-        .map{ (it as? MoodState.InAMood)?.moodId }
-        .distinctUntilChanged()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            null,
-        )
-
-    private var moodExpiryJob: Job? = null
-    fun startMood(
-        mood: Mood
-    ) {
-        _moodState.value = MoodState.InAMood(
-            moodId = mood.moodId,
-            moodName = mood.name,
-        )
-
-        moodExpiryJob?.cancel()
-        moodExpiryJob = viewModelScope.launch {
-            delay(mood.durationMs.milliseconds)
-            _moodState.value = MoodState.Neutral
-        }
-    }
-
-    fun endMood() {
-        _moodState.value = MoodState.Neutral
-        moodExpiryJob?.cancel()
-    }
-
     private val songPlayer = SongPlayer(
         coroutineScope = viewModelScope,
         appContext = appContext,
@@ -292,7 +253,6 @@ class FlowViewModel(
     fun onRemoveFromPnq(key: String) = pnqManager.removeAt(key)
 
     private val nextSongManager = NextSongManager(
-        moodId =  moodIdObservable,
         pnqTop = pnqTop,
         popPnqTop = {
             pnqManager.getNextSong()
@@ -300,7 +260,6 @@ class FlowViewModel(
         updateCache = ::updateCache,
         fetchSpecificSong = flowRepo::fetchSongById,
         fetchNextSong = flowRepo::fetchNextSong,
-        fetchMoodSong =  flowRepo::fetchMoodSong,
         coroutineScope = viewModelScope,
         isOfflinePlay = isOfflinePlay,
     )
@@ -396,12 +355,6 @@ class FlowViewModel(
         }
 
         viewModelScope.launch {
-            flowRepo.getMoods()?.let { moods ->
-                _moodList.value = moods
-            }
-        }
-
-        viewModelScope.launch {
             flowRepo.syncSongSearchCache()
         }
 
@@ -492,7 +445,6 @@ class FlowViewModel(
 
     fun resetPlayback() {
         repeatSongManager.reset()
-        endMood()
     }
 
 
