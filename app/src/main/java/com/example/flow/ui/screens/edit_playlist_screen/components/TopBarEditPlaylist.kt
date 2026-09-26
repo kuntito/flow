@@ -1,31 +1,29 @@
-package com.example.flow.ui.screens.view_playlist_screen.components
+package com.example.flow.ui.screens.edit_playlist_screen.components
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.flow.R
 import com.example.flow.ui.components.general.AppIconButton
-import com.example.flow.ui.theme.colorRaze
+import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsOrion
 
 @Composable
-fun TopBarViewPlaylistScreen(
+fun TopBarEditPlaylist(
     modifier: Modifier = Modifier,
     navBack: () -> Unit,
     playlistName: String,
-    onPlay: () -> Unit,
-    onEdit: () -> Unit,
 ) {
     val iconSize = 24
     Row(
@@ -52,10 +50,21 @@ fun TopBarViewPlaylistScreen(
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.spacedBy(
+                space = 8.dp,
+                alignment = Alignment.CenterHorizontally,
+            ),
             modifier = Modifier
             ,
         ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_twirl),
+                contentDescription = null,
+                tint = colorTelli,
+                modifier = Modifier
+                    .size(iconSize.dp)
+                ,
+            )
             Text(
                 text = playlistName,
                 style = tsOrion
@@ -74,16 +83,6 @@ fun TopBarViewPlaylistScreen(
                 .weight(1f)
             ,
         ) {
-            AppIconButton(
-                iconRes = R.drawable.ic_play,
-                onClick = onPlay,
-                size = 16,
-            )
-            AppIconButton(
-                iconRes = R.drawable.ic_settings,
-                onClick = onEdit,
-                size = iconSize,
-            )
         }
     }
 }

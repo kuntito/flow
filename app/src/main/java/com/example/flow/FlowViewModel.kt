@@ -37,8 +37,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -330,7 +332,9 @@ class FlowViewModel(
     fun onPlayPlaylist(playlist: PlaylistItem) {
         playPlaylistJob?.cancel()
         playPlaylistJob = viewModelScope.launch {
-            val songs = flowRepo.getPlaylistSongs(playlist.id)
+            val songsFlow = flowRepo.getPlaylistSongs(playlist.id)
+            val songs = songsFlow.first()
+
             if (songs.isEmpty()) return@launch
 
             val shuffledSongs = songs.shuffled()
@@ -343,11 +347,16 @@ class FlowViewModel(
         }
     }
 
+    private var loadPlaylistSongsJob: Job? = null
     fun loadPlaylistSongs(playlist: PlaylistItem) {
+        loadPlaylistSongsJob?.cancel()
         _playlistSongs.value = emptyList()
 
-        viewModelScope.launch {
-            _playlistSongs.value = flowRepo.getPlaylistSongs(playlist.id)
+        loadPlaylistSongsJob = viewModelScope.launch {
+            val songsFlow = flowRepo.getPlaylistSongs(playlist.id)
+            songsFlow.collect { songs ->
+                _playlistSongs.value = songs
+            }
         }
     }
 
@@ -650,6 +659,18 @@ class FlowViewModel(
             delay(1000)
 
             _savePlaylistState.value = SavePlaylistState.Idle
+        }
+    }
+
+    fun addSongToPlaylist(
+        playlistId: Int,
+        songId: Int,
+    ) {
+        viewModelScope.launch {
+            flowRepo.addSongToPlaylist(
+                playlistId = playlistId,
+                songId = songId,
+            )
         }
     }
 

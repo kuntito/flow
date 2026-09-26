@@ -132,10 +132,7 @@ class CustomTextFieldState(
 @Composable
 fun rememberCustomTextFieldState(
     onQueryChange: (String) -> Unit,
-    // TODO, this shouldn't be hardcoded here,
-    //  it's a wildcard that shows songs from least to most recent
-    //  time of writing, the logic lives in the repo's search fn.
-    initText: String = "*",
+    initText: String,
 ): CustomTextFieldState {
     val keyboard = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()

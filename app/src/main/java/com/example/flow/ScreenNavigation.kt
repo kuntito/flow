@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.flow.data.models.PlaylistItem
+import com.example.flow.ui.screens.edit_playlist_screen.EditPlaylistScreenRoot
 import com.example.flow.ui.screens.home_screen.HomeScreenRoot
 import com.example.flow.ui.screens.playlist_screen.PlaylistScreenRoot
 import com.example.flow.ui.screens.song_search_screen.SongSearchScreenRoot
@@ -75,6 +76,26 @@ fun ScreenNavigation(
                 },
                 playlistId = args.playlistId,
                 playlistName = args.playlistName,
+                goToEditPlaylist = { playlist ->
+                    navController.navigate(
+                        AppScreens.EditPlaylistScreen(
+                            playlistId = playlist.id,
+                            playlistName = playlist.name,
+                        )
+                    )
+                }
+            )
+        }
+        composable<AppScreens.EditPlaylistScreen> { backStackEntry ->
+            val args = backStackEntry.toRoute<AppScreens.EditPlaylistScreen>()
+
+            EditPlaylistScreenRoot(
+                flowViewModel = flowViewModel,
+                navBack = {
+                    navController.popBackStack()
+                },
+                playlistId = args.playlistId,
+                playlistName = args.playlistName,
             )
         }
     }
@@ -92,6 +113,12 @@ sealed class AppScreens {
 
     @Serializable
     data class ViewPlaylistScreen(
+        val playlistId: Int,
+        val playlistName: String,
+    )
+
+    @Serializable
+    data class EditPlaylistScreen(
         val playlistId: Int,
         val playlistName: String,
     )

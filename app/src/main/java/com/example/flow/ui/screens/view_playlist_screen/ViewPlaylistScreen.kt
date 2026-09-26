@@ -38,6 +38,7 @@ fun ViewPlaylistScreenRoot(
     navBack: () -> Unit,
     playlistId: Int,
     playlistName: String,
+    goToEditPlaylist: (PlaylistItem) -> Unit,
 ) {
     val playlistSongs by flowViewModel.viewingPlaylistSongs.collectAsState()
     val playlistItem = PlaylistItem(
@@ -59,6 +60,10 @@ fun ViewPlaylistScreenRoot(
         flowViewModel.onPlayPlaylist(playlistItem)
     }
 
+    val goToEditPlaylist = {
+        goToEditPlaylist(playlistItem)
+    }
+
     ViewPlaylistScreen(
         navBack = navBack,
         playlist = playlistItem,
@@ -68,6 +73,7 @@ fun ViewPlaylistScreenRoot(
         playSongLater = playSongLater,
         appEventsFlow = appEventsFlow,
         onPlayPlaylist = onPlayPlaylist,
+        goToEditPlaylist = goToEditPlaylist,
     )
 }
 
@@ -82,6 +88,7 @@ fun ViewPlaylistScreen(
     playSongLater: (Song) -> Unit,
     appEventsFlow: Flow<AppEvent>,
     onPlayPlaylist: () -> Unit,
+    goToEditPlaylist: () -> Unit,
 ) {
     val snackBarHostState = remember {
         SnackbarHostState()
@@ -133,6 +140,7 @@ fun ViewPlaylistScreen(
             navBack = navBack,
             playlistName = playlist.name,
             onPlay = onPlayPlaylist,
+            onEdit = goToEditPlaylist,
         )
         Box(
             contentAlignment = Alignment.TopCenter, // for snack bar

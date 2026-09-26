@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.R
+import com.example.flow.ui.components.general.AppSongSearchBar
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.PreviewColumn
 
@@ -37,7 +38,7 @@ fun SearchScreenTopAppBar(
             onClick = onBackButtonClick,
         )
         Spacer(modifier = Modifier.width(10.dp))
-        SearchScreenSearchBar(
+        AppSongSearchBar(
             onSongSearch = onSongSearch,
             modifier = Modifier
                 .weight(1f)

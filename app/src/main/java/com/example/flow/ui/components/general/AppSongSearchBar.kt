@@ -1,4 +1,4 @@
-package com.example.flow.ui.screens.song_search_screen.components
+package com.example.flow.ui.components.general
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -14,12 +14,16 @@ import com.example.flow.ui.theme.colorIsco
 import com.example.flow.ui.theme.colorTelli
 
 @Composable
-fun SearchScreenSearchBar(
+fun AppSongSearchBar(
     modifier: Modifier = Modifier,
     onSongSearch: (String) -> Unit,
+    initText: String = "",
 ) {
     val onQueryChange: (String) -> Unit = onSongSearch
-    val searchFieldState = rememberCustomTextFieldState(onQueryChange = onQueryChange)
+    val searchFieldState = rememberCustomTextFieldState(
+        onQueryChange = onQueryChange,
+        initText = initText,
+    )
 
     LaunchedEffect(Unit) {
         searchFieldState.focusRequester.requestFocus()
@@ -39,9 +43,9 @@ fun SearchScreenSearchBar(
 
 @Preview
 @Composable
-private fun SearchScreenSearchBarPreview() {
+private fun AppSongSearchBarPreview() {
     PreviewColumn {
-        SearchScreenSearchBar(
+        AppSongSearchBar(
             onSongSearch = {},
         )
     }

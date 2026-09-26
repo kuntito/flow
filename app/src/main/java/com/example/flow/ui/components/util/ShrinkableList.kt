@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,6 +36,7 @@ fun <T> ShrinkableList(
     modifier: Modifier = Modifier,
     items: List<T>,
     getKey: (T) -> Any,
+    contentPadding: Int = 16,
     animationDurationMillis: Int = 300,
     itemContent: @Composable (
         item: T,
@@ -48,10 +50,10 @@ fun <T> ShrinkableList(
     }
 
     LazyColumn(
-        contentPadding = PaddingValues(vertical = 16.dp),
+        contentPadding = PaddingValues(vertical = contentPadding.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
         ,
     ) {
         items(

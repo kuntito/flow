@@ -7,6 +7,7 @@ import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.playlist.PlaylistDao
+import com.example.flow.data.local_db.entities.playlist.PlaylistSongEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
@@ -23,6 +24,8 @@ import com.example.flow.data.remote.response_models.toMood
 import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -287,11 +290,29 @@ class FlowRepository(
 
     suspend fun getPlaylistSongs(
         playlistId: Int
-    ): List<Song> {
-        val songIds = playlistDao.getPlaylistSongIds(playlistId)
-        return songSearchCacheDao.getSongsByIds(songIds)
-            .mapNotNull {
+    ): Flow<List<Song>> {
+        val songIdsFlow = playlistDao.getPlaylistSongIds(playlistId)
+
+        val songsFlow = songIdsFlow.map { songIds ->
+            val cachedSongs = songSearchCacheDao.getSongsByIds(songIds)
+
+            cachedSongs.mapNotNull {
                 it.toSong()
             }
+        }
+
+        return songsFlow
+    }
+
+    suspend fun addSongToPlaylist(
+        playlistId: Int,
+        songId: Int,
+    ) {
+        val playlistSong = PlaylistSongEntity(
+            playlistId = playlistId,
+            songId = songId,
+        )
+
+        playlistDao.addSong(playlistSong)
     }
 }

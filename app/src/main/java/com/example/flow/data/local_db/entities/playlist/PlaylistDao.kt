@@ -2,8 +2,10 @@ package com.example.flow.data.local_db.entities.playlist
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlaylistDao {
@@ -33,5 +35,8 @@ interface PlaylistDao {
     suspend fun getAllPlaylists(): List<PlaylistEntity>
 
     @Query("SELECT songId FROM playlist_song WHERE playlistId = :playlistId")
-    suspend fun getPlaylistSongIds(playlistId: Int): List<Int>
+    fun getPlaylistSongIds(playlistId: Int): Flow<List<Int>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun addSong(song: PlaylistSongEntity)
 }

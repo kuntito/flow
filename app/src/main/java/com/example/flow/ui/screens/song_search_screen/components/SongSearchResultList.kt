@@ -17,7 +17,8 @@ fun SongSearchResultList(
     ShrinkableList(
         items = songSearchItems,
         getKey = { it.id },
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+        ,
     ) { song, removeFromList ->
         SongLi(
             song = song,
