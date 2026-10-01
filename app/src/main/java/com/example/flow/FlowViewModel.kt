@@ -311,7 +311,7 @@ class FlowViewModel(
      * after `playlistDuration`, it deactivates on its own,
      * and playback falls back to the default flow.
      */
-    private fun activatePlaylist(
+    fun activatePlaylist(
         playlist: PlaylistItem,
     ) {
         _activePlaylist.value = playlist

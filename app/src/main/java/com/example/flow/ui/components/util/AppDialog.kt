@@ -16,6 +16,7 @@ import com.example.flow.ui.theme.colorAguero
 
 @Composable
 fun AppDialog(
+    modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
     content: @Composable (ColumnScope.() -> Unit),
 ) {
@@ -26,7 +27,7 @@ fun AppDialog(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
+            modifier = modifier
                 .clip(shape = shape)
                 .background(color = colorAguero)
                 .padding(16.dp)

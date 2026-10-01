@@ -33,6 +33,7 @@ fun FlowTopAppBar(
     goToPlaylistScreen: () -> Unit,
     activePlaylist: PlaylistItem?,
     deactivatePlaylist: () -> Unit,
+    onPeekPlaylists: () -> Unit,
 ) {
     val iconSize = 24
     val iconGap = 24
@@ -54,6 +55,11 @@ fun FlowTopAppBar(
             modifier = Modifier
                 .weight(1f),
         ) {
+            AppIconButton(
+                iconRes = R.drawable.ic_list,
+                size = iconSize,
+                onClick = goToPlaylistScreen,
+            )
             AppIconButton(
                 iconRes = if (isOfflinePlay)
                     R.drawable.ic_bulb_off
@@ -125,9 +131,9 @@ fun FlowTopAppBar(
             ,
         ) {
             AppIconButton(
-                iconRes = R.drawable.ic_list,
+                iconRes = R.drawable.ic_helm,
                 size = iconSize,
-                onClick = goToPlaylistScreen,
+                onClick = onPeekPlaylists,
             )
             AppIconButton(
                 iconRes = R.drawable.ic_search,

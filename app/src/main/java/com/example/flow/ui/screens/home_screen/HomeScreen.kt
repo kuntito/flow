@@ -33,6 +33,7 @@ import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
 import com.example.flow.player.PnqItem
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
+import com.example.flow.ui.screens.home_screen.components.peek_playlists.DialogPeekPlaylists
 import com.example.flow.ui.screens.home_screen.models.PlaybackRepeatMode
 import com.example.flow.ui.screens.home_screen.components.sleep_timer.SleepTimerDialog
 import com.example.flow.ui.screens.home_screen.models.SavePlaylistState
@@ -76,6 +77,9 @@ fun HomeScreenRoot(
     val activePlaylist by flowViewModel.activePlaylist.collectAsState()
     val deactivatePlaylist: () -> Unit = flowViewModel::deactivatePlaylist
 
+    val playlistItems by flowViewModel.playlists.collectAsState()
+    val activatePlaylist = flowViewModel::activatePlaylist
+
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
         flowPlaybackState = flowPlaybackState,
@@ -101,6 +105,8 @@ fun HomeScreenRoot(
         toggleOfflinePlay = toggleOfflinePlay,
         activePlaylist = activePlaylist,
         deactivatePlaylist = deactivatePlaylist,
+        playlists = playlistItems,
+        activatePlaylist = activatePlaylist,
     )
 }
 
@@ -131,7 +137,23 @@ fun HomeScreen(
     toggleOfflinePlay: () -> Unit,
     activePlaylist: PlaylistItem?,
     deactivatePlaylist: () -> Unit,
+    playlists: List<PlaylistItem>,
+    activatePlaylist: (PlaylistItem) -> Unit,
 ) {
+    var homeScreenModal by remember {
+        mutableStateOf<HomeScreenModal?>(null)
+    }
+
+    val dismissModal: () -> Unit = {
+        homeScreenModal = null
+    }
+
+    val onPeekPlaylists = {
+        homeScreenModal = HomeScreenModal.PeekPlaylists(
+            playlists = playlists,
+        )
+    }
+
     val snackbarHostState = remember {
         SnackbarHostState()
     }
@@ -145,6 +167,7 @@ fun HomeScreen(
             )
         }
     }
+
 
 
     var isSleepTimerDialogOpen by remember { mutableStateOf(false) }
@@ -173,6 +196,7 @@ fun HomeScreen(
                 toggleOfflinePlay = toggleOfflinePlay,
                 activePlaylist = activePlaylist,
                 deactivatePlaylist = deactivatePlaylist,
+                onPeekPlaylists = onPeekPlaylists,
             )
         },
         modifier = modifier
@@ -236,6 +260,27 @@ fun HomeScreen(
                     )
                 }
             )
+            homeScreenModal?.let { modal ->
+                when(modal) {
+                    is HomeScreenModal.PeekPlaylists -> {
+                        DialogPeekPlaylists(
+                            onDismiss = dismissModal,
+                            playlists = modal.playlists,
+                            activatePlaylist = { playlist ->
+                                dismissModal()
+                                activatePlaylist(playlist)
+                            },
+                        )
+                    }
+                }
+            }
         }
     }
+}
+
+// TODO put other modals here.
+sealed interface HomeScreenModal {
+    data class PeekPlaylists(
+        val playlists: List<PlaylistItem>
+    ): HomeScreenModal
 }
