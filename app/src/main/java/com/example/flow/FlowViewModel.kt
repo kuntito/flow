@@ -299,7 +299,9 @@ class FlowViewModel(
     }
 
     // TODO should probably put in a config.
-    private val playlistDuration = 45.minutes
+
+    // TODO, it might be bad UX if you played the same 5 songs on repeat.
+    private val playlistDuration = 60.minutes
     private var playlistExpiryJob: Job? = null
 
     /**
