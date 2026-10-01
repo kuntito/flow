@@ -60,13 +60,14 @@ fun FlowTopAppBar(
                 size = iconSize,
                 onClick = goToPlaylistScreen,
             )
-            AppIconButton(
-                iconRes = if (isOfflinePlay)
-                    R.drawable.ic_bulb_off
-                    else R.drawable.ic_bulb_on,
-                size = iconSize,
-                onClick = toggleOfflinePlay,
-            )
+            // TODO reason offline play deprecation
+//            AppIconButton(
+//                iconRes = if (isOfflinePlay)
+//                    R.drawable.ic_bulb_off
+//                    else R.drawable.ic_bulb_on,
+//                size = iconSize,
+//                onClick = toggleOfflinePlay,
+//            )
             if (isSleepTimerActive) {
                 Icon(
                     painter = painterResource(R.drawable.ic_hourglass),
