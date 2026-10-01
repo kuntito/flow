@@ -38,7 +38,6 @@ fun LiPlaylistDisplay(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxWidth()
         ) {
 
             Icon(

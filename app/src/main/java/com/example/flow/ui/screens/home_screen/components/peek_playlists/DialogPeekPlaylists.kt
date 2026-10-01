@@ -2,6 +2,7 @@ package com.example.flow.ui.screens.home_screen.components.peek_playlists
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,6 +48,9 @@ fun DialogPeekPlaylists(
         Spacer(Modifier.height(2.dp))
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(
+                bottom = 32.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize(),
