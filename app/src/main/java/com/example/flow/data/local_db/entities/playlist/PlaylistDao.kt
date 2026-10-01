@@ -56,4 +56,16 @@ interface PlaylistDao {
     """
     )
     suspend fun getRandomPlaylistSongId(playlistId: Int): Int?
+
+    @Query(
+        """
+    SELECT ps.songId FROM playlist_song AS ps
+    INNER JOIN song_search_cache AS cache
+    ON cache.songId = ps.songId
+    WHERE ps.playlistId = :playlistId
+    ORDER BY cache.recency ASC
+    LIMIT 1
+    """
+    )
+    suspend fun getLeastRecentPlaylistSongId(playlistId: Int): Int?
 }

@@ -329,7 +329,7 @@ class FlowRepository(
         playlistId: Int,
     ): Song? {
         val songId = playlistDao
-            .getRandomPlaylistSongId(playlistId)
+            .getLeastRecentPlaylistSongId(playlistId)
             ?: return null
 
         val song = fetchSongById(songId)
