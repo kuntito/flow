@@ -336,15 +336,18 @@ class FlowViewModel(
      * from the playlist until it's cleared.
      */
     fun onPlayPlaylist(playlist: PlaylistItem) {
+        val isAlreadyActive = activePlaylist.value?.id == playlist.id
+        if (isAlreadyActive) return
+
         playPlaylistJob?.cancel()
         playPlaylistJob = viewModelScope.launch {
+            activatePlaylist(playlist)
+
             val firstSong = flowRepo.getSongFromPlaylist(
                 playlistId = playlist.id,
             )
 
             if (firstSong == null) return@launch
-
-            activatePlaylist(playlist)
 
             handleNextSongPlay(firstSong.id)
         }
