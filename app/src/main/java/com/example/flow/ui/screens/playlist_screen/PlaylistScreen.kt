@@ -37,6 +37,10 @@ fun PlaylistScreenRoot(
     val appEventsFlow = flowViewModel.appEventsFlow
 
     val deletePlaylist = flowViewModel::deletePlaylist
+    val onPlayPlaylist = flowViewModel::onPlayPlaylist
+
+    val activePlaylist by flowViewModel.activePlaylist.collectAsState()
+    val deactivatePlaylist: () -> Unit = flowViewModel::deactivatePlaylist
 
     PlaylistScreen(
         navBack = navBack,
@@ -44,6 +48,9 @@ fun PlaylistScreenRoot(
         appEventsFlow = appEventsFlow,
         viewPlaylist = goToViewPlaylist,
         deletePlaylist = deletePlaylist,
+        onPlayPlaylist = onPlayPlaylist,
+        activePlaylist = activePlaylist,
+        deactivatePlaylist = deactivatePlaylist,
     )
 }
 
@@ -55,6 +62,9 @@ fun PlaylistScreen(
     appEventsFlow: Flow<AppEvent>,
     viewPlaylist: (PlaylistItem) -> Unit,
     deletePlaylist: (PlaylistItem) -> Unit,
+    onPlayPlaylist: (PlaylistItem) -> Unit,
+    activePlaylist: PlaylistItem?,
+    deactivatePlaylist: () -> Unit,
 ) {
     BackHandler(enabled = true) {
         navBack()
@@ -104,6 +114,9 @@ fun PlaylistScreen(
                     items = playlistItems,
                     viewPlaylist = viewPlaylist,
                     triggerDeletePlaylist = triggerDeletePlaylist,
+                    playPlaylist = onPlayPlaylist,
+                    activePlaylist = activePlaylist,
+                    deactivatePlaylist = deactivatePlaylist,
                 )
             }
         }

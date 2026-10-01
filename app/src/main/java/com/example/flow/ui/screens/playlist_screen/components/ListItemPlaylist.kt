@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.playlist_screen.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import com.example.flow.data.models.DropdownMenuOption
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.ui.components.general.AppDropdownMenuItem
 import com.example.flow.ui.components.general.AppIconButton
+import com.example.flow.ui.components.util.AppSoundBars
 import com.example.flow.ui.components.util.ClickableSurface
 import com.example.flow.ui.theme.colorAguero
 import com.example.flow.ui.theme.colorTelli
@@ -40,6 +42,9 @@ fun ListItemPlaylist(
     item: PlaylistItem,
     onSelect: () -> Unit,
     onDeletePlaylist: () -> Unit,
+    onPlay: () -> Unit,
+    isActive: Boolean,
+    deactivate: () -> Unit,
 ) {
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
@@ -66,6 +71,7 @@ fun ListItemPlaylist(
 
     ClickableSurface(
         onClick = onSelect,
+        onDoubleClick = onPlay,
         isRippleBounded = true,
         modifier = modifier
         ,
@@ -81,15 +87,27 @@ fun ListItemPlaylist(
                 .height(48.dp)
                 .fillMaxWidth()
         ) {
-            Icon(
-                painter = painterResource(
-                    R.drawable.ic_twirl,
-                ),
-                contentDescription = null,
-                tint = colorTelli,
-                modifier = Modifier
-                    .size(24.dp)
-            )
+            if (isActive) {
+                AppSoundBars(
+                    barColor = colorTelli,
+                    modifier = Modifier
+                        .clickable(
+                            onClick = deactivate,
+                        )
+                        .size(24.dp)
+                    ,
+                )
+            } else {
+                Icon(
+                    painter = painterResource(
+                        R.drawable.ic_twirl,
+                    ),
+                    contentDescription = null,
+                    tint = colorTelli,
+                    modifier = Modifier
+                        .size(24.dp)
+                )
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier

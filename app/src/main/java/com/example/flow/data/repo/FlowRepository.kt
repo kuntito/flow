@@ -313,4 +313,16 @@ class FlowRepository(
     suspend fun deletePlaylist(playlistId: Int) {
         playlistDao.deletePlaylist(playlistId)
     }
+
+    suspend fun getSongFromPlaylist(
+        playlistId: Int,
+    ): Song? {
+        val songId = playlistDao
+            .getRandomPlaylistSongId(playlistId)
+            ?: return null
+
+        val song = fetchSongById(songId)
+
+        return song
+    }
 }

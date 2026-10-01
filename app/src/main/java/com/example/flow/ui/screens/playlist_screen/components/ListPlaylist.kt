@@ -7,11 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flow.data.models.PlaylistItem
-import com.example.flow.data.models.genSamplePlaylistItems
-import com.example.flow.ui.components.util.PreviewColumn
 
 @Composable
 fun ListPlaylist(
@@ -19,6 +16,9 @@ fun ListPlaylist(
     items: List<PlaylistItem>,
     viewPlaylist: (PlaylistItem) -> Unit,
     triggerDeletePlaylist: (PlaylistItem) -> Unit,
+    playPlaylist: (PlaylistItem) -> Unit,
+    activePlaylist: PlaylistItem?,
+    deactivatePlaylist: () -> Unit,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -40,7 +40,12 @@ fun ListPlaylist(
                },
                onDeletePlaylist = {
                    triggerDeletePlaylist(playlist)
-               }
+               },
+               onPlay = {
+                   playPlaylist(playlist)
+               },
+               isActive = activePlaylist == playlist,
+               deactivate = deactivatePlaylist,
            )
         }
     }

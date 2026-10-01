@@ -29,6 +29,7 @@ import com.example.flow.ui.screens.home_screen.models.FlowPlaybackState
 import kotlinx.coroutines.launch
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
+import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
 import com.example.flow.player.PnqItem
 import com.example.flow.ui.screens.home_screen.components.SongPlayingWithPlayNextSheet
@@ -72,6 +73,8 @@ fun HomeScreenRoot(
     val isOfflinePlay by flowViewModel.isOfflinePlay.collectAsState()
     val toggleOfflinePlay = flowViewModel::toggleOfflinePlay
 
+    val activePlaylist by flowViewModel.activePlaylist.collectAsState()
+    val deactivatePlaylist: () -> Unit = flowViewModel::deactivatePlaylist
 
     HomeScreen(
         startPlaybackFlow = flowViewModel::onStartPlaybackFlow,
@@ -96,6 +99,8 @@ fun HomeScreenRoot(
         onCancelSleepTimer = onCancelSleepTimer,
         isOfflinePlay = isOfflinePlay,
         toggleOfflinePlay = toggleOfflinePlay,
+        activePlaylist = activePlaylist,
+        deactivatePlaylist = deactivatePlaylist,
     )
 }
 
@@ -124,6 +129,8 @@ fun HomeScreen(
     onCancelSleepTimer: () -> Unit,
     isOfflinePlay: Boolean,
     toggleOfflinePlay: () -> Unit,
+    activePlaylist: PlaylistItem?,
+    deactivatePlaylist: () -> Unit,
 ) {
     val snackbarHostState = remember {
         SnackbarHostState()
@@ -164,6 +171,8 @@ fun HomeScreen(
                 goToPlaylistScreen = goToPlaylistScreen,
                 isOfflinePlay = isOfflinePlay,
                 toggleOfflinePlay = toggleOfflinePlay,
+                activePlaylist = activePlaylist,
+                deactivatePlaylist = deactivatePlaylist,
             )
         },
         modifier = modifier

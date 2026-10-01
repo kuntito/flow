@@ -1,6 +1,7 @@
 package com.example.flow.helper_classes
 
 import android.util.Log
+import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
 import com.example.flow.flowDebugTag
 import com.example.flow.player.PlaybackCacheItem
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 enum class NextSongSource {
     PNQ,
     API_DEFAULT,
-    USER_CHOICE
+    USER_CHOICE,
+    PLAYLIST,
 }
 
 data class NextSongItem(
@@ -23,21 +25,27 @@ data class NextSongItem(
 
 /**
  * holds the next song for playback.
- * it prefetches the song for cache.
  *
- * observes the play-next-queue.
+ * the next song is typically fetched from the API or the local cache.
  *
- * when it changes,
- * it updates what it holds as the next song.
+ * however, the user can pick a specific song, queue up songs,
+ * or play from a playlist. in which case, this class decides
+ * which one plays next.
  *
- * play next queue takes precedence over default flow.
+ * a song the user picks plays right away, skipping everything else.
+ * after that, the play-next-queue comes first,
+ * then the active playlist, then whatever the API returns.
  *
- * default flow is whatever the API is designed to return
- * on getNextSong.
+ * it doesn't wait until a song is needed. while the current one plays,
+ * it fetches the next and hands it to the cache,
+ * so the switch is instant when the time comes.
  *
- * once the next song is consumed,
- * via the `getNextSong` call,
- * it automatically prepares the next one.
+ * it watches the play-next-queue and the active playlist.
+ * if either changes before the prepared song gets played,
+ * it drops that song and prepares a new one from the updated sources.
+ *
+ * once the prepared song is taken via `getNextSong`,
+ * it starts preparing the one after.
  */
 class NextSongManager(
     val pnqTop: StateFlow<Song?>,
@@ -48,15 +56,26 @@ class NextSongManager(
     val fetchNextSong: suspend(
         isOffline: Boolean
     ) -> Song?,
+    val activePlaylist: StateFlow<PlaylistItem?>,
+    val fetchFromPlaylist: suspend (
+        playlist: PlaylistItem,
+    ) -> Song?,
     private val coroutineScope: CoroutineScope,
 ) {
     private var nextSongItem: NextSongItem? = null
 
     init {
         coroutineScope.launch {
-            pnqTop.collect { pnqTop ->
+            val nextSongSourcesFlow = combine(
+                pnqTop,
+                activePlaylist,
+                ::Pair,
+            )
+
+            nextSongSourcesFlow.collect { (pnqTop, activePlaylist) ->
                 runPrepareNextSongJob(
                     pnqTop = pnqTop,
+                    activePlaylist = activePlaylist,
                 )
             }
         }
@@ -64,18 +83,21 @@ class NextSongManager(
 
     private var prepareNextSongJob: Job? = null
     private fun runPrepareNextSongJob(
-        pnqTop: Song?
+        pnqTop: Song?,
+        activePlaylist: PlaylistItem?,
     ) {
         prepareNextSongJob?.cancel()
         prepareNextSongJob = coroutineScope.launch {
             prepareNextSong(
                 pnqTop = pnqTop,
+                activePlaylist = activePlaylist,
             )
         }
     }
 
     private suspend fun prepareNextSong(
-        pnqTop: Song?
+        pnqTop: Song?,
+        activePlaylist: PlaylistItem?,
     ) {
         // trapping the current state
         val nextSongSnapshot = nextSongItem
@@ -90,6 +112,14 @@ class NextSongManager(
                     }
                 } else {
                     nextSongSnapshot
+                }
+            }
+            activePlaylist != null -> {
+                fetchFromPlaylist(activePlaylist)?.let {
+                    NextSongItem(
+                        song = it,
+                        source = NextSongSource.PLAYLIST,
+                    )
                 }
             }
             else -> {
@@ -165,6 +195,7 @@ class NextSongManager(
         if (nextSongItem == null && prepareNextSongJob?.isActive != true) {
             runPrepareNextSongJob(
                 pnqTop = pnqTop.value,
+                activePlaylist = activePlaylist.value,
             )
         }
 

@@ -46,4 +46,14 @@ interface PlaylistDao {
 
     @Query("DELETE FROM playlist WHERE playlistId = :playlistId")
     suspend fun deletePlaylist(playlistId: Int)
+
+    @Query(
+        """
+    SELECT songId FROM playlist_song
+    WHERE playlistId = :playlistId
+    ORDER BY RANDOM()
+    LIMIT 1
+    """
+    )
+    suspend fun getRandomPlaylistSongId(playlistId: Int): Int?
 }

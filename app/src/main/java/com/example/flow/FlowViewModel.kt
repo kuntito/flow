@@ -35,17 +35,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.Int
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
+// TODO start here, track recency locally.
+// sync with api.
+//  do a `max(api_recency, local_recency)`
 @UnstableApi
 class FlowViewModel(
     private val appContext: Application,
@@ -53,6 +54,9 @@ class FlowViewModel(
 ): AndroidViewModel(appContext) {
     private val eventChannel = Channel<AppEvent>()
     val appEventsFlow = eventChannel.receiveAsFlow()
+
+    private val _activePlaylist = MutableStateFlow<PlaylistItem?>(null)
+    val activePlaylist: StateFlow<PlaylistItem?> = _activePlaylist.asStateFlow()
 
     private val _previousSong = MutableStateFlow<Song?>(null)
 
@@ -262,6 +266,12 @@ class FlowViewModel(
         fetchNextSong = flowRepo::fetchNextSong,
         coroutineScope = viewModelScope,
         isOfflinePlay = isOfflinePlay,
+        activePlaylist = activePlaylist,
+        fetchFromPlaylist = { playlist ->
+            flowRepo.getSongFromPlaylist(
+                playlistId = playlist.id,
+            )
+        }
     )
 
     /*
@@ -287,27 +297,55 @@ class FlowViewModel(
         songPlayer.continuePlayback()
     }
 
+    // TODO should probably put in a config.
+    private val playlistDuration = 45.minutes
+    private var playlistExpiryJob: Job? = null
+
+    /**
+     * makes the playlist the source for upcoming songs.
+     *
+     * it doesn't play anything itself,
+     * it just tells the next song manager where to pull from.
+     *
+     * after `playlistDuration`, it deactivates on its own,
+     * and playback falls back to the default flow.
+     */
+    private fun activatePlaylist(
+        playlist: PlaylistItem,
+    ) {
+        _activePlaylist.value = playlist
+
+        playlistExpiryJob?.cancel()
+        playlistExpiryJob = viewModelScope.launch {
+            delay(playlistDuration)
+            _activePlaylist.value = null
+        }
+    }
+
+    fun deactivatePlaylist() {
+        _activePlaylist.value = null
+        playlistExpiryJob?.cancel()
+    }
 
     private var playPlaylistJob: Job? = null
     /**
-     * plays the first song
-     * then adds the rest to the front of the play next queue.
+     * makes the playlist active, then plays a song from it.
+     *
+     * from there, the next song manager keeps pulling
+     * from the playlist until it's cleared.
      */
     fun onPlayPlaylist(playlist: PlaylistItem) {
         playPlaylistJob?.cancel()
         playPlaylistJob = viewModelScope.launch {
-            val songsFlow = flowRepo.getPlaylistSongs(playlist.id)
-            val songs = songsFlow.first()
-
-            if (songs.isEmpty()) return@launch
-
-            val shuffledSongs = songs.shuffled()
-
-            handleNextSongPlay(shuffledSongs.first().id)
-
-            pnqManager.playTheseNext(
-                shuffledSongs.drop(1)
+            val firstSong = flowRepo.getSongFromPlaylist(
+                playlistId = playlist.id,
             )
+
+            if (firstSong == null) return@launch
+
+            activatePlaylist(playlist)
+
+            handleNextSongPlay(firstSong.id)
         }
     }
 

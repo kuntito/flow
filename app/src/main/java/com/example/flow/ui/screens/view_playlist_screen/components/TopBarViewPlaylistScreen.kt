@@ -1,13 +1,12 @@
 package com.example.flow.ui.screens.view_playlist_screen.components
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,7 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.flow.R
 import com.example.flow.ui.components.general.AppIconButton
-import com.example.flow.ui.theme.colorRaze
+import com.example.flow.ui.components.util.AppSoundBars
+import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsOrion
 
 @Composable
@@ -26,6 +26,8 @@ fun TopBarViewPlaylistScreen(
     playlistName: String,
     onPlay: () -> Unit,
     onEdit: () -> Unit,
+    isActive: Boolean,
+    onDeactivate: () -> Unit,
 ) {
     val iconSize = 24
     Row(
@@ -74,11 +76,23 @@ fun TopBarViewPlaylistScreen(
                 .weight(1f)
             ,
         ) {
-            AppIconButton(
-                iconRes = R.drawable.ic_play,
-                onClick = onPlay,
-                size = 16,
-            )
+            if (isActive) {
+                AppSoundBars(
+                    barColor = colorTelli,
+                    modifier = Modifier
+                        .clickable(
+                            onClick = onDeactivate,
+                        )
+                        .size(16.dp)
+                    ,
+                )
+            } else {
+                AppIconButton(
+                    iconRes = R.drawable.ic_play,
+                    onClick = onPlay,
+                    size = 16,
+                )
+            }
             AppIconButton(
                 iconRes = R.drawable.ic_settings,
                 onClick = onEdit,

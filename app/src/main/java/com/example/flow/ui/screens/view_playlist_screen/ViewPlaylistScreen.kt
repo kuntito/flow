@@ -26,9 +26,7 @@ import com.example.flow.ui.screens.playlist_screen.models.PlaylistEvent
 import com.example.flow.ui.screens.view_playlist_screen.components.ListPlaylistSongs
 import com.example.flow.ui.screens.view_playlist_screen.components.TopBarViewPlaylistScreen
 import com.example.flow.ui.theme.colorPower
-import com.example.flow.ui.theme.colorRaze
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
@@ -62,9 +60,13 @@ fun ViewPlaylistScreenRoot(
         flowViewModel.onPlayPlaylist(playlistItem)
     }
 
+    val deactivatePlaylist: () -> Unit = flowViewModel::deactivatePlaylist
+
     val goToEditPlaylist = {
         goToEditPlaylist(playlistItem)
     }
+
+    val activePlaylist by flowViewModel.activePlaylist.collectAsState()
 
     ViewPlaylistScreen(
         navBack = navBack,
@@ -77,6 +79,8 @@ fun ViewPlaylistScreenRoot(
         onPlayPlaylist = onPlayPlaylist,
         goToEditPlaylist = goToEditPlaylist,
         removeSongFromPlaylist = removeSongFromPlaylist,
+        activePlaylist = activePlaylist,
+        onDeactivatePlaylist = deactivatePlaylist,
     )
 }
 
@@ -93,6 +97,8 @@ fun ViewPlaylistScreen(
     onPlayPlaylist: () -> Unit,
     goToEditPlaylist: () -> Unit,
     removeSongFromPlaylist: (Song, PlaylistItem) -> Unit,
+    activePlaylist: PlaylistItem?,
+    onDeactivatePlaylist: () -> Unit,
 ) {
     val snackBarHostState = remember {
         SnackbarHostState()
@@ -145,6 +151,8 @@ fun ViewPlaylistScreen(
             playlistName = playlist.name,
             onPlay = onPlayPlaylist,
             onEdit = goToEditPlaylist,
+            isActive = playlist.id == activePlaylist?.id,
+            onDeactivate = onDeactivatePlaylist,
         )
         Box(
             contentAlignment = Alignment.TopCenter, // for snack bar
