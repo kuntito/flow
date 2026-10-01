@@ -53,6 +53,11 @@ class LruSongCache(
             }
         }
     }
+
+    // TODO getCachedPath updates recency on every lookup,
+    //  including prefetches from fetchSongById and enrichSongWithCache.
+    //  so a song that's prepped but never played still counts as accessed,
+    //  and survives eviction a bit longer.
     suspend fun getCachedPath(songId: Int): String? {
         val path = lruCacheDao.getBySongId(songId) ?: return null
         lruCacheDao.updateRecency(

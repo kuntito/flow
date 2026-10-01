@@ -19,6 +19,7 @@ import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.ListenCountItemApi
 import com.example.flow.data.remote.response_models.SongWithUrl
+import com.example.flow.data.remote.response_models.SyncRecencyItemApi
 import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
@@ -186,8 +187,18 @@ class FlowRepository(
     }
 
     suspend fun syncSongSearchCache() {
-        val response = flowDs.safeFetchCacheItemsSongSearch()
+        val localRecencies = songSearchCacheDao.getAllRecencies()
+
+        val recencyItems = localRecencies.map {
+            SyncRecencyItemApi(
+                songId = it.songId,
+                recency = it.recency,
+            )
+        }
+
+        val response = flowDs.safeSyncCacheItemsSongSearch(recencyItems)
         Log.d(flowDebugTag, "cache sync: ${response?.cacheItems?.firstOrNull()}")
+
         response?.cacheItems?.let { cacheItems ->
             val entities = cacheItems.map{
                 it.toSongSearchCacheEntity()
@@ -324,5 +335,9 @@ class FlowRepository(
         val song = fetchSongById(songId)
 
         return song
+    }
+
+    suspend fun updateRecency(songId: Int) {
+        songSearchCacheDao.updateRecency(songId)
     }
 }

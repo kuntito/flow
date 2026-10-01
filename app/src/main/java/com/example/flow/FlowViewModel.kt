@@ -271,7 +271,8 @@ class FlowViewModel(
             flowRepo.getSongFromPlaylist(
                 playlistId = playlist.id,
             )
-        }
+        },
+        updateRecency = flowRepo::updateRecency
     )
 
     /*

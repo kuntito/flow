@@ -60,6 +60,7 @@ class NextSongManager(
     val fetchFromPlaylist: suspend (
         playlist: PlaylistItem,
     ) -> Song?,
+    val updateRecency: suspend (songId: Int) -> Unit,
     private val coroutineScope: CoroutineScope,
 ) {
     private var nextSongItem: NextSongItem? = null
@@ -180,6 +181,11 @@ class NextSongManager(
             popPnqTop()
         }
 
+
+        nsi?.let {
+            updateRecency(it.song.id)
+        }
+
         // TODO at time of writing,
         //  for every song request, the repo checks locally for the song file.
         //  if file missing,
@@ -198,7 +204,6 @@ class NextSongManager(
                 activePlaylist = activePlaylist.value,
             )
         }
-
 
         Log.d(flowDebugTag, "getNextSong: ${nsi?.song?.title}, cachedFp: ${nsi?.song?.cachedFilePath}")
         return nsi?.song

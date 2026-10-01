@@ -41,4 +41,24 @@ interface SongSearchCacheDao {
 
     @Query("SELECT * FROM song_search_cache WHERE songId IN (:songIds)")
     suspend fun getSongsByIds(songIds: List<Int>): List<SongSearchCacheEntity>
+
+    @Query("SELECT songId, recency FROM song_search_cache WHERE recency IS NOT NULL")
+    suspend fun getAllRecencies(): List<SongRecency>
+
+    @Query("UPDATE song_search_cache SET recency = :recency WHERE songId = :songId")
+    suspend fun updateRecency(songId: Int, recency: Long)
+
+    suspend fun updateRecency(songId: Int) {
+        val now = System.currentTimeMillis()
+
+        updateRecency(
+            songId = songId,
+            recency = now,
+        )
+    }
 }
+
+data class SongRecency(
+    val songId: Int,
+    val recency: Long,
+)

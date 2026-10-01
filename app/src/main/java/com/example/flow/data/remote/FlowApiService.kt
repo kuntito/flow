@@ -7,8 +7,10 @@ import com.example.flow.data.remote.response_models.GetNextSongResponse
 import com.example.flow.data.remote.response_models.GetSongByIdResponse
 import com.example.flow.data.remote.response_models.ListenCountItemApi
 import com.example.flow.data.remote.response_models.SearchSongResponse
+import com.example.flow.data.remote.response_models.SyncCacheSongSearchBody
 import com.example.flow.data.remote.response_models.SyncListenCountsBody
 import com.example.flow.data.remote.response_models.SyncListenCountsResponse
+import com.example.flow.data.remote.response_models.SyncRecencyItemApi
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -34,6 +36,11 @@ interface FlowApiService {
 
     @GET("api/flow/cache-song-search")
     suspend fun getCacheItemsSongSearch(): GetCacheItemsSongSearchResponse
+
+    @POST("api/flow/cache-song-search/sync")
+    suspend fun syncCacheItemsSongSearch(
+        @Body body: SyncCacheSongSearchBody
+    ): GetCacheItemsSongSearchResponse
 
     @POST("api/flow/sync-listen-counts")
     suspend fun syncListenCounts(
@@ -90,6 +97,21 @@ class FlowApiDataSource(
             "fetches cache items for song search",
             fn = {
                 api.getCacheItemsSongSearch()
+            }
+        )
+    )
+
+    suspend fun safeSyncCacheItemsSongSearch(
+        items: List<SyncRecencyItemApi>
+    ) = safeApiCall(
+        ApiCallInfo(
+            "syncs recencies, then fetches cache items for song search",
+            fn = {
+                val body = SyncCacheSongSearchBody(
+                    recencyItems = items,
+                )
+
+                api.syncCacheItemsSongSearch(body)
             }
         )
     )
