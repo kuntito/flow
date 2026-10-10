@@ -7,12 +7,22 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "playlist",
-    indices = [Index(value = ["name"], unique = true)],
+    indices = [
+        Index(
+            value = ["name"],
+            unique = true,
+        ),
+        Index(
+            value = ["autoType"],
+            unique = true,
+        ),
+    ],
 )
 data class PlaylistEntity(
     @PrimaryKey(autoGenerate = true)
     val playlistId: Int = 0,
     val name: String,
+    val autoType: AutoPlaylistType? = null,
 )
 
 @Entity(
@@ -31,3 +41,11 @@ data class PlaylistSongEntity(
     val playlistId: Int,
     val songId: Int,
 )
+
+enum class AutoPlaylistType(
+    val nickname: String,
+) {
+    TOP_LISTENS(
+        nickname = "top listens",
+    ),
+}

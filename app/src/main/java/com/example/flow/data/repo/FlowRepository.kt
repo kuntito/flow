@@ -6,7 +6,9 @@ import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntit
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
+import com.example.flow.data.local_db.entities.playlist.AutoPlaylistType
 import com.example.flow.data.local_db.entities.playlist.PlaylistDao
+import com.example.flow.data.local_db.entities.playlist.PlaylistEntity
 import com.example.flow.data.local_db.entities.playlist.PlaylistSongEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
@@ -339,5 +341,48 @@ class FlowRepository(
 
     suspend fun updateRecency(songId: Int) {
         songSearchCacheDao.updateRecency(songId)
+    }
+
+    /**
+     * creates auto playlist if missing.
+     */
+    private suspend fun ensureAutoPlaylists() {
+        for (autoType in AutoPlaylistType.entries) {
+            val autoPlaylist = PlaylistEntity(
+                name = autoType.nickname,
+                autoType = autoType,
+            )
+
+            playlistDao.insertPlaylistIfMissing(autoPlaylist)
+        }
+    }
+
+    private suspend fun getAutoPlaylistSongIds(
+        autoType: AutoPlaylistType,
+    ): List<Int> {
+        val topListensSize = 100
+        return when (autoType) {
+            AutoPlaylistType.TOP_LISTENS -> {
+                songSearchCacheDao.getTopListenedSongIds(
+                    limit = topListensSize,
+                )
+            }
+        }
+    }
+    suspend fun refreshAutoPlaylists() {
+        ensureAutoPlaylists()
+
+        val autoPlaylists = playlistDao.getAutoPlaylists()
+
+        for (playlist in autoPlaylists) {
+            val autoType = playlist.autoType ?: continue
+
+            val songIds = getAutoPlaylistSongIds(autoType)
+
+            playlistDao.replacePlaylistSongs(
+                playlistId = playlist.playlistId,
+                songIds = songIds,
+            )
+        }
     }
 }

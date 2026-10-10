@@ -301,7 +301,7 @@ class FlowViewModel(
     // TODO should probably put in a config.
 
     // TODO, it might be bad UX if you played the same 5 songs on repeat.
-    private val playlistDuration = 60.minutes
+    private val playlistDuration = 180.minutes
     private var playlistExpiryJob: Job? = null
 
     /**
@@ -406,7 +406,10 @@ class FlowViewModel(
             flowRepo.syncListenCounts()
         }
 
-        loadPlaylists()
+        viewModelScope.launch {
+            flowRepo.refreshAutoPlaylists()
+            loadPlaylists()
+        }
 
         notificationBridge.start()
     }

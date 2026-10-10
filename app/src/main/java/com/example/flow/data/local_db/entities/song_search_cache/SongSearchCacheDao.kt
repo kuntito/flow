@@ -56,6 +56,16 @@ interface SongSearchCacheDao {
             recency = now,
         )
     }
+
+    @Query(
+        """
+    SELECT songId FROM song_search_cache
+    WHERE listenCount > 0
+    ORDER BY listenCount DESC
+    LIMIT :limit
+    """
+    )
+    suspend fun getTopListenedSongIds(limit: Int): List<Int>
 }
 
 data class SongRecency(

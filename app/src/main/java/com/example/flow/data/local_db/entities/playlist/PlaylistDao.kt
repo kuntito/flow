@@ -68,4 +68,30 @@ interface PlaylistDao {
     """
     )
     suspend fun getLeastRecentPlaylistSongId(playlistId: Int): Int?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertPlaylistIfMissing(playlist: PlaylistEntity): Long
+
+    @Query("SELECT * FROM playlist WHERE autoType IS NOT NULL")
+    suspend fun getAutoPlaylists(): List<PlaylistEntity>
+
+    @Query("DELETE FROM playlist_song WHERE playlistId = :playlistId")
+    suspend fun clearPlaylistSongs(playlistId: Int)
+
+    @Transaction
+    suspend fun replacePlaylistSongs(
+        playlistId: Int,
+        songIds: List<Int>,
+    ) {
+        clearPlaylistSongs(playlistId)
+
+        val playlistSongs = songIds.map { songId ->
+            PlaylistSongEntity(
+                playlistId = playlistId,
+                songId = songId,
+            )
+        }
+
+        insertPlaylistSongs(playlistSongs)
+    }
 }
