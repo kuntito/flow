@@ -360,11 +360,22 @@ class FlowRepository(
     private suspend fun getAutoPlaylistSongIds(
         autoType: AutoPlaylistType,
     ): List<Int> {
-        val topListensSize = 100
+        val poolSize = 100
         return when (autoType) {
             AutoPlaylistType.TOP_LISTENS -> {
+
                 songSearchCacheDao.getTopListenedSongIds(
-                    limit = topListensSize,
+                    limit = poolSize,
+                )
+            }
+            AutoPlaylistType.TOP_RECENTS -> {
+                val days = 7
+                val windowMillis = days * 24 * 60 * 60 * 1000L
+                val since = System.currentTimeMillis() - windowMillis
+
+                listenHistoryDao.getTopListenedSongIdsSince(
+                    since = since,
+                    limit = poolSize,
                 )
             }
         }

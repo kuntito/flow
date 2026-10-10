@@ -26,4 +26,18 @@ interface ListenHistoryDao {
         LIMIT 50
     """)
     suspend fun getHottestSongs(since: Long): List<HotSongResult>
+
+    @Query(
+        """
+    SELECT songId FROM listen_history
+    WHERE listenedAtMillis >= :since
+    GROUP BY songId
+    ORDER BY COUNT(*) DESC, MAX(listenedAtMillis) DESC
+    LIMIT :limit
+    """
+    )
+    suspend fun getTopListenedSongIdsSince(
+        since: Long,
+        limit: Int,
+    ): List<Int>
 }

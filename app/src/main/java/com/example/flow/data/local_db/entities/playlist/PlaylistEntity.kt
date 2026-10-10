@@ -48,4 +48,7 @@ enum class AutoPlaylistType(
     TOP_LISTENS(
         nickname = "top listens",
     ),
+    TOP_RECENTS(
+        nickname = "top recents",
+    )
 }
