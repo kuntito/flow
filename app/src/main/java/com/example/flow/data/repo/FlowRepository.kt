@@ -373,6 +373,7 @@ class FlowRepository(
         poolSize: Int,
     ): List<Int> {
         val regularPlaylists = playlistDao.getRegularPlaylists()
+        val minPlaylistSize = 100
 
         val pooledSongIds = mutableSetOf<Int>()
 
@@ -380,7 +381,7 @@ class FlowRepository(
             val songIdsFlow = playlistDao.getPlaylistSongIds(playlist.playlistId)
             val songIds = songIdsFlow.first()
 
-            val isBigEnough = songIds.size >= poolSize
+            val isBigEnough = songIds.size >= minPlaylistSize
             if (!isBigEnough) continue
 
             val sampledSongIds = songIds
@@ -400,7 +401,7 @@ class FlowRepository(
     private suspend fun getAutoPlaylistSongIds(
         autoType: AutoPlaylistType,
     ): List<Int> {
-        val poolSize = 100
+        val poolSize = 50
         return when (autoType) {
             AutoPlaylistType.TOP_LISTENS -> {
 
