@@ -42,6 +42,11 @@ data class PlaylistSongEntity(
     val songId: Int,
 )
 
+
+// TODO nicknames must be unique, playlist names are a unique column.
+//  a clash makes the insert in `ensureAutoPlaylists` silently skip,
+//  and that auto playlist never shows up.
+//  maybe a check at startup, or a unit test, that fails on duplicates.
 enum class AutoPlaylistType(
     val nickname: String,
 ) {
@@ -50,5 +55,11 @@ enum class AutoPlaylistType(
     ),
     TOP_RECENTS(
         nickname = "top recents",
-    )
+    ),
+    SOUGHT_OUT(
+        nickname = "seeks",
+    ),
+    COCKTAIL(
+        nickname = "cocktail",
+    ),
 }

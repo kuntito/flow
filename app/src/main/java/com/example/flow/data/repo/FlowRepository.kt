@@ -26,6 +26,7 @@ import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -67,30 +68,41 @@ class FlowRepository(
         )
     }
 
+    // TODO check if the query is trimmed upstream.
+    //  if not, trim once here and use it for both search and state,
+    //  so "* " works as a shortcut and the logged query stays clean.
     suspend fun searchSong(
         query: String
     ): List<Song>? {
-        val searchResults = if (query == "*") {
-            songSearchCacheDao.getAll().shuffled()
-        } else if (query == "÷") {
-            songSearchCacheDao.getAllByLeastRecent()
-        } else if (query == "%") {
-            songSearchCacheDao.getAll()
-                .sortedByDescending { it.listenCount }
-        } else if (query == "@") {
-            val days = 3
-            val since = System.currentTimeMillis() - (days * 24 * 60 * 60 * 1000L)
-            val hotSongIds = listenHistoryDao
-                .getHottestSongs(since)
-                .map { it.songId }
-            songSearchCacheDao.getSongsByIds(hotSongIds)
-        } else {
-            val normalizedQuery = normalizeForSongSearch(query)
-            if (normalizedQuery.isNotBlank()) {
-                songSearchCacheDao.search(normalizedQuery)
-                    .sortedByDescending { it.listenCount ?: 0 }
-            } else {
-                emptyList()
+        val shortcut = SearchShortcut.fromQuery(query)
+
+        val searchResults = when (shortcut) {
+            SearchShortcut.RANDOM -> {
+                songSearchCacheDao.getAll().shuffled()
+            }
+            SearchShortcut.LEAST_RECENT -> {
+                songSearchCacheDao.getAllByLeastRecent()
+            }
+            SearchShortcut.MOST_LISTENED -> {
+                songSearchCacheDao.getAll()
+                    .sortedByDescending { it.listenCount }
+            }
+            SearchShortcut.HOT -> {
+                val days = 3
+                val since = System.currentTimeMillis() - (days * 24 * 60 * 60 * 1000L)
+                val hotSongIds = listenHistoryDao
+                    .getHottestSongs(since)
+                    .map { it.songId }
+                songSearchCacheDao.getSongsByIds(hotSongIds)
+            }
+            null -> {
+                val normalizedQuery = normalizeForSongSearch(query)
+                if (normalizedQuery.isNotBlank()) {
+                    songSearchCacheDao.search(normalizedQuery)
+                        .sortedByDescending { it.listenCount ?: 0 }
+                } else {
+                    emptyList()
+                }
             }
         }
 
@@ -357,6 +369,34 @@ class FlowRepository(
         }
     }
 
+    private suspend fun getCocktailSongIds(
+        poolSize: Int,
+    ): List<Int> {
+        val regularPlaylists = playlistDao.getRegularPlaylists()
+
+        val pooledSongIds = mutableSetOf<Int>()
+
+        for (playlist in regularPlaylists) {
+            val songIdsFlow = playlistDao.getPlaylistSongIds(playlist.playlistId)
+            val songIds = songIdsFlow.first()
+
+            val isBigEnough = songIds.size >= poolSize
+            if (!isBigEnough) continue
+
+            val sampledSongIds = songIds
+                .shuffled()
+                .take(poolSize)
+
+            pooledSongIds.addAll(sampledSongIds)
+        }
+
+        val cocktailSongIds = pooledSongIds
+            .shuffled()
+            .take(poolSize)
+
+        return cocktailSongIds
+    }
+
     private suspend fun getAutoPlaylistSongIds(
         autoType: AutoPlaylistType,
     ): List<Int> {
@@ -378,6 +418,17 @@ class FlowRepository(
                     limit = poolSize,
                 )
             }
+            AutoPlaylistType.SOUGHT_OUT -> {
+                playFromSearchDao.getMostSoughtSongIds(
+                    excludedQueries = SearchShortcut.symbols,
+                    limit = poolSize,
+                )
+            }
+            AutoPlaylistType.COCKTAIL -> {
+                getCocktailSongIds(
+                    poolSize = poolSize,
+                )
+            }
         }
     }
     suspend fun refreshAutoPlaylists() {
@@ -394,6 +445,35 @@ class FlowRepository(
                 playlistId = playlist.playlistId,
                 songIds = songIds,
             )
+        }
+    }
+}
+
+enum class SearchShortcut(
+    val symbol: String,
+) {
+    RANDOM(
+        symbol = "*",
+    ),
+    LEAST_RECENT(
+        symbol = "÷",
+    ),
+    MOST_LISTENED(
+        symbol = "%",
+    ),
+    HOT(
+        symbol = "@",
+    );
+
+    companion object {
+        fun fromQuery(query: String): SearchShortcut? {
+            return entries.find {
+                it.symbol == query
+            }
+        }
+
+        val symbols = entries.map {
+            it.symbol
         }
     }
 }

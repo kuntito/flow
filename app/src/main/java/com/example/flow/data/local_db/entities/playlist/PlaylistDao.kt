@@ -75,6 +75,9 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlist WHERE autoType IS NOT NULL")
     suspend fun getAutoPlaylists(): List<PlaylistEntity>
 
+    @Query("SELECT * FROM playlist WHERE autoType IS NULL")
+    suspend fun getRegularPlaylists(): List<PlaylistEntity>
+
     @Query("DELETE FROM playlist_song WHERE playlistId = :playlistId")
     suspend fun clearPlaylistSongs(playlistId: Int)
 
