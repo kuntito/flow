@@ -26,10 +26,12 @@ fun EditPlaylistScreenRoot(
     navBack: () -> Unit,
     playlistId: Int,
     playlistName: String,
+    isPlaylistAuto: Boolean,
 ) {
     val playlistItem = PlaylistItem(
         id = playlistId,
         name = playlistName,
+        isAuto = isPlaylistAuto,
     )
 
     val playlistSongs by flowViewModel.viewingPlaylistSongs.collectAsState()
@@ -102,6 +104,7 @@ fun EditPlaylistScreen(
         TopBarEditPlaylist(
             navBack = navBack,
             playlistName = playlist.name,
+            isPlaylistAuto = playlist.isAuto,
         )
         SearchSongForPlaylist(
             songSearchState = songSearchState,

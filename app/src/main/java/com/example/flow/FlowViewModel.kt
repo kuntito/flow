@@ -44,9 +44,6 @@ import kotlin.Int
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
-// TODO start here, track recency locally.
-// sync with api.
-//  do a `max(api_recency, local_recency)`
 @UnstableApi
 class FlowViewModel(
     private val appContext: Application,
@@ -386,6 +383,10 @@ class FlowViewModel(
 
 
     init {
+        // TODO, start here, peaks only see this install's history.
+        //  listen history and search plays never leave the device.
+        //  listen counts sync, but only as totals, not when each listen happened.
+        //  so a reinstall or new phone resets every song's peaks.
         viewModelScope.launch {
             songPlayer.onPlaybackComplete.collect { lastPlayedSong ->
                 if (repeatSongManager.consumeRepeatIfActive()) {

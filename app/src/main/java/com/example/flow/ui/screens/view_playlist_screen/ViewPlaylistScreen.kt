@@ -37,11 +37,13 @@ fun ViewPlaylistScreenRoot(
     playlistId: Int,
     playlistName: String,
     goToEditPlaylist: (PlaylistItem) -> Unit,
+    isPlaylistAuto: Boolean,
 ) {
     val playlistSongs by flowViewModel.viewingPlaylistSongs.collectAsState()
     val playlistItem = PlaylistItem(
         id = playlistId,
         name = playlistName,
+        isAuto = isPlaylistAuto,
     )
 
     LaunchedEffect(playlistId) {
@@ -153,6 +155,7 @@ fun ViewPlaylistScreen(
             onEdit = goToEditPlaylist,
             isActive = playlist.id == activePlaylist?.id,
             onDeactivate = onDeactivatePlaylist,
+            isPlaylistAuto = playlist.isAuto,
         )
         Box(
             contentAlignment = Alignment.TopCenter, // for snack bar

@@ -28,6 +28,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.flow.R
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
+import com.example.flow.ui.components.util.AppPlaylistIcon
 import com.example.flow.ui.screens.song_search_screen.components.SongLi
 import com.example.flow.ui.theme.colorAguero
 import com.example.flow.ui.theme.colorTelli
@@ -73,10 +74,9 @@ fun DialogViewPlaylist(
                         .weight(1f)
                     ,
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_twirl),
-                        contentDescription = null,
-                        tint = colorTelli,
+                    AppPlaylistIcon(
+                        iconSize = 24,
+                        isAuto = playlistItem.isAuto,
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(

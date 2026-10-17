@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.flow.R
 import com.example.flow.data.models.PlaylistItem
+import com.example.flow.ui.components.util.AppPlaylistIcon
 import com.example.flow.ui.components.util.ClickableSurface
 import com.example.flow.ui.theme.colorRaze
 import com.example.flow.ui.theme.colorTelli
@@ -40,14 +41,9 @@ fun LiPlaylistDisplay(
             modifier = Modifier
         ) {
 
-            Icon(
-                painter = painterResource(
-                    R.drawable.ic_twirl,
-                ),
-                contentDescription = null,
-                tint = colorTelli,
-                modifier = Modifier
-                    .size(24.dp)
+            AppPlaylistIcon(
+                isAuto = playlist.isAuto,
+                iconSize = 24,
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,

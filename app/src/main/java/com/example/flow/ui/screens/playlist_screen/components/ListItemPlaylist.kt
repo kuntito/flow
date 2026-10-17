@@ -27,6 +27,7 @@ import com.example.flow.data.models.DropdownMenuOption
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.ui.components.general.AppDropdownMenuItem
 import com.example.flow.ui.components.general.AppIconButton
+import com.example.flow.ui.components.util.AppPlaylistIcon
 import com.example.flow.ui.components.util.AppSoundBars
 import com.example.flow.ui.components.util.ClickableSurface
 import com.example.flow.ui.theme.colorAguero
@@ -98,14 +99,9 @@ fun ListItemPlaylist(
                     ,
                 )
             } else {
-                Icon(
-                    painter = painterResource(
-                        R.drawable.ic_twirl,
-                    ),
-                    contentDescription = null,
-                    tint = colorTelli,
-                    modifier = Modifier
-                        .size(24.dp)
+                AppPlaylistIcon(
+                    isAuto = item.isAuto,
+                    iconSize = 24,
                 )
             }
             Row(

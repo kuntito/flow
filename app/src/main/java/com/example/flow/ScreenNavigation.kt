@@ -61,6 +61,7 @@ fun ScreenNavigation(
                         AppScreens.ViewPlaylistScreen(
                             playlistId = playlist.id,
                             playlistName = playlist.name,
+                            isPlaylistAuto = playlist.isAuto,
                         )
                     )
                 }
@@ -76,11 +77,13 @@ fun ScreenNavigation(
                 },
                 playlistId = args.playlistId,
                 playlistName = args.playlistName,
+                isPlaylistAuto = args.isPlaylistAuto,
                 goToEditPlaylist = { playlist ->
                     navController.navigate(
                         AppScreens.EditPlaylistScreen(
                             playlistId = playlist.id,
                             playlistName = playlist.name,
+                            isPlaylistAuto = playlist.isAuto,
                         )
                     )
                 }
@@ -96,6 +99,7 @@ fun ScreenNavigation(
                 },
                 playlistId = args.playlistId,
                 playlistName = args.playlistName,
+                isPlaylistAuto = args.isPlaylistAuto,
             )
         }
     }
@@ -115,11 +119,13 @@ sealed class AppScreens {
     data class ViewPlaylistScreen(
         val playlistId: Int,
         val playlistName: String,
+        val isPlaylistAuto: Boolean,
     )
 
     @Serializable
     data class EditPlaylistScreen(
         val playlistId: Int,
         val playlistName: String,
+        val isPlaylistAuto: Boolean,
     )
 }

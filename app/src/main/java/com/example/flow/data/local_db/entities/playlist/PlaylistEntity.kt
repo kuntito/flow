@@ -47,19 +47,55 @@ data class PlaylistSongEntity(
 //  a clash makes the insert in `ensureAutoPlaylists` silently skip,
 //  and that auto playlist never shows up.
 //  maybe a check at startup, or a unit test, that fails on duplicates.
+
+// TODO every auto playlist should carry a description,
+//  shown in the app so i don't have to remember what each one means.
+//  likely a column on playlist, so it needs a migration.
 enum class AutoPlaylistType(
     val nickname: String,
 ) {
+    /**
+     * my most listened songs of all time,
+     * by the server's total listen count.
+     */
     TOP_LISTENS(
         nickname = "top listens",
     ),
+
+    /**
+     * songs that peaked within the recent window,
+     * the last few days, as set in the implementation.
+     */
     TOP_RECENTS(
-        nickname = "top recents",
+        nickname = "recents",
     ),
+
+    /**
+     * songs i searched for, then played.
+     * the more often i went looking, the higher it ranks.
+     */
     SOUGHT_OUT(
         nickname = "seeks",
     ),
+
+    /**
+     * a random mix drawn from my bigger playlists.
+     */
     COCKTAIL(
         nickname = "cocktail",
+    ),
+
+    /**
+     * songs i haven't added to any playlist.
+     */
+    GRAVEYARD(
+        nickname = "graveyard",
+    ),
+
+    /**
+     * songs that peaked before the recent window.
+     */
+    EXES(
+        nickname = "x's",
     ),
 }

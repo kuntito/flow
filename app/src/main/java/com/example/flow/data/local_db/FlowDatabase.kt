@@ -11,7 +11,7 @@ import com.example.flow.data.local_db.entities.lru_cache.LruCacheEntity
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
-import com.example.flow.data.local_db.entities.play_count.SongPlayCountEntity
+import com.example.flow.data.local_db.entities.play_count.UnsyncedListenCountEntity
 import com.example.flow.data.local_db.entities.playlist.PlaylistDao
 import com.example.flow.data.local_db.entities.playlist.PlaylistEntity
 import com.example.flow.data.local_db.entities.playlist.PlaylistSongEntity
@@ -35,7 +35,7 @@ import com.example.flow.data.local_db.migrations.migration_9_10
 
 @Database(
     entities = [
-        SongPlayCountEntity::class,
+        UnsyncedListenCountEntity::class,
         ListenHistoryEntity::class,
         PnqHistoryEntity::class,
         SongSearchCacheEntity::class,

@@ -66,6 +66,26 @@ interface SongSearchCacheDao {
     """
     )
     suspend fun getTopListenedSongIds(limit: Int): List<Int>
+
+    /**
+     * songs that aren't in any regular playlist.
+     *
+     * auto playlists don't count, graveyard is one of them,
+     * and counting it would bury its own songs on the next refresh.
+     */
+    @Query(
+        """
+    SELECT cache.songId FROM song_search_cache AS cache
+    WHERE cache.songId NOT IN (
+        SELECT ps.songId FROM playlist_song AS ps
+        INNER JOIN playlist AS p ON p.playlistId = ps.playlistId
+        WHERE p.autoType IS NULL
+    )
+    ORDER BY RANDOM()
+    LIMIT :limit
+    """
+    )
+    suspend fun getUnplaylistedSongIds(limit: Int): List<Int>
 }
 
 data class SongRecency(

@@ -28,6 +28,7 @@ fun TopBarViewPlaylistScreen(
     onEdit: () -> Unit,
     isActive: Boolean,
     onDeactivate: () -> Unit,
+    isPlaylistAuto: Boolean,
 ) {
     val iconSize = 24
     Row(
@@ -93,11 +94,15 @@ fun TopBarViewPlaylistScreen(
                     size = 16,
                 )
             }
-            AppIconButton(
-                iconRes = R.drawable.ic_settings,
-                onClick = onEdit,
-                size = iconSize,
-            )
+            if (isPlaylistAuto) {
+                // show nothing
+            } else {
+                AppIconButton(
+                    iconRes = R.drawable.ic_settings,
+                    onClick = onEdit,
+                    size = iconSize,
+                )
+            }
         }
     }
 }

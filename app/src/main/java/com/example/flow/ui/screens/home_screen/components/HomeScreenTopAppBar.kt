@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.example.flow.R
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.ui.components.general.AppIconButton
+import com.example.flow.ui.components.util.AppPlaylistIcon
 import com.example.flow.ui.components.util.blinkable
 import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsOrion
@@ -95,14 +96,9 @@ fun FlowTopAppBar(
                     .blinkable()
                 ,
             ) {
-                Icon(
-                    painter = painterResource(
-                        R.drawable.ic_twirl,
-                    ),
-                    contentDescription = null,
-                    tint = colorTelli,
-                    modifier = Modifier
-                        .size(24.dp)
+                AppPlaylistIcon(
+                    iconSize = 24,
+                    isAuto = activePlaylist.isAuto,
                 )
                 Text(
                     text = activePlaylist.name,

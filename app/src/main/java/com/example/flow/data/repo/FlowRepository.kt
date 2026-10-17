@@ -17,6 +17,7 @@ import com.example.flow.data.local_db.entities.song_search_cache.normalizeForSon
 import com.example.flow.data.local_db.entities.song_search_cache.toSong
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.data.models.Song
+import com.example.flow.data.models.SongPeak
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.ListenCountItemApi
@@ -247,7 +248,7 @@ class FlowRepository(
             val items = listenCounts.map {
                 ListenCountItemApi(
                     songId = it.songId,
-                    listenCount = it.playCount,
+                    listenCount = it.unsyncedListenCount,
                 )
             }
 
@@ -291,6 +292,7 @@ class FlowRepository(
             PlaylistItem(
                 id = it.playlistId,
                 name = it.name,
+                isAuto = it.autoType != null
             )
         }
     }
@@ -398,26 +400,71 @@ class FlowRepository(
         return cocktailSongIds
     }
 
+    private suspend fun getTopPeaks(
+        fromMillis: Long,
+        untilMillis: Long,
+        limit: Int,
+    ): List<SongPeak> {
+        // TODO put these guys in a config.
+        val PEAK_WEIGHT_LISTEN = 1.0
+        val PEAK_WEIGHT_SEARCH_PLAY = 2.0
+
+        // TODO heat, how concentrated my listens are.
+        //  peak counts reaches, but not how close together they are.
+        //  heat is likely just a peak over a short window, say a day.
+        //  see if it's worth its own playlist, or a factor in recent peak.
+        val topPeaks = listenHistoryDao.getTopPeaks(
+            fromMillis = fromMillis,
+            untilMillis = untilMillis,
+            weightListen = PEAK_WEIGHT_LISTEN,
+            weightSearchPlay = PEAK_WEIGHT_SEARCH_PLAY,
+            wildcards = SearchShortcut.symbols,
+            limit = limit,
+        )
+
+        return topPeaks
+    }
+
     private suspend fun getAutoPlaylistSongIds(
         autoType: AutoPlaylistType,
     ): List<Int> {
         val poolSize = 50
+        val dayMillis = 24 * 60 * 60 * 1000L
+        val daysRecentWindow = 14
         return when (autoType) {
             AutoPlaylistType.TOP_LISTENS -> {
-
                 songSearchCacheDao.getTopListenedSongIds(
                     limit = poolSize,
                 )
             }
             AutoPlaylistType.TOP_RECENTS -> {
-                val days = 7
-                val windowMillis = days * 24 * 60 * 60 * 1000L
-                val since = System.currentTimeMillis() - windowMillis
+                val now = System.currentTimeMillis()
+                val recentWindowMillis = daysRecentWindow * dayMillis
 
-                listenHistoryDao.getTopListenedSongIdsSince(
-                    since = since,
+                val recentPeaks = getTopPeaks(
+                    fromMillis = now - recentWindowMillis,
+                    untilMillis = now,
                     limit = poolSize,
                 )
+
+                recentPeaks.map {
+                    it.songId
+                }
+            }
+            AutoPlaylistType.EXES -> {
+                val now = System.currentTimeMillis()
+                val recentWindowMillis = daysRecentWindow * dayMillis
+                val recentWindowStart = now - recentWindowMillis
+
+                val pastPeaks = getTopPeaks(
+                    fromMillis = 0,
+                    untilMillis = recentWindowStart,
+                    limit = poolSize,
+                )
+
+                pastPeaks.map {
+                    it.songId
+                }
             }
             AutoPlaylistType.SOUGHT_OUT -> {
                 playFromSearchDao.getMostSoughtSongIds(
@@ -428,6 +475,11 @@ class FlowRepository(
             AutoPlaylistType.COCKTAIL -> {
                 getCocktailSongIds(
                     poolSize = poolSize,
+                )
+            }
+            AutoPlaylistType.GRAVEYARD -> {
+                songSearchCacheDao.getUnplaylistedSongIds(
+                    limit = poolSize,
                 )
             }
         }
