@@ -28,9 +28,11 @@ fun LiPlaylistDisplay(
     modifier: Modifier = Modifier,
     playlist: PlaylistItem,
     activate: () -> Unit,
+    start: () -> Unit,
 ) {
     ClickableSurface(
         onClick = activate,
+        onDoubleClick = start,
         isRippleBounded = true,
         modifier = modifier
         ,

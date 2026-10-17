@@ -27,6 +27,7 @@ fun DialogPeekPlaylists(
     onDismiss: () -> Unit,
     playlists: List<PlaylistItem>,
     activatePlaylist: (PlaylistItem) -> Unit,
+    startPlaylist: (PlaylistItem) -> Unit,
 ) {
     AppDialog(
         onDismiss = onDismiss,
@@ -62,6 +63,9 @@ fun DialogPeekPlaylists(
                     playlist = playlist,
                     activate = {
                         activatePlaylist(playlist)
+                    },
+                    start = {
+                        startPlaylist(playlist)
                     }
                 )
             }
