@@ -96,6 +96,6 @@ enum class AutoPlaylistType(
      * songs that peaked before the recent window.
      */
     EXES(
-        nickname = "x's",
+        nickname = "exes",
     ),
 }
