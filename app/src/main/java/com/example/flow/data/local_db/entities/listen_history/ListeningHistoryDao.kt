@@ -51,6 +51,10 @@ interface ListenHistoryDao {
     @Query("SELECT songId, listenedAtMillis AS atMillis FROM listen_history")
     suspend fun getAllListenEvents(): List<SongListen>
 
+    // TODO maybe a minimum peak per window, `HAVING SUM(weight) >= 3`.
+    //  without it, a song played once or twice can still make the top 50
+    //  when i listen narrowly, and land in both recents and x's.
+    //  with it, lists can come up short of 50.
     /**
      * a song's peak is how much i reached for it within a window.
      *

@@ -400,6 +400,36 @@ class FlowRepository(
         return cocktailSongIds
     }
 
+    /**
+     * the top peaks for one window, counted back from now.
+     *
+     * 0 is the recent window, 1 is the one before it, and so on.
+     */
+    private suspend fun getTopPeakSongIdsInWindow(
+        windowsAgo: Int,
+        windowDays: Int,
+        limit: Int,
+    ): List<Int> {
+        val dayMillis = 24 * 60 * 60 * 1000L
+        val windowMillis = windowDays * dayMillis
+
+        val now = System.currentTimeMillis()
+        val untilMillis = now - (windowsAgo * windowMillis)
+        val fromMillis = untilMillis - windowMillis
+
+        val topPeaks = getTopPeaks(
+            fromMillis = fromMillis,
+            untilMillis = untilMillis,
+            limit = limit,
+        )
+
+        val songIds = topPeaks.map {
+            it.songId
+        }
+
+        return songIds
+    }
+
     private suspend fun getTopPeaks(
         fromMillis: Long,
         untilMillis: Long,
@@ -438,33 +468,18 @@ class FlowRepository(
                 )
             }
             AutoPlaylistType.TOP_RECENTS -> {
-                val now = System.currentTimeMillis()
-                val recentWindowMillis = daysRecentWindow * dayMillis
-
-                val recentPeaks = getTopPeaks(
-                    fromMillis = now - recentWindowMillis,
-                    untilMillis = now,
+                getTopPeakSongIdsInWindow(
+                    windowsAgo = 0,
+                    windowDays = daysRecentWindow,
                     limit = poolSize,
                 )
-
-                recentPeaks.map {
-                    it.songId
-                }
             }
             AutoPlaylistType.EXES -> {
-                val now = System.currentTimeMillis()
-                val recentWindowMillis = daysRecentWindow * dayMillis
-                val recentWindowStart = now - recentWindowMillis
-
-                val pastPeaks = getTopPeaks(
-                    fromMillis = 0,
-                    untilMillis = recentWindowStart,
+                getTopPeakSongIdsInWindow(
+                    windowsAgo = 1,
+                    windowDays = daysRecentWindow,
                     limit = poolSize,
                 )
-
-                pastPeaks.map {
-                    it.songId
-                }
             }
             AutoPlaylistType.SOUGHT_OUT -> {
                 playFromSearchDao.getMostSoughtSongIds(
