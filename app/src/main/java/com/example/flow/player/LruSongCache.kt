@@ -31,6 +31,12 @@ class LruSongCache(
         //  one fix, would be to delete every file in cache dir without a db entry.
     }
 
+
+    // TODO can i evict based on peak.
+    //  take out the song with the lowest peak?
+    //  the idea is the songs you care about the least should be evicted.
+    //  perhaps, i shouldn't even store them.
+    //  i started the cache, so i had a copy of what i'd just played.
     private val evictMutex = Mutex()
     private suspend fun maintainCacheSize() {
         evictMutex.withLock {
