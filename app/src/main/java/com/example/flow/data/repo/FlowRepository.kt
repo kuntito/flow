@@ -22,10 +22,13 @@ import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.ListenCountItemApi
 import com.example.flow.data.remote.response_models.SongWithUrl
+import com.example.flow.data.remote.response_models.SyncPlaylistItemApi
 import com.example.flow.data.remote.response_models.SyncRecencyItemApi
 import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -499,6 +502,78 @@ class FlowRepository(
             }
         }
     }
+
+    /**
+     * backs up regular playlists to the API, or restores them.
+     *
+     * sends every regular playlist, and the API keeps them as truth.
+     * if there are none, as on a fresh install,
+     * the API sends back what it has, and those are saved locally.
+     *
+     * auto playlists don't sync, they're rebuilt on launch.
+     */
+    suspend fun syncPlaylists() {
+        val (regularPlaylists, regularPlaylistSongs) = coroutineScope {
+            val playlistsDeferred = async {
+                playlistDao.getRegularPlaylists()
+            }
+
+            val playlistSongsDeferred = async {
+                playlistDao.getRegularPlaylistSongs()
+            }
+
+            Pair(
+                playlistsDeferred.await(),
+                playlistSongsDeferred.await(),
+            )
+        }
+
+        // maps each playlist id to its list of song ids.
+        val songIdsByPlaylistId = regularPlaylistSongs.groupBy(
+            keySelector = { it.playlistId },
+            valueTransform = { it.songId },
+        )
+
+        val items = regularPlaylists.map { playlist ->
+            SyncPlaylistItemApi(
+                playlistId = playlist.playlistId,
+                name = playlist.name,
+                songIds = songIdsByPlaylistId[playlist.playlistId] ?: emptyList(),
+            )
+        }
+
+        val response = flowDs.safeSyncPlaylists(items)
+        if (response?.success != true) return
+
+        val isEmptySentItems = items.isEmpty()
+        if (isEmptySentItems) {
+            val playlistsToSave = response.playlists ?: return
+
+            val playlistsToRestore = playlistsToSave.map {
+                PlaylistEntity(
+                    playlistId = it.playlistId,
+                    name = it.name,
+                )
+            }
+
+            val playlistSongsToSave = playlistsToSave.flatMap { playlist ->
+                playlist.songIds.map { songId ->
+                    PlaylistSongEntity(
+                        playlistId = playlist.playlistId,
+                        songId = songId,
+                    )
+                }
+            }
+
+            playlistDao.insertPlaylistsAndSongs(
+                playlists = playlistsToRestore,
+                playlistSongs = playlistSongsToSave,
+            )
+
+            Log.d(flowDebugTag, "restored ${playlistsToRestore.size} playlists")
+        }
+    }
+
     suspend fun refreshAutoPlaylists() {
         ensureAutoPlaylists()
 

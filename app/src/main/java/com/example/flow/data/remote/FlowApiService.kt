@@ -10,6 +10,9 @@ import com.example.flow.data.remote.response_models.SearchSongResponse
 import com.example.flow.data.remote.response_models.SyncCacheSongSearchBody
 import com.example.flow.data.remote.response_models.SyncListenCountsBody
 import com.example.flow.data.remote.response_models.SyncListenCountsResponse
+import com.example.flow.data.remote.response_models.SyncPlaylistItemApi
+import com.example.flow.data.remote.response_models.SyncPlaylistsBody
+import com.example.flow.data.remote.response_models.SyncPlaylistsResponse
 import com.example.flow.data.remote.response_models.SyncRecencyItemApi
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -46,6 +49,11 @@ interface FlowApiService {
     suspend fun syncListenCounts(
         @Body body: SyncListenCountsBody
     ): SyncListenCountsResponse
+
+    @POST("api/flow/playlists/sync")
+    suspend fun syncPlaylists(
+        @Body body: SyncPlaylistsBody
+    ): SyncPlaylistsResponse
 }
 
 /**
@@ -125,6 +133,21 @@ class FlowApiDataSource(
                 api.syncListenCounts(
                     SyncListenCountsBody(itemsListenCount = items)
                 )
+            }
+        )
+    )
+
+    suspend fun safeSyncPlaylists(
+        items: List<SyncPlaylistItemApi>
+    ) = safeApiCall(
+        ApiCallInfo(
+            "syncing playlists",
+            fn = {
+                val body = SyncPlaylistsBody(
+                    playlists = items,
+                )
+
+                api.syncPlaylists(body)
             }
         )
     )

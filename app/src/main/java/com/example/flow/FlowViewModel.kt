@@ -408,6 +408,7 @@ class FlowViewModel(
         }
 
         viewModelScope.launch {
+            flowRepo.syncPlaylists()
             flowRepo.refreshAutoPlaylists()
             loadPlaylists()
         }

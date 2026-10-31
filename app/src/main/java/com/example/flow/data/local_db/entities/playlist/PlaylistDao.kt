@@ -97,4 +97,25 @@ interface PlaylistDao {
 
         insertPlaylistSongs(playlistSongs)
     }
+
+    @Query(
+        """
+    SELECT ps.* FROM playlist_song AS ps
+    INNER JOIN playlist AS p ON p.playlistId = ps.playlistId
+    WHERE p.autoType IS NULL
+    """
+    )
+    suspend fun getRegularPlaylistSongs(): List<PlaylistSongEntity>
+
+    @Transaction
+    suspend fun insertPlaylistsAndSongs(
+        playlists: List<PlaylistEntity>,
+        playlistSongs: List<PlaylistSongEntity>,
+    ) {
+        for (playlist in playlists) {
+            insertPlaylist(playlist)
+        }
+
+        insertPlaylistSongs(playlistSongs)
+    }
 }
