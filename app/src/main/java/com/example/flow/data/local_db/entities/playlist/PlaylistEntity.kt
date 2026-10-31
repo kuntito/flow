@@ -43,6 +43,8 @@ data class PlaylistSongEntity(
 )
 
 
+// TODO a playlist that intersperses top songs with songs not reached for in a while.
+
 // TODO nicknames must be unique, playlist names are a unique column.
 //  a clash makes the insert in `ensureAutoPlaylists` silently skip,
 //  and that auto playlist never shows up.
