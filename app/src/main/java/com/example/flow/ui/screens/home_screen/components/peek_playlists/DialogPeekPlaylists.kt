@@ -32,7 +32,7 @@ fun DialogPeekPlaylists(
     AppDialog(
         onDismiss = onDismiss,
         modifier = Modifier
-            .height(224.dp)
+            .height(300.dp)
     ) {
         Row(
             modifier = Modifier
