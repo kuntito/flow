@@ -240,7 +240,7 @@ class FlowViewModel(
     fun swapSongPlayNextQueue(
         fromIndex: Int,
         toIndex: Int
-    ) = pnqManager.swapSongs(fromIndex, toIndex)
+    ) = pnqManager.moveSong(fromIndex, toIndex)
 
 
     fun onSongAddPnq(songId: Int) {
@@ -387,6 +387,7 @@ class FlowViewModel(
         //  listen history and search plays never leave the device.
         //  listen counts sync, but only as totals, not when each listen happened.
         //  so a reinstall or new phone resets every song's peaks.
+        //  also, listen history is listen counts. i should drop listen counts.
         viewModelScope.launch {
             songPlayer.onPlaybackComplete.collect { lastPlayedSong ->
                 if (repeatSongManager.consumeRepeatIfActive()) {

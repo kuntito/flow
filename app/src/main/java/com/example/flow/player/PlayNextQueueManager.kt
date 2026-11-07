@@ -96,7 +96,7 @@ class PlayNextQueueManager(
         _playNextQueue.value = newEntries + _playNextQueue.value
     }
 
-    fun swapSongs(fromIndex: Int, toIndex: Int) {
+    fun moveSong(fromIndex: Int, toIndex: Int) {
         _playNextQueue.value = _playNextQueue.value.toMutableList().apply {
             add(toIndex, removeAt(fromIndex))
         }
