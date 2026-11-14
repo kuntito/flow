@@ -671,6 +671,9 @@ class FlowViewModel(
 
             if (success) {
                 loadPlaylists()
+                viewModelScope.launch {
+                    flowRepo.syncPlaylists()
+                }
             }
 
             delay(1000)
@@ -688,6 +691,7 @@ class FlowViewModel(
                 playlistId = playlistId,
                 songId = songId,
             )
+            flowRepo.syncPlaylists()
         }
     }
 
@@ -700,6 +704,7 @@ class FlowViewModel(
                 playlistId = playlist.id,
                 songId = song.id,
             )
+            flowRepo.syncPlaylists()
         }
     }
 
