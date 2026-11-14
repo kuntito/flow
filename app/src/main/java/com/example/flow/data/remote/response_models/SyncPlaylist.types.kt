@@ -4,6 +4,7 @@ data class SyncPlaylistItemApi(
     val playlistId: Int,
     val name: String,
     val songIds: List<Int>,
+    val isAuto: Boolean,
 )
 
 data class SyncPlaylistsBody(

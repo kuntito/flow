@@ -504,22 +504,29 @@ class FlowRepository(
     }
 
     /**
-     * backs up regular playlists to the API, or restores them.
+     * sends every playlist and playlist songs to server.
      *
-     * sends every regular playlist, and the API keeps them as truth.
-     * if there are none, as on a fresh install,
-     * the API sends back what it has, and those are saved locally.
+     * doubles as restore too.
      *
-     * auto playlists don't sync, they're rebuilt on launch.
+     * if the request is sent with an empty list.
+     * server sends back every playlist and playlist song it has.
+     *
+     * this is useful on fresh devices,
+     * where they can fetch every playlist.
+     *
+     * mobile then filters, and only saves the non-auto playlists.
+     *
+     * auto playlists go up as snapshots, so desktop can play them,
+     * but they're never restored, since they're rebuilt on launch.
      */
     suspend fun syncPlaylists() {
-        val (regularPlaylists, regularPlaylistSongs) = coroutineScope {
+        val (allPlaylists, allPlaylistSongs) = coroutineScope {
             val playlistsDeferred = async {
-                playlistDao.getRegularPlaylists()
+                playlistDao.getAllPlaylists()
             }
 
             val playlistSongsDeferred = async {
-                playlistDao.getRegularPlaylistSongs()
+                playlistDao.getAllPlaylistSongs()
             }
 
             Pair(
@@ -529,17 +536,26 @@ class FlowRepository(
         }
 
         // maps each playlist id to its list of song ids.
-        val songIdsByPlaylistId = regularPlaylistSongs.groupBy(
+        val songIdsByPlaylistId = allPlaylistSongs.groupBy(
             keySelector = { it.playlistId },
             valueTransform = { it.songId },
         )
 
-        val items = regularPlaylists.map { playlist ->
-            SyncPlaylistItemApi(
-                playlistId = playlist.playlistId,
-                name = playlist.name,
-                songIds = songIdsByPlaylistId[playlist.playlistId] ?: emptyList(),
-            )
+        val hasRegularPlaylists = allPlaylists.any { playlist ->
+            playlist.autoType == null
+        }
+
+        val items = if (hasRegularPlaylists) {
+            allPlaylists.map { playlist ->
+                SyncPlaylistItemApi(
+                    playlistId = playlist.playlistId,
+                    name = playlist.name,
+                    songIds = songIdsByPlaylistId[playlist.playlistId] ?: emptyList(),
+                    isAuto = playlist.autoType != null,
+                )
+            }
+        } else {
+            emptyList()
         }
 
         val response = flowDs.safeSyncPlaylists(items)
@@ -547,7 +563,11 @@ class FlowRepository(
 
         val isEmptySentItems = items.isEmpty()
         if (isEmptySentItems) {
-            val playlistsToSave = response.playlists ?: return
+            val returnedPlaylists = response.playlists ?: return
+
+            val playlistsToSave = returnedPlaylists.filter { playlist ->
+                !playlist.isAuto
+            }
 
             val playlistsToRestore = playlistsToSave.map {
                 PlaylistEntity(

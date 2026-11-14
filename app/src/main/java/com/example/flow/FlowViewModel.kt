@@ -408,9 +408,21 @@ class FlowViewModel(
             flowRepo.syncListenCounts()
         }
 
+        // TODO maybe change?
+        //  right now, the sync call doubles as a restore.
+        //  if mobile has no regular playlists, sync brings back everything the server has.
+        //  if mobile has regular playlists, it tells the server to save everything it has.
+        //  .
+        //  the concern: auto playlists get refreshed on app launch, after this sync.
+        //  so the auto playlists it saves are last launch's,
+        //  and they're replaced on mobile straight after.
+        //  the server always lags one launch behind mobile.
+        //  .
+        //  right now, i fix this with another sync.
         viewModelScope.launch {
             flowRepo.syncPlaylists()
             flowRepo.refreshAutoPlaylists()
+            flowRepo.syncPlaylists()
             loadPlaylists()
         }
 

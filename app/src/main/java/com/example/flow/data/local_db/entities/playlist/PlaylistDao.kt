@@ -35,6 +35,9 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlist ORDER BY playlistId DESC")
     suspend fun getAllPlaylists(): List<PlaylistEntity>
 
+    @Query("SELECT * FROM playlist_song")
+    suspend fun getAllPlaylistSongs(): List<PlaylistSongEntity>
+
     @Query("SELECT songId FROM playlist_song WHERE playlistId = :playlistId")
     fun getPlaylistSongIds(playlistId: Int): Flow<List<Int>>
 
@@ -78,6 +81,15 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlist WHERE autoType IS NULL")
     suspend fun getRegularPlaylists(): List<PlaylistEntity>
 
+    @Query(
+        """
+    SELECT ps.* FROM playlist_song AS ps
+    INNER JOIN playlist AS p ON p.playlistId = ps.playlistId
+    WHERE p.autoType IS NULL
+    """
+    )
+    suspend fun getRegularPlaylistSongs(): List<PlaylistSongEntity>
+
     @Query("DELETE FROM playlist_song WHERE playlistId = :playlistId")
     suspend fun clearPlaylistSongs(playlistId: Int)
 
@@ -97,15 +109,6 @@ interface PlaylistDao {
 
         insertPlaylistSongs(playlistSongs)
     }
-
-    @Query(
-        """
-    SELECT ps.* FROM playlist_song AS ps
-    INNER JOIN playlist AS p ON p.playlistId = ps.playlistId
-    WHERE p.autoType IS NULL
-    """
-    )
-    suspend fun getRegularPlaylistSongs(): List<PlaylistSongEntity>
 
     @Transaction
     suspend fun insertPlaylistsAndSongs(

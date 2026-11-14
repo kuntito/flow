@@ -27,7 +27,7 @@ fun AppPlaylistIcon(
         if (isAuto) {
             Icon(
                 painter = painterResource(
-                    R.drawable.ic_auto_wavy,
+                    R.drawable.ic_snowflake,
                 ),
                 contentDescription = null,
                 tint = color,
