@@ -291,13 +291,21 @@ class FlowRepository(
     }
 
     suspend fun getPlaylists(): List<PlaylistItem> {
-        return playlistDao.getAllPlaylists().map {
+        val playlists = playlistDao.getAllPlaylists().map {
             PlaylistItem(
                 id = it.playlistId,
                 name = it.name,
                 isAuto = it.autoType != null
             )
         }
+
+        // auto playlists first, then regular ones.
+        // partition keeps each group in its original order.
+        val (autoPlaylists, regularPlaylists) = playlists.partition {
+            it.isAuto
+        }
+
+        return autoPlaylists + regularPlaylists
     }
 
     suspend fun getPlaylistSongs(
