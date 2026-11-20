@@ -123,7 +123,7 @@ class PlayNextQueueManager(
         _playNextQueue.value = emptyList()
     }
 
-    fun removeAt(key: String) {
+    fun remove(key: String) {
         _playNextQueue.value = _playNextQueue.value
             .filter { it.key != key }
     }
@@ -131,7 +131,7 @@ class PlayNextQueueManager(
 
 /**
  * a song in the play-next queue.
- *
+ *1
  * [key] is unique per queue entry,
  * so the same song can appear twice
  * without conflicting keys in the UI.

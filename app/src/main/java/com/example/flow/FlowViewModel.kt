@@ -251,7 +251,7 @@ class FlowViewModel(
 
     fun onClearPnq() = pnqManager.clearPnq()
 
-    fun onRemoveFromPnq(key: String) = pnqManager.removeAt(key)
+    fun onRemoveFromPnq(key: String) = pnqManager.remove(key)
 
     private val nextSongManager = NextSongManager(
         pnqTop = pnqTop,
