@@ -14,7 +14,7 @@ interface LruCacheDao {
     suspend fun upsert(entry: LruCacheEntity)
 
     @Query("UPDATE lru_cache SET recency = :recency WHERE songId = :songId")
-    suspend fun updateRecency(songId: Int, recency: Long)
+    suspend fun setRecency(songId: Int, recency: Long)
 
     @Query("SELECT COALESCE(SUM(fileSize), 0) FROM lru_cache")
     suspend fun totalSize(): Long

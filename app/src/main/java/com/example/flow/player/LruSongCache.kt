@@ -66,7 +66,7 @@ class LruSongCache(
     //  and survives eviction a bit longer.
     suspend fun getCachedPath(songId: Int): String? {
         val path = lruCacheDao.getBySongId(songId) ?: return null
-        lruCacheDao.updateRecency(
+        lruCacheDao.setRecency(
             songId = songId,
             recency = System.currentTimeMillis(),
         )
@@ -139,7 +139,7 @@ class LruSongCache(
     suspend fun getLeastRecentCached(): LruCacheEntity? {
         val item = lruCacheDao.leastRecent() ?: return null
 
-        lruCacheDao.updateRecency(
+        lruCacheDao.setRecency(
             songId = item.songId,
             recency = System.currentTimeMillis(),
         )
