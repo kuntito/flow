@@ -73,19 +73,21 @@ interface SongSearchCacheDao {
      * auto playlists don't count, graveyard is one of them,
      * and counting it would bury its own songs on the next refresh.
      */
+    /**
+     * songs you've played before, but not in a while.
+     * oldest play first.
+     *
+     * never-played songs are left out, that's unlistened's job.
+     */
     @Query(
         """
-    SELECT cache.songId FROM song_search_cache AS cache
-    WHERE cache.songId NOT IN (
-        SELECT ps.songId FROM playlist_song AS ps
-        INNER JOIN playlist AS p ON p.playlistId = ps.playlistId
-        WHERE p.autoType IS NULL
-    )
-    ORDER BY RANDOM()
+    SELECT songId FROM song_search_cache
+    WHERE recency IS NOT NULL AND recency > 0
+    ORDER BY recency ASC
     LIMIT :limit
     """
     )
-    suspend fun getUnplaylistedSongIds(limit: Int): List<Int>
+    suspend fun getLeastRecentSongIds(limit: Int): List<Int>
 }
 
 data class SongRecency(

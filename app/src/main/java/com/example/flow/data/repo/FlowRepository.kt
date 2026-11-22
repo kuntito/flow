@@ -504,7 +504,7 @@ class FlowRepository(
                 )
             }
             AutoPlaylistType.GRAVEYARD -> {
-                songSearchCacheDao.getUnplaylistedSongIds(
+                songSearchCacheDao.getLeastRecentSongIds(
                     limit = poolSize,
                 )
             }

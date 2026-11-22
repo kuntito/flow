@@ -88,7 +88,7 @@ enum class AutoPlaylistType(
     ),
 
     /**
-     * songs i haven't added to any playlist.
+     * songs i haven't heard in a minute.
      */
     GRAVEYARD(
         nickname = "graveyard",
