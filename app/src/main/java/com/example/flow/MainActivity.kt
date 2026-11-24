@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity() {
 
         val flowRepo = FlowRepository(
             flowDs = flowDS,
-            songPlayCountDao = db.songPlayCountDao(),
             listenHistoryDao = db.listenHistoryDao(),
             pnPnqHistoryDao = db.pnqHistoryDao(),
             songSearchCacheDao = db.songSearchCacheDao(),

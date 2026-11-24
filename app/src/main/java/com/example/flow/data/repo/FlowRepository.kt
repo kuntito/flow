@@ -6,7 +6,6 @@ import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntit
 import com.example.flow.data.local_db.entities.listen_history.toListenEventApi
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
-import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
 import com.example.flow.data.local_db.entities.playlist.AutoPlaylistType
 import com.example.flow.data.local_db.entities.playlist.PlaylistDao
 import com.example.flow.data.local_db.entities.playlist.PlaylistEntity
@@ -21,7 +20,6 @@ import com.example.flow.data.models.Song
 import com.example.flow.data.models.SongPeak
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
-import com.example.flow.data.remote.response_models.ListenCountItemApi
 import com.example.flow.data.remote.response_models.ListenEventApi
 import com.example.flow.data.remote.response_models.SongWithUrl
 import com.example.flow.data.remote.response_models.SyncPlaylistItemApi
@@ -43,7 +41,6 @@ import java.util.UUID
 
 class FlowRepository(
     private val flowDs: FlowApiDataSource,
-    private val songPlayCountDao: SongPlayCountDao,
     private val listenHistoryDao: ListenHistoryDao,
     private val pnPnqHistoryDao: PnqHistoryDao,
     private val songSearchCacheDao: SongSearchCacheDao,
@@ -51,10 +48,6 @@ class FlowRepository(
     private val playlistDao: PlaylistDao,
     private val lruSongCache: LruSongCache,
 ) {
-    suspend fun incrementPlayCount(songId: Int) {
-        songPlayCountDao.incrementOrCreate(songId)
-    }
-
     suspend fun logListen(
         songId: Int
     ) {
@@ -244,32 +237,6 @@ class FlowRepository(
                 playedAtMillis = System.currentTimeMillis(),
             )
         )
-    }
-
-    private var isSyncingListenCounts = false
-    suspend fun syncListenCounts() {
-        if (isSyncingListenCounts) return
-        isSyncingListenCounts = true
-        try {
-            val listenCounts = songPlayCountDao.getAll()
-            if (listenCounts.isEmpty()) return
-
-            val items = listenCounts.map {
-                ListenCountItemApi(
-                    songId = it.songId,
-                    listenCount = it.unsyncedListenCount,
-                )
-            }
-
-            Log.d(flowDebugTag, "syncing listen count")
-            val response = flowDs.safeSyncListenCounts(items)
-            if (response?.success == true) {
-                songPlayCountDao.deleteAll()
-                Log.d(flowDebugTag, "sync successful")
-            }
-        } finally {
-            isSyncingListenCounts = false
-        }
     }
 
     private data class SplitListens(

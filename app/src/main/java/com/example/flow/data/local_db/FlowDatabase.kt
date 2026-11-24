@@ -11,8 +11,6 @@ import com.example.flow.data.local_db.entities.lru_cache.LruCacheDao
 import com.example.flow.data.local_db.entities.lru_cache.LruCacheEntity
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
-import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
-import com.example.flow.data.local_db.entities.play_count.UnsyncedListenCountEntity
 import com.example.flow.data.local_db.entities.playlist.PlaylistDao
 import com.example.flow.data.local_db.entities.playlist.PlaylistEntity
 import com.example.flow.data.local_db.entities.playlist.PlaylistSongEntity
@@ -26,6 +24,7 @@ import com.example.flow.data.local_db.migrations.migration_12_13
 import com.example.flow.data.local_db.migrations.migration_13_14
 import com.example.flow.data.local_db.migrations.migration_14_15
 import com.example.flow.data.local_db.migrations.migration_15_16
+import com.example.flow.data.local_db.migrations.migration_16_17
 import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
@@ -38,7 +37,6 @@ import com.example.flow.data.local_db.migrations.migration_9_10
 
 @Database(
     entities = [
-        UnsyncedListenCountEntity::class,
         ListenHistoryEntity::class,
         ListenHistoryCursorEntity::class,
         PnqHistoryEntity::class,
@@ -48,10 +46,9 @@ import com.example.flow.data.local_db.migrations.migration_9_10
         PlaylistEntity::class,
         PlaylistSongEntity::class,
     ],
-    version = 16,
+    version = 17,
 )
 abstract class FlowDb: RoomDatabase() {
-    abstract fun songPlayCountDao(): SongPlayCountDao
     abstract fun listenHistoryDao(): ListenHistoryDao
     abstract fun pnqHistoryDao(): PnqHistoryDao
     abstract fun songSearchCacheDao(): SongSearchCacheDao
@@ -85,6 +82,7 @@ abstract class FlowDb: RoomDatabase() {
                         migration_13_14,
                         migration_14_15,
                         migration_15_16,
+                        migration_16_17,
                     )
                     .build()
 

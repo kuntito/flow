@@ -184,7 +184,6 @@ class FlowViewModel(
 
     fun onSongListened(songId: Int) {
         viewModelScope.launch {
-            flowRepo.incrementPlayCount(songId)
             flowRepo.logListen(songId)
         }
     }
@@ -383,11 +382,8 @@ class FlowViewModel(
 
 
     init {
-        // TODO, start here, peaks only see this install's history.
-        //  listen history and search plays never leave the device.
-        //  listen counts sync, but only as totals, not when each listen happened.
-        //  so a reinstall or new phone resets every song's peaks.
-        //  also, listen history is listen counts. i should drop listen counts.
+        // TODO, start here, search plays never leave the device.
+        //  so a reinstall or new phone resets that data
         viewModelScope.launch {
             songPlayer.onPlaybackComplete.collect { lastPlayedSong ->
                 if (repeatSongManager.consumeRepeatIfActive()) {
@@ -402,10 +398,6 @@ class FlowViewModel(
 
         viewModelScope.launch {
             flowRepo.syncSongSearchCache()
-        }
-
-        viewModelScope.launch {
-            flowRepo.syncListenCounts()
         }
 
         viewModelScope.launch {

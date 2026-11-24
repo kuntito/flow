@@ -5,12 +5,9 @@ import com.example.flow.data.remote.helpers.safeApiCall
 import com.example.flow.data.remote.response_models.GetCacheItemsSongSearchResponse
 import com.example.flow.data.remote.response_models.GetNextSongResponse
 import com.example.flow.data.remote.response_models.GetSongByIdResponse
-import com.example.flow.data.remote.response_models.ListenCountItemApi
 import com.example.flow.data.remote.response_models.ListenEventApi
 import com.example.flow.data.remote.response_models.SearchSongResponse
 import com.example.flow.data.remote.response_models.SyncCacheSongSearchBody
-import com.example.flow.data.remote.response_models.SyncListenCountsBody
-import com.example.flow.data.remote.response_models.SyncListenCountsResponse
 import com.example.flow.data.remote.response_models.SyncListenHistoryBody
 import com.example.flow.data.remote.response_models.SyncListenHistoryResponse
 import com.example.flow.data.remote.response_models.SyncPlaylistItemApi
@@ -47,11 +44,6 @@ interface FlowApiService {
     suspend fun syncCacheItemsSongSearch(
         @Body body: SyncCacheSongSearchBody
     ): GetCacheItemsSongSearchResponse
-
-    @POST("api/flow/sync-listen-counts")
-    suspend fun syncListenCounts(
-        @Body body: SyncListenCountsBody
-    ): SyncListenCountsResponse
 
     @POST("api/flow/playlists/sync")
     suspend fun syncPlaylists(
@@ -128,19 +120,6 @@ class FlowApiDataSource(
                 )
 
                 api.syncCacheItemsSongSearch(body)
-            }
-        )
-    )
-
-    suspend fun safeSyncListenCounts(
-        items: List<ListenCountItemApi>
-    ) = safeApiCall(
-        ApiCallInfo(
-            "syncing listen counts",
-            fn = {
-                api.syncListenCounts(
-                    SyncListenCountsBody(itemsListenCount = items)
-                )
             }
         )
     )
