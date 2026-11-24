@@ -2,7 +2,9 @@ package com.example.flow.data.local_db.entities.listen_history
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.example.flow.data.models.SongPeak
 
 data class HotSongResult(
@@ -100,4 +102,34 @@ interface ListenHistoryDao {
         wildcards: List<String>,
         limit: Int,
     ): List<SongPeak>
+
+    @Query("SELECT * FROM listen_history WHERE isSynced = 0")
+    suspend fun getUnsynced(): List<ListenHistoryEntity>
+
+    @Query("SELECT curSeq FROM listen_history_cursor WHERE id = 0")
+    suspend fun getCurSeq(): Int?
+
+    @Query("UPDATE listen_history SET isSynced = 1 WHERE eventId IN (:eventIds)")
+    suspend fun markSynced(eventIds: List<String>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertNewListens(listens: List<ListenHistoryEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun setCursor(cursor: ListenHistoryCursorEntity)
+
+    @Transaction
+    suspend fun applySync(
+        idsExistingListens: List<String>,
+        newListens: List<ListenHistoryEntity>,
+        curSeq: Int,
+    ) {
+        markSynced(idsExistingListens)
+        insertNewListens(newListens)
+        setCursor(
+            ListenHistoryCursorEntity(
+                curSeq = curSeq,
+            )
+        )
+    }
 }

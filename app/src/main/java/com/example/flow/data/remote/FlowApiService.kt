@@ -6,10 +6,13 @@ import com.example.flow.data.remote.response_models.GetCacheItemsSongSearchRespo
 import com.example.flow.data.remote.response_models.GetNextSongResponse
 import com.example.flow.data.remote.response_models.GetSongByIdResponse
 import com.example.flow.data.remote.response_models.ListenCountItemApi
+import com.example.flow.data.remote.response_models.ListenEventApi
 import com.example.flow.data.remote.response_models.SearchSongResponse
 import com.example.flow.data.remote.response_models.SyncCacheSongSearchBody
 import com.example.flow.data.remote.response_models.SyncListenCountsBody
 import com.example.flow.data.remote.response_models.SyncListenCountsResponse
+import com.example.flow.data.remote.response_models.SyncListenHistoryBody
+import com.example.flow.data.remote.response_models.SyncListenHistoryResponse
 import com.example.flow.data.remote.response_models.SyncPlaylistItemApi
 import com.example.flow.data.remote.response_models.SyncPlaylistsBody
 import com.example.flow.data.remote.response_models.SyncPlaylistsResponse
@@ -54,6 +57,11 @@ interface FlowApiService {
     suspend fun syncPlaylists(
         @Body body: SyncPlaylistsBody
     ): SyncPlaylistsResponse
+
+    @POST("api/flow/listen-history/sync")
+    suspend fun syncListenHistory(
+        @Body body: SyncListenHistoryBody
+    ): SyncListenHistoryResponse
 }
 
 /**
@@ -148,6 +156,23 @@ class FlowApiDataSource(
                 )
 
                 api.syncPlaylists(body)
+            }
+        )
+    )
+
+    suspend fun safeSyncListenHistory(
+        events: List<ListenEventApi>,
+        afterSeq: Int,
+    ) = safeApiCall(
+        ApiCallInfo(
+            "pushes unsynced listens, then fetches listens after the cursor",
+            fn = {
+                val body = SyncListenHistoryBody(
+                    events = events,
+                    afterSeq = afterSeq,
+                )
+
+                api.syncListenHistory(body)
             }
         )
     )

@@ -408,6 +408,10 @@ class FlowViewModel(
             flowRepo.syncListenCounts()
         }
 
+        viewModelScope.launch {
+            flowRepo.syncListenHistory()
+        }
+
         // TODO maybe change?
         //  right now, the sync call doubles as a restore.
         //  if mobile has no regular playlists, sync brings back everything the server has.

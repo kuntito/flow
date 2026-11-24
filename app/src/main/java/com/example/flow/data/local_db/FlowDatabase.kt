@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.flow.data.local_db.entities.listen_history.ListenHistoryCursorEntity
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
 import com.example.flow.data.local_db.entities.lru_cache.LruCacheDao
@@ -23,6 +24,8 @@ import com.example.flow.data.local_db.migrations.migration_10_11
 import com.example.flow.data.local_db.migrations.migration_11_12
 import com.example.flow.data.local_db.migrations.migration_12_13
 import com.example.flow.data.local_db.migrations.migration_13_14
+import com.example.flow.data.local_db.migrations.migration_14_15
+import com.example.flow.data.local_db.migrations.migration_15_16
 import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
@@ -37,6 +40,7 @@ import com.example.flow.data.local_db.migrations.migration_9_10
     entities = [
         UnsyncedListenCountEntity::class,
         ListenHistoryEntity::class,
+        ListenHistoryCursorEntity::class,
         PnqHistoryEntity::class,
         SongSearchCacheEntity::class,
         PlayFromSearchEntity::class,
@@ -44,7 +48,7 @@ import com.example.flow.data.local_db.migrations.migration_9_10
         PlaylistEntity::class,
         PlaylistSongEntity::class,
     ],
-    version = 14,
+    version = 16,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun songPlayCountDao(): SongPlayCountDao
@@ -79,6 +83,8 @@ abstract class FlowDb: RoomDatabase() {
                         migration_11_12,
                         migration_12_13,
                         migration_13_14,
+                        migration_14_15,
+                        migration_15_16,
                     )
                     .build()
 

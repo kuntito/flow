@@ -3,6 +3,7 @@ package com.example.flow.data.repo
 import android.util.Log
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
+import com.example.flow.data.local_db.entities.listen_history.toListenEventApi
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.play_count.SongPlayCountDao
@@ -21,9 +22,11 @@ import com.example.flow.data.models.SongPeak
 import com.example.flow.data.models.toSong
 import com.example.flow.data.remote.FlowApiDataSource
 import com.example.flow.data.remote.response_models.ListenCountItemApi
+import com.example.flow.data.remote.response_models.ListenEventApi
 import com.example.flow.data.remote.response_models.SongWithUrl
 import com.example.flow.data.remote.response_models.SyncPlaylistItemApi
 import com.example.flow.data.remote.response_models.SyncRecencyItemApi
+import com.example.flow.data.remote.response_models.toListenHistoryEntity
 import com.example.flow.data.remote.response_models.toSongSearchCacheEntity
 import com.example.flow.flowDebugTag
 import com.example.flow.player.LruSongCache
@@ -32,9 +35,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 class FlowRepository(
     private val flowDs: FlowApiDataSource,
@@ -57,6 +62,7 @@ class FlowRepository(
             ListenHistoryEntity(
                 songId = songId,
                 listenedAtMillis = System.currentTimeMillis(),
+                eventId = UUID.randomUUID().toString(),
             )
         )
     }
@@ -240,10 +246,10 @@ class FlowRepository(
         )
     }
 
-    private var isSyncing = false
+    private var isSyncingListenCounts = false
     suspend fun syncListenCounts() {
-        if (isSyncing) return
-        isSyncing = true
+        if (isSyncingListenCounts) return
+        isSyncingListenCounts = true
         try {
             val listenCounts = songPlayCountDao.getAll()
             if (listenCounts.isEmpty()) return
@@ -262,7 +268,115 @@ class FlowRepository(
                 Log.d(flowDebugTag, "sync successful")
             }
         } finally {
-            isSyncing = false
+            isSyncingListenCounts = false
+        }
+    }
+
+    private data class SplitListens(
+        val idsExistingListens: List<String>,
+        val newListens: List<ListenEventApi>,
+    )
+    private fun splitReturnedListens(
+        returnedListens: List<ListenEventApi>,
+        eventIdsUnsyncedListens: Set<String>,
+    ): SplitListens {
+        val idsExistingListens = mutableListOf<String>()
+        val newListens = mutableListOf<ListenEventApi>()
+
+        for (listen in returnedListens) {
+            if (listen.eventId in eventIdsUnsyncedListens) {
+                idsExistingListens.add(listen.eventId)
+            } else {
+                newListens.add(listen)
+            }
+        }
+
+        return SplitListens(
+            idsExistingListens = idsExistingListens,
+            newListens = newListens,
+        )
+    }
+
+
+    private suspend fun syncListenHistoryBatch(
+        batch: List<ListenHistoryEntity>,
+        eventIdsUnsyncedListens: Set<String>,
+    ): Boolean {
+
+        val eventsUnsyncedListens = batch.map {
+            it.toListenEventApi()
+        }
+        val curSeq = listenHistoryDao.getCurSeq() ?: 0
+
+        val response = flowDs.safeSyncListenHistory(
+            events = eventsUnsyncedListens,
+            afterSeq = curSeq,
+        ) ?: return false
+
+        val latestSeq = response.latestSeq ?: return false
+        val returnedListens = response.events ?: return false
+
+        val (idsExistingListens, newListens) = splitReturnedListens(
+            returnedListens = returnedListens,
+            eventIdsUnsyncedListens = eventIdsUnsyncedListens,
+        )
+
+        val entitiesNewListens = newListens.map {
+            it.toListenHistoryEntity(
+                isSynced = true
+            )
+        }
+
+        listenHistoryDao.applySync(
+            idsExistingListens = idsExistingListens,
+            newListens = entitiesNewListens,
+            curSeq = latestSeq,
+        )
+
+        return true
+    }
+
+    private val syncListenHistoryMutex = Mutex()
+
+    /**
+     * syncs listen history in batches.
+     *
+     * tells server about local listens it doesn't know about,
+     * and asks for listens since client's last sync.
+     *
+     * the returned listens include the local ones just sent,
+     * which get marked synced, and new ones, which get added.
+     *
+     * it stops the moment one batch fails.
+     */
+    suspend fun syncListenHistory() {
+        val batchSize = 500
+        if (!syncListenHistoryMutex.tryLock()) return
+
+        try {
+            val entitiesUnsyncedListens = listenHistoryDao.getUnsynced()
+            val eventIdsUnsyncedListens = entitiesUnsyncedListens
+                .map { it.eventId }
+                .toSet()
+
+            val batches = entitiesUnsyncedListens.chunked(batchSize)
+            var batchIndex = 0
+            do {
+                val batch = batches.getOrElse(batchIndex) {
+                    emptyList()
+                }
+
+                val isBatchSynced = syncListenHistoryBatch(
+                    batch,
+                    eventIdsUnsyncedListens,
+                )
+                if (!isBatchSynced) break
+
+                batchIndex++
+            } while (batchIndex < batches.size)
+
+        } finally {
+            syncListenHistoryMutex.unlock()
         }
     }
 
