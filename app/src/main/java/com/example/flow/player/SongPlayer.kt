@@ -181,7 +181,7 @@ class SongPlayer(
                         )
 
                     playbackCheckpoints?.updateCheckpoints(
-                        _playerState.value.playProgress
+                        newPosMs
                     )
 
                     delay(1000.milliseconds)
@@ -220,7 +220,8 @@ class SongPlayer(
 
         playbackCheckpoints = PlaybackCheckpoints(
             songId = song.id,
-            onSongListened = onSongListened
+            onSongListened = onSongListened,
+            durationMs = song.durationMillis,
         )
     }
 

@@ -1,41 +1,46 @@
 package com.example.flow.player
 
-/*
-* used to determine whether a song was listened to.
-*
-* tracks three check points during playback:
-* - the start
-* - the middle
-* - the third quarter
-*
-* the idea is if all three are hit during playback,
-* user listened to the song.
-*
-* a single check point could raise false positives
-* using every check point would be overkill
-* hence, this.
-* */
+/**
+ * used to determine if a song was listened to.
+ *
+ * it tracks how far the song has played without skipping,
+ * checking the player's position every second.
+ *
+ * once that tracked position passes 75% of the song's duration,
+ * it logs a listen.
+ *
+ * it spots skips by comparing each new position
+ * with the one it has stored.
+ *
+ * if the new position is too far ahead,
+ * it's a skip, and the record stays where it is.
+ * the seek bar only seeks on release,
+ * so a drag always lands as one jump, never as steady playback.
+ *
+ * on seek backs, it takes the new position.
+ */
 class PlaybackCheckpoints(
     private val songId: Int,
     private val onSongListened: (Int) -> Unit,
+    private val durationMs: Int,
 ) {
-    private var hitStart: Boolean = false
-    private var hitMiddle: Boolean = false
-    private var hitThirdQuarter: Boolean = false
     private var isListenLogged = false
 
+    private var trackedPositionMs = 0
+    private val acceptableGapMs = 3000
+    private val listenFraction = 0.75f
+    private val msRequiredForListen = listenFraction * durationMs
+
     val isSongListened
-        get() = hitStart && hitMiddle && hitThirdQuarter
+        get() = durationMs > 0 && trackedPositionMs >= msRequiredForListen
 
     fun updateCheckpoints(
-        playProgress: Float
+        playerPositionMs: Int
     ) {
-        if (hitMiddle && playProgress >= 0.75f) {
-            hitThirdQuarter = true
-        } else if (hitStart && playProgress >= 0.5f) {
-            hitMiddle = true
-        } else if (playProgress > 0.1f) {
-            hitStart = true
+        if (playerPositionMs <= trackedPositionMs) {
+            trackedPositionMs = playerPositionMs
+        } else if (trackedPositionMs + acceptableGapMs >= playerPositionMs){
+            trackedPositionMs = playerPositionMs
         }
 
         if (isSongListened && !isListenLogged) {
