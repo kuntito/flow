@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.edit_playlist_screen.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -40,10 +41,18 @@ fun LiSongToAddPlaylist(
                 .weight(1f)
         )
         Spacer(modifier = Modifier.width(16.dp))
-        AppIconButton(
-            iconRes = R.drawable.ic_add,
-            onClick = onAddToPlaylist,
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AppIconButton(
+                iconRes = R.drawable.ic_minus,
+                onClick = onAddToPlaylist,
+            )
+            AppIconButton(
+                iconRes = R.drawable.ic_add,
+                onClick = onAddToPlaylist,
+            )
+        }
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
