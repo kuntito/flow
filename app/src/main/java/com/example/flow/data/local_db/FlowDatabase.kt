@@ -25,6 +25,7 @@ import com.example.flow.data.local_db.migrations.migration_13_14
 import com.example.flow.data.local_db.migrations.migration_14_15
 import com.example.flow.data.local_db.migrations.migration_15_16
 import com.example.flow.data.local_db.migrations.migration_16_17
+import com.example.flow.data.local_db.migrations.migration_17_18
 import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
@@ -46,7 +47,7 @@ import com.example.flow.data.local_db.migrations.migration_9_10
         PlaylistEntity::class,
         PlaylistSongEntity::class,
     ],
-    version = 17,
+    version = 18,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun listenHistoryDao(): ListenHistoryDao
@@ -83,6 +84,7 @@ abstract class FlowDb: RoomDatabase() {
                         migration_14_15,
                         migration_15_16,
                         migration_16_17,
+                        migration_17_18,
                     )
                     .build()
 

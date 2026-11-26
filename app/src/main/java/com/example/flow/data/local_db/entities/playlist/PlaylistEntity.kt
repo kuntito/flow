@@ -43,6 +43,24 @@ data class PlaylistSongEntity(
 )
 
 
+@Entity(
+    tableName = "playlist_match",
+    primaryKeys = ["playlistId", "songId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = PlaylistEntity::class,
+            parentColumns = ["playlistId"],
+            childColumns = ["playlistId"],
+            onDelete = ForeignKey.CASCADE,
+        )
+    ]
+)
+data class PlaylistMatchEntity(
+    val playlistId: Int,
+    val songId: Int,
+    val isMatch: Boolean,
+)
+
 // TODO a playlist that intersperses top songs with songs not reached for in a while.
 
 // TODO nicknames must be unique, playlist names are a unique column.
