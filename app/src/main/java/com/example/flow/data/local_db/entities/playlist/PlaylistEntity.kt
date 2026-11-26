@@ -25,23 +25,6 @@ data class PlaylistEntity(
     val autoType: AutoPlaylistType? = null,
 )
 
-@Entity(
-    tableName = "playlist_song",
-    primaryKeys = ["playlistId", "songId"],
-    foreignKeys = [
-        ForeignKey(
-            entity = PlaylistEntity::class,
-            parentColumns = ["playlistId"],
-            childColumns = ["playlistId"],
-            onDelete = ForeignKey.CASCADE,
-        )
-    ]
-)
-data class PlaylistSongEntity(
-    val playlistId: Int,
-    val songId: Int,
-)
-
 
 @Entity(
     tableName = "playlist_match",

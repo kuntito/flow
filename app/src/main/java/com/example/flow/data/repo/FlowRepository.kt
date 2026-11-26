@@ -1,6 +1,7 @@
 package com.example.flow.data.repo
 
 import android.util.Log
+import androidx.room.Transaction
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
 import com.example.flow.data.local_db.entities.listen_history.toListenEventApi
@@ -9,7 +10,7 @@ import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEnti
 import com.example.flow.data.local_db.entities.playlist.AutoPlaylistType
 import com.example.flow.data.local_db.entities.playlist.PlaylistDao
 import com.example.flow.data.local_db.entities.playlist.PlaylistEntity
-import com.example.flow.data.local_db.entities.playlist.PlaylistSongEntity
+import com.example.flow.data.local_db.entities.playlist.PlaylistMatchEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheDao
@@ -409,24 +410,30 @@ class FlowRepository(
         playlistId: Int,
         songId: Int,
     ) {
-        val playlistSong = PlaylistSongEntity(
+        playlistDao.addSong(
             playlistId = playlistId,
             songId = songId,
         )
+    }
 
-        playlistDao.addSong(playlistSong)
+    suspend fun excludeSongFromPlaylist(
+        playlistId: Int,
+        songId: Int,
+    ) {
+        playlistDao.excludeSong(
+            playlistId = playlistId,
+            songId = songId,
+        )
     }
 
     suspend fun removeSongFromPlaylist(
         playlistId: Int,
         songId: Int,
     ) {
-        val playlistSong = PlaylistSongEntity(
+        playlistDao.removeSong(
             playlistId = playlistId,
             songId = songId,
         )
-
-        playlistDao.removeSong(playlistSong)
     }
 
     suspend fun deletePlaylist(playlistId: Int) {
@@ -593,7 +600,7 @@ class FlowRepository(
     }
 
     /**
-     * sends every playlist and playlist songs to server.
+     * sends every playlist and it's songs to server for syncing.
      *
      * doubles as restore too.
      *
@@ -606,7 +613,7 @@ class FlowRepository(
      * mobile then filters, and only saves the non-auto playlists.
      *
      * auto playlists go up as snapshots, so desktop can play them,
-     * but they're never restored, since they're rebuilt on launch.
+     * but they're never restored, since on mobile, they're rebuilt on launch.
      */
     suspend fun syncPlaylists() {
         val (allPlaylists, allPlaylistSongs) = coroutineScope {
@@ -644,14 +651,17 @@ class FlowRepository(
                 )
             }
         } else {
+            // if no regular playlists exist,
+            // you send an empty list,
+            // so the server returns all the playlists it has.
             emptyList()
         }
 
         val response = flowDs.safeSyncPlaylists(items)
         if (response?.success != true) return
 
-        val isEmptySentItems = items.isEmpty()
-        if (isEmptySentItems) {
+        val isRestoringPlaylists = items.isEmpty()
+        if (isRestoringPlaylists) {
             val returnedPlaylists = response.playlists ?: return
 
             val playlistsToSave = returnedPlaylists.filter { playlist ->
@@ -667,9 +677,10 @@ class FlowRepository(
 
             val playlistSongsToSave = playlistsToSave.flatMap { playlist ->
                 playlist.songIds.map { songId ->
-                    PlaylistSongEntity(
+                    PlaylistMatchEntity(
                         playlistId = playlist.playlistId,
                         songId = songId,
+                        isMatch = true,
                     )
                 }
             }

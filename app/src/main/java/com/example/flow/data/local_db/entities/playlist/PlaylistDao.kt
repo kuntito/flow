@@ -1,11 +1,11 @@
 package com.example.flow.data.local_db.entities.playlist
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -14,7 +14,7 @@ interface PlaylistDao {
     suspend fun insertPlaylist(playlist: PlaylistEntity): Long
 
     @Insert
-    suspend fun insertPlaylistSongs(songs: List<PlaylistSongEntity>)
+    suspend fun insertPlaylistMatches(matches: List<PlaylistMatchEntity>)
 
     @Transaction
     suspend fun createPlaylist(name: String, songIds: List<Int>) {
@@ -22,11 +22,12 @@ interface PlaylistDao {
             PlaylistEntity(name = name)
         ).toInt()
 
-        insertPlaylistSongs(
+        insertPlaylistMatches(
             songIds.map { songId ->
-                PlaylistSongEntity(
+                PlaylistMatchEntity(
                     playlistId = playlistId,
                     songId = songId,
+                    isMatch = true,
                 )
             }
         )
@@ -35,37 +36,48 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlist ORDER BY playlistId DESC")
     suspend fun getAllPlaylists(): List<PlaylistEntity>
 
-    @Query("SELECT * FROM playlist_song")
-    suspend fun getAllPlaylistSongs(): List<PlaylistSongEntity>
+    @Query("SELECT * FROM playlist_match WHERE isMatch = 1")
+    suspend fun getAllPlaylistSongs(): List<PlaylistMatchEntity>
 
-    @Query("SELECT songId FROM playlist_song WHERE playlistId = :playlistId")
+    @Query("SELECT songId FROM playlist_match WHERE playlistId = :playlistId AND isMatch = 1")
     fun getPlaylistSongIds(playlistId: Int): Flow<List<Int>>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addSong(song: PlaylistSongEntity)
+    @Upsert
+    suspend fun upsertPlaylistMatch(match: PlaylistMatchEntity)
 
-    @Delete
-    suspend fun removeSong(song: PlaylistSongEntity)
+    suspend fun addSong(playlistId: Int, songId: Int) {
+        upsertPlaylistMatch(
+            PlaylistMatchEntity(
+                playlistId = playlistId,
+                songId = songId,
+                isMatch = true,
+            )
+        )
+    }
+
+    suspend fun excludeSong(playlistId: Int, songId: Int) {
+        upsertPlaylistMatch(
+            PlaylistMatchEntity(
+                playlistId = playlistId,
+                songId = songId,
+                isMatch = false,
+            )
+        )
+    }
+
+    @Query("DELETE FROM playlist_match WHERE playlistId = :playlistId AND songId = :songId")
+    suspend fun removeSong(playlistId: Int, songId: Int)
 
     @Query("DELETE FROM playlist WHERE playlistId = :playlistId")
     suspend fun deletePlaylist(playlistId: Int)
 
     @Query(
         """
-    SELECT songId FROM playlist_song
-    WHERE playlistId = :playlistId
-    ORDER BY RANDOM()
-    LIMIT 1
-    """
-    )
-    suspend fun getRandomPlaylistSongId(playlistId: Int): Int?
-
-    @Query(
-        """
-    SELECT ps.songId FROM playlist_song AS ps
+    SELECT pm.songId FROM playlist_match AS pm
     INNER JOIN song_search_cache AS cache
-    ON cache.songId = ps.songId
-    WHERE ps.playlistId = :playlistId
+    ON cache.songId = pm.songId
+    WHERE pm.playlistId = :playlistId
+    AND pm.isMatch = 1
     ORDER BY cache.recency ASC
     LIMIT 1
     """
@@ -81,16 +93,7 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlist WHERE autoType IS NULL")
     suspend fun getRegularPlaylists(): List<PlaylistEntity>
 
-    @Query(
-        """
-    SELECT ps.* FROM playlist_song AS ps
-    INNER JOIN playlist AS p ON p.playlistId = ps.playlistId
-    WHERE p.autoType IS NULL
-    """
-    )
-    suspend fun getRegularPlaylistSongs(): List<PlaylistSongEntity>
-
-    @Query("DELETE FROM playlist_song WHERE playlistId = :playlistId")
+    @Query("DELETE FROM playlist_match WHERE playlistId = :playlistId")
     suspend fun clearPlaylistSongs(playlistId: Int)
 
     @Transaction
@@ -101,24 +104,25 @@ interface PlaylistDao {
         clearPlaylistSongs(playlistId)
 
         val playlistSongs = songIds.map { songId ->
-            PlaylistSongEntity(
+            PlaylistMatchEntity(
                 playlistId = playlistId,
                 songId = songId,
+                isMatch = true,
             )
         }
 
-        insertPlaylistSongs(playlistSongs)
+        insertPlaylistMatches(playlistSongs)
     }
 
     @Transaction
     suspend fun insertPlaylistsAndSongs(
         playlists: List<PlaylistEntity>,
-        playlistSongs: List<PlaylistSongEntity>,
+        playlistSongs: List<PlaylistMatchEntity>,
     ) {
         for (playlist in playlists) {
             insertPlaylist(playlist)
         }
 
-        insertPlaylistSongs(playlistSongs)
+        insertPlaylistMatches(playlistSongs)
     }
 }

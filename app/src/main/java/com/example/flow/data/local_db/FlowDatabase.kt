@@ -13,7 +13,7 @@ import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchDao
 import com.example.flow.data.local_db.entities.playFromSearch.PlayFromSearchEntity
 import com.example.flow.data.local_db.entities.playlist.PlaylistDao
 import com.example.flow.data.local_db.entities.playlist.PlaylistEntity
-import com.example.flow.data.local_db.entities.playlist.PlaylistSongEntity
+import com.example.flow.data.local_db.entities.playlist.PlaylistMatchEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryEntity
 import com.example.flow.data.local_db.entities.queue_history.PnqHistoryDao
 import com.example.flow.data.local_db.entities.song_search_cache.SongSearchCacheEntity
@@ -26,6 +26,7 @@ import com.example.flow.data.local_db.migrations.migration_14_15
 import com.example.flow.data.local_db.migrations.migration_15_16
 import com.example.flow.data.local_db.migrations.migration_16_17
 import com.example.flow.data.local_db.migrations.migration_17_18
+import com.example.flow.data.local_db.migrations.migration_18_19
 import com.example.flow.data.local_db.migrations.migration_1_2
 import com.example.flow.data.local_db.migrations.migration_2_3
 import com.example.flow.data.local_db.migrations.migration_3_4
@@ -45,9 +46,9 @@ import com.example.flow.data.local_db.migrations.migration_9_10
         PlayFromSearchEntity::class,
         LruCacheEntity::class,
         PlaylistEntity::class,
-        PlaylistSongEntity::class,
+        PlaylistMatchEntity::class,
     ],
-    version = 18,
+    version = 19,
 )
 abstract class FlowDb: RoomDatabase() {
     abstract fun listenHistoryDao(): ListenHistoryDao
@@ -85,6 +86,7 @@ abstract class FlowDb: RoomDatabase() {
                         migration_15_16,
                         migration_16_17,
                         migration_17_18,
+                        migration_18_19,
                     )
                     .build()
 
