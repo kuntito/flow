@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.example.flow.R
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.AppPlaylistIcon
+import com.example.flow.ui.theme.colorIsco
 import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsOrion
 
@@ -26,6 +27,7 @@ fun TopBarEditPlaylist(
     navBack: () -> Unit,
     playlistName: String,
     isPlaylistAuto: Boolean,
+    goToExclusions: () -> Unit,
 ) {
     val iconSize = 24
     Row(
@@ -81,6 +83,12 @@ fun TopBarEditPlaylist(
                 .weight(1f)
             ,
         ) {
+            AppIconButton(
+                iconRes = R.drawable.ic_ban,
+                color = colorIsco,
+                onClick = goToExclusions,
+                size = iconSize
+            )
         }
     }
 }

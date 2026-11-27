@@ -7,8 +7,8 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +38,7 @@ fun <T> ShrinkableList(
     getKey: (T) -> Any,
     contentPadding: Int = 16,
     animationDurationMillis: Int = 300,
+    stickyHeaderContent: (@Composable (LazyItemScope.(Int) -> Unit))? = null,
     itemContent: @Composable (
         item: T,
         removeFromList: () -> Unit
@@ -56,6 +57,11 @@ fun <T> ShrinkableList(
             .fillMaxSize()
         ,
     ) {
+        if (stickyHeaderContent != null) {
+            stickyHeader{ index ->
+                stickyHeaderContent(index)
+            }
+        }
         items(
             items = items,
             key = getKey,

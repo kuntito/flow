@@ -9,6 +9,7 @@ val Pink80 = Color(0xFFEFB8C8)
 
 val colorKDB = Color(0xFF030303)
 val colorTelli = Color(0xFFFFFFFF)
+val colorTelliAlpha = Color(0x99FFFFFF)
 val colorSane = Color(0xFF111111)
 val colorAguero = Color(0xFF181818)
 val colorMarcelo = Color(0xFF3C3C3C)

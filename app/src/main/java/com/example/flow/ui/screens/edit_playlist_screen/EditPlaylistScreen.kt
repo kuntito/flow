@@ -25,6 +25,7 @@ fun EditPlaylistScreenRoot(
     playlistId: Int,
     playlistName: String,
     isPlaylistAuto: Boolean,
+    goToExclusions: () -> Unit,
 ) {
     val playlistItem = PlaylistItem(
         id = playlistId,
@@ -89,6 +90,7 @@ fun EditPlaylistScreenRoot(
         onSongSearchForPlaylist = onSongSearchForPlaylist,
         addSongToPlaylist = addSongToPlaylist,
         excludeSongFromPlaylist = excludeSongFromPlaylist,
+        goToExclusions = goToExclusions,
     )
 }
 
@@ -101,6 +103,7 @@ fun EditPlaylistScreen(
     onSongSearchForPlaylist: (String) -> Unit,
     addSongToPlaylist: (playlistId: Int, songId: Int) -> Unit,
     excludeSongFromPlaylist: (playlistId: Int, songId: Int) -> Unit,
+    goToExclusions: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -111,6 +114,7 @@ fun EditPlaylistScreen(
             navBack = navBack,
             playlistName = playlist.name,
             isPlaylistAuto = playlist.isAuto,
+            goToExclusions = goToExclusions,
         )
         SearchSongForPlaylist(
             songSearchState = songSearchState,

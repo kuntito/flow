@@ -10,6 +10,7 @@ import androidx.navigation.toRoute
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.ui.screens.edit_playlist_screen.EditPlaylistScreenRoot
 import com.example.flow.ui.screens.home_screen.HomeScreenRoot
+import com.example.flow.ui.screens.playlist_exclusions_screen.PlaylistExclusionsRoot
 import com.example.flow.ui.screens.playlist_screen.PlaylistScreenRoot
 import com.example.flow.ui.screens.song_search_screen.SongSearchScreenRoot
 import com.example.flow.ui.screens.view_playlist_screen.ViewPlaylistScreenRoot
@@ -100,6 +101,28 @@ fun ScreenNavigation(
                 playlistId = args.playlistId,
                 playlistName = args.playlistName,
                 isPlaylistAuto = args.isPlaylistAuto,
+                goToExclusions = {
+                    navController.navigate(
+                        AppScreens.PlaylistExclusionsScreen(
+                            playlistId = args.playlistId,
+                            playlistName = args.playlistName,
+                            isPlaylistAuto = args.isPlaylistAuto,
+                        )
+                    )
+                }
+            )
+        }
+        composable<AppScreens.PlaylistExclusionsScreen> { backStackEntry ->
+            val args = backStackEntry.toRoute<AppScreens.PlaylistExclusionsScreen>()
+
+            PlaylistExclusionsRoot(
+                flowViewModel = flowViewModel,
+                navBack = {
+                    navController.popBackStack()
+                },
+                playlistId = args.playlistId,
+                playlistName = args.playlistName,
+                isPlaylistAuto = args.isPlaylistAuto,
             )
         }
     }
@@ -124,6 +147,13 @@ sealed class AppScreens {
 
     @Serializable
     data class EditPlaylistScreen(
+        val playlistId: Int,
+        val playlistName: String,
+        val isPlaylistAuto: Boolean,
+    )
+
+    @Serializable
+    data class PlaylistExclusionsScreen(
         val playlistId: Int,
         val playlistName: String,
         val isPlaylistAuto: Boolean,
