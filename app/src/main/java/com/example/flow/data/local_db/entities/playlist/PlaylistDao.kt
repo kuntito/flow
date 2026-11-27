@@ -42,6 +42,9 @@ interface PlaylistDao {
     @Query("SELECT songId FROM playlist_match WHERE playlistId = :playlistId AND isMatch = 1")
     fun getPlaylistSongIds(playlistId: Int): Flow<List<Int>>
 
+    @Query("SELECT songId FROM playlist_match WHERE playlistId = :playlistId AND isMatch = 0")
+    fun getPlaylistExclusions(playlistId: Int): Flow<List<Int>>
+
     @Upsert
     suspend fun upsertPlaylistMatch(match: PlaylistMatchEntity)
 

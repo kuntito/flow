@@ -8,9 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.FlowViewModel
@@ -34,9 +32,10 @@ fun EditPlaylistScreenRoot(
         isAuto = isPlaylistAuto,
     )
 
-    val playlistSongs by flowViewModel.viewingPlaylistSongs.collectAsState()
+    val playlistSongSet by flowViewModel.playlistSongSet.collectAsState()
+
     LaunchedEffect(playlistId) {
-        flowViewModel.loadPlaylistSongs(playlistItem)
+        flowViewModel.loadPlaylistSongSet(playlistItem)
     }
 
 
@@ -45,13 +44,17 @@ fun EditPlaylistScreenRoot(
 
     val songIdsToExclude by remember {
         derivedStateOf {
-            val existingIds = playlistSongs.map {
+            val idsSongsInPlaylist = playlistSongSet.songs.map {
                 it.id
             }
 
-            val existingIdsSet = existingIds.toSet()
+            val idsExcludedSongs = playlistSongSet.exclusions.map {
+                it.id
+            }
 
-            existingIdsSet
+            val setOfSongIds = (idsSongsInPlaylist + idsExcludedSongs).toSet()
+
+            setOfSongIds
         }
     }
 
@@ -77,6 +80,7 @@ fun EditPlaylistScreenRoot(
     }
 
     val addSongToPlaylist = flowViewModel::addSongToPlaylist
+    val excludeSongFromPlaylist = flowViewModel::excludeSongFromPlaylist
 
     EditPlaylistScreen(
         navBack = navBack,
@@ -84,6 +88,7 @@ fun EditPlaylistScreenRoot(
         songSearchState = filteredSongSearchState,
         onSongSearchForPlaylist = onSongSearchForPlaylist,
         addSongToPlaylist = addSongToPlaylist,
+        excludeSongFromPlaylist = excludeSongFromPlaylist,
     )
 }
 
@@ -95,6 +100,7 @@ fun EditPlaylistScreen(
     songSearchState: SongSearchState,
     onSongSearchForPlaylist: (String) -> Unit,
     addSongToPlaylist: (playlistId: Int, songId: Int) -> Unit,
+    excludeSongFromPlaylist: (playlistId: Int, songId: Int) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -111,6 +117,12 @@ fun EditPlaylistScreen(
             onSongSearch = onSongSearchForPlaylist,
             addToPlaylist = { songId ->
                 addSongToPlaylist(
+                    playlist.id,
+                    songId
+                )
+            },
+            excludeSongFromPlaylist = { songId ->
+                excludeSongFromPlaylist(
                     playlist.id,
                     songId
                 )

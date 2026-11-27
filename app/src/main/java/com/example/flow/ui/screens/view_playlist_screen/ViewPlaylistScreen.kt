@@ -39,7 +39,7 @@ fun ViewPlaylistScreenRoot(
     goToEditPlaylist: (PlaylistItem) -> Unit,
     isPlaylistAuto: Boolean,
 ) {
-    val playlistSongs by flowViewModel.viewingPlaylistSongs.collectAsState()
+    val playlistSongSet by flowViewModel.playlistSongSet.collectAsState()
     val playlistItem = PlaylistItem(
         id = playlistId,
         name = playlistName,
@@ -47,7 +47,7 @@ fun ViewPlaylistScreenRoot(
     )
 
     LaunchedEffect(playlistId) {
-        flowViewModel.loadPlaylistSongs(playlistItem)
+        flowViewModel.loadPlaylistSongSet(playlistItem)
     }
 
     val playSong: (Song) -> Unit = flowViewModel::playSongFromPlaylist
@@ -73,7 +73,7 @@ fun ViewPlaylistScreenRoot(
     ViewPlaylistScreen(
         navBack = navBack,
         playlist = playlistItem,
-        playlistSongs = playlistSongs,
+        playlistSongs = playlistSongSet.songs,
         playSong = playSong,
         playSongNext = playSongNext,
         playSongLater = playSongLater,

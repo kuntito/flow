@@ -406,6 +406,22 @@ class FlowRepository(
         return songsFlow
     }
 
+    suspend fun getPlaylistExclusions(
+        playlistId: Int
+    ): Flow<List<Song>> {
+        val songIdsFlow = playlistDao.getPlaylistExclusions(playlistId)
+
+        val songsFlow = songIdsFlow.map { songIds ->
+            val cachedSongs = songSearchCacheDao.getSongsByIds(songIds)
+
+            cachedSongs.mapNotNull {
+                it.toSong()
+            }
+        }
+
+        return songsFlow
+    }
+
     suspend fun addSongToPlaylist(
         playlistId: Int,
         songId: Int,

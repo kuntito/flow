@@ -21,6 +21,7 @@ fun LiSongToAddPlaylist(
     modifier: Modifier = Modifier,
     song: Song,
     onAddToPlaylist: () -> Unit,
+    onExcludeFromPlaylist: () -> Unit,
 ) {
 
     Row(
@@ -46,7 +47,7 @@ fun LiSongToAddPlaylist(
         ) {
             AppIconButton(
                 iconRes = R.drawable.ic_minus,
-                onClick = onAddToPlaylist,
+                onClick = onExcludeFromPlaylist,
             )
             AppIconButton(
                 iconRes = R.drawable.ic_add,

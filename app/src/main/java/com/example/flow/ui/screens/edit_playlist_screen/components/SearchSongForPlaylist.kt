@@ -26,6 +26,7 @@ fun SearchSongForPlaylist(
     songSearchState: SongSearchState,
     onSongSearch: (String) -> Unit,
     addToPlaylist: (Int) -> Unit,
+    excludeSongFromPlaylist: (Int) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -72,6 +73,10 @@ fun SearchSongForPlaylist(
                             onAddToPlaylist = {
                                 removeFromList()
                                 addToPlaylist(song.id)
+                            },
+                            onExcludeFromPlaylist = {
+                                removeFromList()
+                                excludeSongFromPlaylist(song.id)
                             }
                         )
                     }

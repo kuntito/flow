@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.PlaylistItem
+import com.example.flow.data.models.PlaylistSongSet
 import com.example.flow.data.models.Song
 import com.example.flow.data.repo.FlowRepository
 import com.example.flow.helper_classes.AlbumArtLoader
@@ -35,10 +36,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.Int
 import kotlin.time.Duration.Companion.milliseconds
@@ -72,9 +75,8 @@ class FlowViewModel(
         }
     }
 
-    // VM
-    private val _playlistSongs = MutableStateFlow<List<Song>>(emptyList())
-    val viewingPlaylistSongs = _playlistSongs.asStateFlow()
+    private val _playlistSongSet = MutableStateFlow(PlaylistSongSet())
+    val playlistSongSet = _playlistSongSet.asStateFlow()
 
     private var stopBecauseSleepTimer = false
     fun setStopBecauseSleepTimer(flag: Boolean) {
@@ -351,21 +353,36 @@ class FlowViewModel(
         }
     }
 
-    private var loadPlaylistSongsJob: Job? = null
-    fun loadPlaylistSongs(playlist: PlaylistItem) {
-        loadPlaylistSongsJob?.cancel()
-        _playlistSongs.value = emptyList()
+    private var loadPlaylistSongSetJob: Job? = null
+    fun loadPlaylistSongSet(playlist: PlaylistItem) {
+        loadPlaylistSongSetJob?.cancel()
+        _playlistSongSet.value = PlaylistSongSet()
 
-        loadPlaylistSongsJob = viewModelScope.launch {
-            val songsFlow = flowRepo.getPlaylistSongs(playlist.id)
-            songsFlow.collect { songs ->
-                _playlistSongs.value = songs
+        loadPlaylistSongSetJob = viewModelScope.launch {
+            launch {
+                val songsFlow = flowRepo.getPlaylistSongs(playlist.id)
+                songsFlow.collect { songs ->
+                    _playlistSongSet.update {
+                        it.copy(songs = songs)
+                    }
+                }
+            }
+
+            launch {
+                val exclusionsFlow = flowRepo.getPlaylistExclusions(playlist.id)
+                exclusionsFlow.collect { excludedSongs ->
+                    _playlistSongSet.update {
+                        it.copy(
+                            exclusions = excludedSongs
+                        )
+                    }
+                }
             }
         }
     }
 
     fun onDismissPlaylistSongsInView() {
-        _playlistSongs.value = emptyList()
+        _playlistSongSet.value = PlaylistSongSet()
     }
 
     private val notificationBridge = NotificationPlayerVmBridge(
@@ -688,6 +705,18 @@ class FlowViewModel(
                 songId = songId,
             )
             flowRepo.syncPlaylists()
+        }
+    }
+
+    fun excludeSongFromPlaylist(
+        playlistId: Int,
+        songId: Int,
+    ) {
+        viewModelScope.launch {
+            flowRepo.excludeSongFromPlaylist(
+                playlistId = playlistId,
+                songId = songId,
+            )
         }
     }
 
