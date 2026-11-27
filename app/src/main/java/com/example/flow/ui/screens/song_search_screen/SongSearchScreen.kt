@@ -17,14 +17,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.FlowViewModel
+import com.example.flow.data.models.AppEvent
 import com.example.flow.data.models.Song
 import com.example.flow.ui.components.util.AppSnackBar
+import com.example.flow.ui.components.util.AppSnackBarVisuals
+import com.example.flow.ui.screens.home_screen.models.ObserveAsEvents
+import com.example.flow.ui.screens.playlist_screen.models.PlaylistEvent
 import com.example.flow.ui.screens.song_search_screen.components.OngoingSongSearchIndicator
 import com.example.flow.ui.screens.song_search_screen.components.SearchFinishedNoResultIndicator
 import com.example.flow.ui.screens.song_search_screen.components.SearchScreenTopAppBar
 import com.example.flow.ui.screens.song_search_screen.components.SongSearchResultList
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
-import com.example.flow.ui.theme.colorDebit
+import com.example.flow.ui.theme.colorPower
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 
@@ -52,6 +57,9 @@ fun SongSearchScreenRoot(
 
     val onPlaySongNextFromSearch: (Song) -> Unit = flowViewModel::playSongNextFromSearch
     val onPlaySongLaterFromSearch: (Song) -> Unit = flowViewModel::playSongLaterFromSearch
+    val openAddToPlaylist = flowViewModel::openAddToPlaylist
+
+    val appEventsFlow = flowViewModel.appEventsFlow
 
     SongSearchScreen(
         songSearchState = songSearchState,
@@ -61,6 +69,8 @@ fun SongSearchScreenRoot(
         onPlaySongSearchItem = onPlaySongSearchItem,
         onPlaySongNext = onPlaySongNextFromSearch,
         onPlaySongLater = onPlaySongLaterFromSearch,
+        onAddSongToPlaylist = openAddToPlaylist,
+        appEventsFlow = appEventsFlow,
     )
 }
 
@@ -74,6 +84,8 @@ fun SongSearchScreen(
     onPlaySongSearchItem: (Int, String) -> Unit,
     onPlaySongNext: (Song) -> Unit,
     onPlaySongLater: (Song) -> Unit,
+    onAddSongToPlaylist: (Song) -> Unit,
+    appEventsFlow: Flow<AppEvent>,
 ) {
     Scaffold(
         topBar = {
@@ -92,6 +104,28 @@ fun SongSearchScreen(
             val snackBarHostState = remember { SnackbarHostState() }
 
             val scope = rememberCoroutineScope()
+
+            ObserveAsEvents<AppEvent>(
+                flow = appEventsFlow
+            ) { event ->
+                when (event) {
+                    is PlaylistEvent.OnAddToPlaylist -> {
+                        val message = "added to ${event.playlistName}"
+
+                        scope.launch {
+                            snackBarHostState.currentSnackbarData?.dismiss()
+                            snackBarHostState.showSnackbar(
+                                AppSnackBarVisuals(
+                                    message = message,
+                                    bgColor = colorPower,
+                                )
+                            )
+                        }
+                    }
+                    else -> {}
+                }
+            }
+
             val displayErrorSnackBar = {
                 scope.launch {
                     snackBarHostState.showSnackbar(
@@ -121,6 +155,7 @@ fun SongSearchScreen(
                             },
                             onPlaySongNext = onPlaySongNext,
                             onPlaySongLater = onPlaySongLater,
+                            addToPlaylist = onAddSongToPlaylist,
                         )
                     }
                     SongSearchState.FinishedNoResult -> {
@@ -135,9 +170,10 @@ fun SongSearchScreen(
             SnackbarHost(
                 hostState = snackBarHostState,
                 snackbar = { data ->
+                    val visuals = data.visuals as? AppSnackBarVisuals
                     AppSnackBar(
                         text = data.visuals.message,
-                        bgColor = colorDebit,
+                        bgColor = visuals?.bgColor,
                     )
                 }
             )

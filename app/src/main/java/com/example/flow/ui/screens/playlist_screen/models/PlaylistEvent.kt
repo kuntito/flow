@@ -11,4 +11,9 @@ sealed interface PlaylistEvent: AppEvent {
     data class OnAddPlayLater(
         val song: Song
     ): PlaylistEvent
+
+    data class OnAddToPlaylist(
+        val song: Song,
+        val playlistName: String,
+    ): PlaylistEvent
 }

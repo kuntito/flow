@@ -14,6 +14,7 @@ fun PlaylistSongLi(
     playSongNext: () -> Unit,
     playSongLater: () -> Unit,
     removeFromPlaylist: () -> Unit,
+    addToPlaylist: () -> Unit,
 ) {
     val dropdownOptions = listOf(
         DropdownMenuOption(
@@ -26,6 +27,7 @@ fun PlaylistSongLi(
         onPlaySong = onPlaySong,
         playSongNext = playSongNext,
         playSongLater = playSongLater,
+        addToPlaylist = addToPlaylist,
         dropdowns = dropdownOptions,
         modifier = modifier,
     )

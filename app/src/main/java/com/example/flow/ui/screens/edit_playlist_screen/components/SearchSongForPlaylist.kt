@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.flow.data.models.PlaylistItem
+import com.example.flow.data.models.Song
 import com.example.flow.ui.components.general.AppSongSearchBar
 import com.example.flow.ui.components.util.ShrinkableList
 import com.example.flow.ui.screens.song_search_screen.components.OngoingSongSearchIndicator
@@ -31,7 +32,7 @@ fun SearchSongForPlaylist(
     modifier: Modifier = Modifier,
     songSearchState: SongSearchState,
     onSongSearch: (String) -> Unit,
-    addToPlaylist: (Int) -> Unit,
+    addToPlaylist: (Song) -> Unit,
     excludeSongFromPlaylist: (Int) -> Unit,
 ) {
     Column(
@@ -99,7 +100,7 @@ fun SearchSongForPlaylist(
                             song = song,
                             onAddToPlaylist = {
                                 removeFromList()
-                                addToPlaylist(song.id)
+                                addToPlaylist(song)
                             },
                             onExcludeFromPlaylist = {
                                 removeFromList()

@@ -72,7 +72,11 @@ fun PlaylistExclusionsScreen(
     navBack: () -> Unit,
     playlist: PlaylistItem,
     excludedSongs: List<Song>,
-    addSongToPlaylist: (playlistId: Int, songId: Int) -> Unit,
+    addSongToPlaylist: (
+        playlist: PlaylistItem,
+        song: Song,
+        sendEvent: Boolean,
+    ) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -134,8 +138,9 @@ fun PlaylistExclusionsScreen(
                         onAddToPlaylist = {
                             removeFromList()
                             addSongToPlaylist(
-                                playlist.id,
-                                song.id
+                                playlist,
+                                song,
+                                false,
                             )
                         },
                         onExcludeFromPlaylist = null

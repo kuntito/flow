@@ -30,6 +30,7 @@ fun ListPlaylistSongs(
     playSongNext: (Song) -> Unit,
     playSongLater: (Song) -> Unit,
     removeSong: (Song) -> Unit,
+    addSongToPlaylist: (Song) -> Unit,
 ) {
     val totalMinutes = getTotalMinutes(songs)
     val durationText = when(totalMinutes) {
@@ -100,6 +101,9 @@ fun ListPlaylistSongs(
                 },
                 removeFromPlaylist = {
                     removeSong(it)
+                },
+                addToPlaylist = {
+                    addSongToPlaylist(it)
                 }
             )
         }

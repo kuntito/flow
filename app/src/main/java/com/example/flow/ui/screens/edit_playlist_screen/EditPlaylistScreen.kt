@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.FlowViewModel
 import com.example.flow.data.models.PlaylistItem
+import com.example.flow.data.models.Song
 import com.example.flow.ui.screens.edit_playlist_screen.components.SearchSongForPlaylist
 import com.example.flow.ui.screens.edit_playlist_screen.components.TopBarEditPlaylist
 import com.example.flow.ui.screens.song_search_screen.models.SongSearchState
@@ -101,7 +102,7 @@ fun EditPlaylistScreen(
     playlist: PlaylistItem,
     songSearchState: SongSearchState,
     onSongSearchForPlaylist: (String) -> Unit,
-    addSongToPlaylist: (playlistId: Int, songId: Int) -> Unit,
+    addSongToPlaylist: (playlist: PlaylistItem, song: Song, sendEvent: Boolean) -> Unit,
     excludeSongFromPlaylist: (playlistId: Int, songId: Int) -> Unit,
     goToExclusions: () -> Unit,
 ) {
@@ -119,10 +120,11 @@ fun EditPlaylistScreen(
         SearchSongForPlaylist(
             songSearchState = songSearchState,
             onSongSearch = onSongSearchForPlaylist,
-            addToPlaylist = { songId ->
+            addToPlaylist = { song ->
                 addSongToPlaylist(
-                    playlist.id,
-                    songId
+                    playlist,
+                    song,
+                    true
                 )
             },
             excludeSongFromPlaylist = { songId ->

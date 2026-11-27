@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -294,6 +293,17 @@ class FlowViewModel(
     * */
     fun onContinuePlay() {
         songPlayer.continuePlayback()
+    }
+
+    private val _pendingSongAddToPlaylist = MutableStateFlow<Song?>(null)
+    val pendingSongAddToPlaylist = _pendingSongAddToPlaylist.asStateFlow()
+
+    fun openAddToPlaylist(song: Song) {
+        _pendingSongAddToPlaylist.value = song
+    }
+
+    fun closeAddToPlaylist() {
+        _pendingSongAddToPlaylist.value = null
     }
 
     // TODO should probably put in a config.
@@ -696,15 +706,27 @@ class FlowViewModel(
     }
 
     fun addSongToPlaylist(
-        playlistId: Int,
-        songId: Int,
+        playlist: PlaylistItem,
+        song: Song,
+        sendEvent: Boolean,
     ) {
         viewModelScope.launch {
             flowRepo.addSongToPlaylist(
-                playlistId = playlistId,
-                songId = songId,
+                playlistId = playlist.id,
+                songId = song.id,
             )
             flowRepo.syncPlaylists()
+        }
+
+        if (sendEvent) {
+            viewModelScope.launch {
+                eventChannel.send(
+                    PlaylistEvent.OnAddToPlaylist(
+                        song = song,
+                        playlistName = playlist.name,
+                    )
+                )
+            }
         }
     }
 

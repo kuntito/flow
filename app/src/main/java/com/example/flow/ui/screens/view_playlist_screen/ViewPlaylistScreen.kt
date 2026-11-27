@@ -69,6 +69,7 @@ fun ViewPlaylistScreenRoot(
     }
 
     val activePlaylist by flowViewModel.activePlaylist.collectAsState()
+    val openAddToPlaylist = flowViewModel::openAddToPlaylist
 
     ViewPlaylistScreen(
         navBack = navBack,
@@ -83,6 +84,7 @@ fun ViewPlaylistScreenRoot(
         removeSongFromPlaylist = removeSongFromPlaylist,
         activePlaylist = activePlaylist,
         onDeactivatePlaylist = deactivatePlaylist,
+        onAddSongToPlaylist = openAddToPlaylist,
     )
 }
 
@@ -101,6 +103,7 @@ fun ViewPlaylistScreen(
     removeSongFromPlaylist: (Song, PlaylistItem) -> Unit,
     activePlaylist: PlaylistItem?,
     onDeactivatePlaylist: () -> Unit,
+    onAddSongToPlaylist: (Song) -> Unit,
 ) {
     val snackBarHostState = remember {
         SnackbarHostState()
@@ -136,7 +139,19 @@ fun ViewPlaylistScreen(
                         )
                     )
                 }
+            }
+            is PlaylistEvent.OnAddToPlaylist -> {
+                val message = "added to ${event.playlistName}"
 
+                scope.launch {
+                    snackBarHostState.currentSnackbarData?.dismiss()
+                    snackBarHostState.showSnackbar(
+                        AppSnackBarVisuals(
+                            message = message,
+                            bgColor = colorPower,
+                        )
+                    )
+                }
             }
             else -> {}
         }
@@ -170,6 +185,9 @@ fun ViewPlaylistScreen(
                         song,
                         playlist,
                     )
+                },
+                addSongToPlaylist = { song ->
+                    onAddSongToPlaylist(song)
                 }
             )
             SnackbarHost(

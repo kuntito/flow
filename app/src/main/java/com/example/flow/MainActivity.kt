@@ -10,6 +10,8 @@ import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.zIndex
@@ -104,6 +106,25 @@ class MainActivity : ComponentActivity() {
                         ScreenNavigation(
                             flowViewModel = flowViewModel,
                         )
+
+                        val pendingSongAddToPlaylist by flowViewModel.pendingSongAddToPlaylist.collectAsState()
+                        val playlists by flowViewModel.playlists.collectAsState()
+
+                        pendingSongAddToPlaylist?.let { song ->
+                            val regularPlaylists = playlists.filter { !it.isAuto }
+
+                            DialogAddToPlaylist (
+                                playlists = regularPlaylists,
+                                onAddToPlaylist = { playlist ->
+                                    flowViewModel.addSongToPlaylist(
+                                        playlist = playlist,
+                                        song = song,
+                                        sendEvent = true,
+                                    )
+                                },
+                                onDismiss = flowViewModel::closeAddToPlaylist,
+                            )
+                        }
                     }
                 }
             }

@@ -36,6 +36,7 @@ fun SongLi(
     playSongNext: () -> Unit,
     playSongLater: () -> Unit,
     dropdowns: List<DropdownMenuOption> = emptyList(),
+    addToPlaylist: () -> Unit,
 ) {
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
@@ -54,6 +55,12 @@ fun SongLi(
                 DropdownMenuOption(
                     label = "play next",
                     onClick = playSongNext
+                )
+            )
+            add(
+                DropdownMenuOption(
+                    label = "add to playlist",
+                    onClick = addToPlaylist,
                 )
             )
 
