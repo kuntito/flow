@@ -40,6 +40,15 @@ fun ScreenNavigation(
                     navController.navigate(
                         AppScreens.PlaylistScreen,
                     )
+                },
+                goToViewPlaylistScreen = { playlist ->
+                    navController.navigate(
+                        AppScreens.ViewPlaylistScreen(
+                            playlistId = playlist.id,
+                            playlistName = playlist.name,
+                            isPlaylistAuto = playlist.isAuto,
+                        )
+                    )
                 }
             )
         }

@@ -48,6 +48,7 @@ fun HomeScreenRoot(
     flowViewModel: FlowViewModel,
     goToSongSearchScreen: () -> Unit,
     goToPlaylistScreen: () -> Unit,
+    goToViewPlaylistScreen: (PlaylistItem) -> Unit,
 ) {
     val flowPlaybackState by flowViewModel.flowPlaybackState.collectAsState()
     val playbackRepeatMode by flowViewModel.playbackRepeatMode.collectAsState()
@@ -109,6 +110,7 @@ fun HomeScreenRoot(
         playlists = playlistItems,
         activatePlaylist = activatePlaylist,
         startPlaylist = startPlaylist,
+        viewActivePlaylist = goToViewPlaylistScreen
     )
 }
 
@@ -142,6 +144,7 @@ fun HomeScreen(
     playlists: List<PlaylistItem>,
     activatePlaylist: (PlaylistItem) -> Unit,
     startPlaylist: (PlaylistItem) -> Unit,
+    viewActivePlaylist: (PlaylistItem) -> Unit,
 ) {
     var homeScreenModal by remember {
         mutableStateOf<HomeScreenModal?>(null)
@@ -200,6 +203,7 @@ fun HomeScreen(
                 activePlaylist = activePlaylist,
                 deactivatePlaylist = deactivatePlaylist,
                 onPeekPlaylists = onPeekPlaylists,
+                viewActivePlaylist = viewActivePlaylist,
             )
         },
         modifier = modifier

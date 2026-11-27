@@ -1,6 +1,6 @@
 package com.example.flow.ui.screens.home_screen.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +35,7 @@ fun FlowTopAppBar(
     activePlaylist: PlaylistItem?,
     deactivatePlaylist: () -> Unit,
     onPeekPlaylists: () -> Unit,
+    viewActivePlaylist: (PlaylistItem) -> Unit,
 ) {
     val iconSize = 24
     val iconGap = 24
@@ -107,8 +108,11 @@ fun FlowTopAppBar(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
-                        .clickable(
-                            onClick = deactivatePlaylist,
+                        .combinedClickable(
+                            onClick = {
+                                viewActivePlaylist(activePlaylist)
+                            },
+                            onDoubleClick = deactivatePlaylist,
                         )
                     ,
                 )
