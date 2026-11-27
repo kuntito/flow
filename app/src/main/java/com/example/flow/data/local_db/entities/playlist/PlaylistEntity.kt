@@ -1,5 +1,6 @@
 package com.example.flow.data.local_db.entities.playlist
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -23,6 +24,8 @@ data class PlaylistEntity(
     val playlistId: Int = 0,
     val name: String,
     val autoType: AutoPlaylistType? = null,
+    @ColumnInfo(defaultValue = "0")
+    val isStashed: Boolean = false,
 )
 
 
