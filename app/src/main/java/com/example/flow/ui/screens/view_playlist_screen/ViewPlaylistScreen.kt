@@ -71,6 +71,8 @@ fun ViewPlaylistScreenRoot(
     val activePlaylist by flowViewModel.activePlaylist.collectAsState()
     val openAddToPlaylist = flowViewModel::openAddToPlaylist
 
+    val excludeSongFromPlaylist = flowViewModel::excludeSongFromPlaylist
+
     ViewPlaylistScreen(
         navBack = navBack,
         playlist = playlistItem,
@@ -85,6 +87,7 @@ fun ViewPlaylistScreenRoot(
         activePlaylist = activePlaylist,
         onDeactivatePlaylist = deactivatePlaylist,
         onAddSongToPlaylist = openAddToPlaylist,
+        onExcludeSongFromPlaylist = excludeSongFromPlaylist
     )
 }
 
@@ -104,6 +107,7 @@ fun ViewPlaylistScreen(
     activePlaylist: PlaylistItem?,
     onDeactivatePlaylist: () -> Unit,
     onAddSongToPlaylist: (Song) -> Unit,
+    onExcludeSongFromPlaylist: (playlistId: Int, songId: Int) -> Unit,
 ) {
     val snackBarHostState = remember {
         SnackbarHostState()
@@ -188,6 +192,12 @@ fun ViewPlaylistScreen(
                 },
                 addSongToPlaylist = { song ->
                     onAddSongToPlaylist(song)
+                },
+                excludeSongFromPlaylist = { song ->
+                    onExcludeSongFromPlaylist(
+                        playlist.id,
+                        song.id,
+                    )
                 }
             )
             SnackbarHost(

@@ -15,12 +15,18 @@ fun PlaylistSongLi(
     playSongLater: () -> Unit,
     removeFromPlaylist: () -> Unit,
     addToPlaylist: () -> Unit,
+    excludeFromPlaylist: () -> Unit,
 ) {
     val dropdownOptions = listOf(
         DropdownMenuOption(
+            label = "exclude",
+            onClick = excludeFromPlaylist,
+        ),
+        // TODO do i need remove since i now have exclude?
+        DropdownMenuOption(
             label = "remove song",
             onClick = removeFromPlaylist,
-        )
+        ),
     )
     SongLi(
         song = song,

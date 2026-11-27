@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.example.flow.data.models.Song
-import com.example.flow.getTotalMinutes
+import com.example.flow.formatRemainingTime
 import com.example.flow.ui.theme.colorKDB
 import com.example.flow.ui.theme.colorTelli
 import com.example.flow.ui.theme.tsHush
@@ -31,12 +31,10 @@ fun ListPlaylistSongs(
     playSongLater: (Song) -> Unit,
     removeSong: (Song) -> Unit,
     addSongToPlaylist: (Song) -> Unit,
+    excludeSongFromPlaylist: (Song) -> Unit,
 ) {
-    val totalMinutes = getTotalMinutes(songs)
-    val durationText = when(totalMinutes) {
-        1 -> "$totalMinutes minute."
-        else -> "$totalMinutes minutes."
-    }
+    val totalDurationMs = songs.sumOf { it.durationMillis.toLong() }
+    val durationText = formatRemainingTime(totalDurationMs)
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -48,7 +46,7 @@ fun ListPlaylistSongs(
         ,
     ) {
         stickyHeader {
-            if (totalMinutes > 0) {
+            if (totalDurationMs > 0) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(
                         space = 32.dp,
@@ -104,6 +102,9 @@ fun ListPlaylistSongs(
                 },
                 addToPlaylist = {
                     addSongToPlaylist(it)
+                },
+                excludeFromPlaylist = {
+                    excludeSongFromPlaylist(it)
                 }
             )
         }
