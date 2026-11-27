@@ -128,4 +128,16 @@ interface PlaylistDao {
 
         insertPlaylistMatches(playlistSongs)
     }
+
+    @Query("SELECT * FROM playlist WHERE isStashed = 0 ORDER BY playlistId DESC")
+    suspend fun getUnstashedPlaylists(): List<PlaylistEntity>
+
+    @Query("SELECT * FROM playlist WHERE isStashed = 1 ORDER BY playlistId DESC")
+    suspend fun getStashedPlaylists(): List<PlaylistEntity>
+
+    @Query("UPDATE playlist SET isStashed = 1 WHERE playlistId = :playlistId")
+    suspend fun stashPlaylist(playlistId: Int)
+
+    @Query("UPDATE playlist SET isStashed = 0 WHERE playlistId = :playlistId")
+    suspend fun unstashPlaylist(playlistId: Int)
 }

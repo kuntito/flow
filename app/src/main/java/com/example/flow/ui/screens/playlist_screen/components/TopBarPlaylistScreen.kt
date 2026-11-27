@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.playlist_screen.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,12 +17,14 @@ import androidx.compose.ui.unit.sp
 import com.example.flow.R
 import com.example.flow.ui.components.general.AppIconButton
 import com.example.flow.ui.components.util.PreviewColumn
+import com.example.flow.ui.theme.colorRaze
 import com.example.flow.ui.theme.tsOrion
 
 @Composable
 fun TopBarPlaylistScreen(
     modifier: Modifier = Modifier,
     navBack: () -> Unit,
+    seeStash: () -> Unit,
 ) {
     val iconSize = 24
     Row(
@@ -52,14 +55,12 @@ fun TopBarPlaylistScreen(
                     ),
             )
         }
-        Spacer(Modifier.width(iconSize.dp))
-    }
-}
-
-@Preview
-@Composable
-private fun PreviewTopBarPlaylistScreen() {
-    PreviewColumn {
-        TopBarPlaylistScreen() { }
+        AppIconButton(
+            iconRes = R.drawable.ic_archive,
+            onClick = seeStash,
+            size = iconSize,
+            modifier = Modifier
+        )
+        Spacer(Modifier.width(8.dp))
     }
 }

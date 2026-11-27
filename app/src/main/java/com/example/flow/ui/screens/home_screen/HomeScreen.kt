@@ -202,6 +202,7 @@ fun HomeScreen(
                 toggleOfflinePlay = toggleOfflinePlay,
                 activePlaylist = activePlaylist,
                 deactivatePlaylist = deactivatePlaylist,
+                noOfPlaylists = playlists.size,
                 onPeekPlaylists = onPeekPlaylists,
                 viewActivePlaylist = viewActivePlaylist,
             )

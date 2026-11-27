@@ -109,9 +109,12 @@ class MainActivity : ComponentActivity() {
 
                         val pendingSongAddToPlaylist by flowViewModel.pendingSongAddToPlaylist.collectAsState()
                         val playlists by flowViewModel.playlists.collectAsState()
+                        val stashedPlaylists by flowViewModel.stashedPlaylists.collectAsState()
 
                         pendingSongAddToPlaylist?.let { song ->
-                            val regularPlaylists = playlists.filter { !it.isAuto }
+                            val regularPlaylists = (playlists + stashedPlaylists)
+                                .filter { !it.isAuto }
+                                .sortedBy { it.name.lowercase() }
 
                             DialogAddToPlaylist (
                                 playlists = regularPlaylists,

@@ -47,6 +47,7 @@ fun ListItemPlaylist(
     isActive: Boolean,
     deactivate: () -> Unit,
     activate: () -> Unit,
+    dropdowns: List<DropdownMenuOption> = emptyList(),
 ) {
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
@@ -67,6 +68,9 @@ fun ListItemPlaylist(
                     onClick = activate,
                 )
             )
+
+            addAll(dropdowns)
+
             add(
                 DropdownMenuOption(
                     label = "delete playlist",

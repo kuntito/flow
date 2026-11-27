@@ -372,8 +372,13 @@ class FlowRepository(
         }
     }
 
-    suspend fun getPlaylists(): List<PlaylistItem> {
-        val playlists = playlistDao.getAllPlaylists().map {
+    /**
+     * auto playlists are shown first.
+     */
+    private fun orderPlaylistItems(
+        entities: List<PlaylistEntity>,
+    ): List<PlaylistItem> {
+        val playlists = entities.map {
             PlaylistItem(
                 id = it.playlistId,
                 name = it.name,
@@ -388,6 +393,30 @@ class FlowRepository(
         }
 
         return autoPlaylists + regularPlaylists
+    }
+
+    suspend fun getPlaylists(): List<PlaylistItem> {
+        val playlistEntities = playlistDao.getUnstashedPlaylists()
+
+        return orderPlaylistItems(playlistEntities)
+    }
+
+    suspend fun getStashedPlaylists(): List<PlaylistItem> {
+        val entities = playlistDao.getStashedPlaylists()
+
+        return orderPlaylistItems(entities)
+    }
+
+    suspend fun stashPlaylist(playlistId: Int) {
+        playlistDao.stashPlaylist(
+            playlistId = playlistId,
+        )
+    }
+
+    suspend fun unstashPlaylist(playlistId: Int) {
+        playlistDao.unstashPlaylist(
+            playlistId = playlistId,
+        )
     }
 
     suspend fun getPlaylistSongs(

@@ -74,6 +74,23 @@ class FlowViewModel(
         }
     }
 
+    private val _stashedPlaylists = MutableStateFlow<List<PlaylistItem>>(emptyList())
+    val stashedPlaylists = _stashedPlaylists.asStateFlow()
+
+    fun loadStashedPlaylists() {
+        viewModelScope.launch {
+            _stashedPlaylists.value = flowRepo.getStashedPlaylists()
+        }
+    }
+
+    /**
+     * loads stashed and unstashed playlists
+     */
+    fun loadAllPlaylists() {
+        loadPlaylists()
+        loadStashedPlaylists()
+    }
+
     private val _playlistSongSet = MutableStateFlow(PlaylistSongSet())
     val playlistSongSet = _playlistSongSet.asStateFlow()
 
@@ -761,7 +778,27 @@ class FlowViewModel(
                 playlistId = playlist.id,
             )
 
-            loadPlaylists()
+            loadAllPlaylists()
+        }
+    }
+
+    fun stashPlaylist(playlist: PlaylistItem) {
+        viewModelScope.launch {
+            flowRepo.stashPlaylist(
+                playlistId = playlist.id,
+            )
+
+            loadAllPlaylists()
+        }
+    }
+
+    fun unstashPlaylist(playlist: PlaylistItem) {
+        viewModelScope.launch {
+            flowRepo.unstashPlaylist(
+                playlistId = playlist.id,
+            )
+
+            loadAllPlaylists()
         }
     }
 

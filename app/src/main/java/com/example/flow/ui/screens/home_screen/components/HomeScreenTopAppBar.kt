@@ -1,5 +1,6 @@
 package com.example.flow.ui.screens.home_screen.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ fun FlowTopAppBar(
     goToPlaylistScreen: () -> Unit,
     activePlaylist: PlaylistItem?,
     deactivatePlaylist: () -> Unit,
+    noOfPlaylists: Int,
     onPeekPlaylists: () -> Unit,
     viewActivePlaylist: (PlaylistItem) -> Unit,
 ) {
@@ -131,11 +133,13 @@ fun FlowTopAppBar(
                 .weight(1f)
             ,
         ) {
-            AppIconButton(
-                iconRes = R.drawable.ic_helm,
-                size = iconSize,
-                onClick = onPeekPlaylists,
-            )
+            AnimatedVisibility(visible = noOfPlaylists > 0) {
+                AppIconButton(
+                    iconRes = R.drawable.ic_helm,
+                    size = iconSize,
+                    onClick = onPeekPlaylists,
+                )
+            }
             AppIconButton(
                 iconRes = R.drawable.ic_search,
                 size = iconSize,

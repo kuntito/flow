@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.media3.common.util.UnstableApi
 import com.example.flow.FlowViewModel
 import com.example.flow.data.models.AppEvent
+import com.example.flow.data.models.DropdownMenuOption
 import com.example.flow.data.models.PlaylistItem
 import com.example.flow.ui.components.util.AppCenter
 import com.example.flow.ui.screens.playlist_screen.components.ListPlaylist
@@ -31,6 +32,7 @@ fun PlaylistScreenRoot(
     flowViewModel: FlowViewModel,
     navBack: () -> Unit,
     goToViewPlaylist: (PlaylistItem) -> Unit,
+    goToPlaylistStash: () -> Unit,
 ) {
     val playlistItems by flowViewModel.playlists.collectAsState()
 
@@ -43,6 +45,8 @@ fun PlaylistScreenRoot(
     val deactivatePlaylist: () -> Unit = flowViewModel::deactivatePlaylist
     val activatePlaylist = flowViewModel::activatePlaylist
 
+    val stashPlaylist = flowViewModel::stashPlaylist
+
     PlaylistScreen(
         navBack = navBack,
         playlistItems = playlistItems,
@@ -53,6 +57,8 @@ fun PlaylistScreenRoot(
         activePlaylist = activePlaylist,
         deactivatePlaylist = deactivatePlaylist,
         activatePlaylist = activatePlaylist,
+        goToPlaylistStash = goToPlaylistStash,
+        stashPlaylist = stashPlaylist,
     )
 }
 
@@ -68,6 +74,8 @@ fun PlaylistScreen(
     activePlaylist: PlaylistItem?,
     deactivatePlaylist: () -> Unit,
     activatePlaylist: (PlaylistItem) -> Unit,
+    goToPlaylistStash: () -> Unit,
+    stashPlaylist: (PlaylistItem) -> Unit,
 ) {
     BackHandler(enabled = true) {
         navBack()
@@ -99,7 +107,8 @@ fun PlaylistScreen(
             ,
         ) {
             TopBarPlaylistScreen(
-                navBack = navBack
+                navBack = navBack,
+                seeStash = goToPlaylistStash,
             )
             if (playlistItems.isEmpty()) {
                 AppCenter {
@@ -121,6 +130,16 @@ fun PlaylistScreen(
                     activePlaylist = activePlaylist,
                     deactivatePlaylist = deactivatePlaylist,
                     activatePlaylist = activatePlaylist,
+                    dropdownsFor = { playlist ->
+                        listOf(
+                            DropdownMenuOption(
+                                label = "stash",
+                                onClick = {
+                                    stashPlaylist(playlist)
+                                },
+                            )
+                        )
+                    },
                 )
             }
         }

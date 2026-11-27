@@ -1,8 +1,10 @@
 package com.example.flow
 
+import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,10 +14,12 @@ import com.example.flow.ui.screens.edit_playlist_screen.EditPlaylistScreenRoot
 import com.example.flow.ui.screens.home_screen.HomeScreenRoot
 import com.example.flow.ui.screens.playlist_exclusions_screen.PlaylistExclusionsRoot
 import com.example.flow.ui.screens.playlist_screen.PlaylistScreenRoot
+import com.example.flow.ui.screens.playlist_stash_screen.PlaylistStashRoot
 import com.example.flow.ui.screens.song_search_screen.SongSearchScreenRoot
 import com.example.flow.ui.screens.view_playlist_screen.ViewPlaylistScreenRoot
 import kotlinx.serialization.Serializable
 
+@OptIn(UnstableApi::class)
 @Composable
 fun ScreenNavigation(
     modifier: Modifier = Modifier,
@@ -73,6 +77,11 @@ fun ScreenNavigation(
                             playlistName = playlist.name,
                             isPlaylistAuto = playlist.isAuto,
                         )
+                    )
+                },
+                goToPlaylistStash = {
+                    navController.navigate(
+                        AppScreens.PlaylistStashScreen
                     )
                 }
             )
@@ -134,6 +143,23 @@ fun ScreenNavigation(
                 isPlaylistAuto = args.isPlaylistAuto,
             )
         }
+        composable<AppScreens.PlaylistStashScreen> {
+            PlaylistStashRoot(
+                flowViewModel = flowViewModel,
+                navBack = {
+                    navController.popBackStack()
+                },
+                goToViewPlaylist = { playlist ->
+                    navController.navigate(
+                        AppScreens.ViewPlaylistScreen(
+                            playlistId = playlist.id,
+                            playlistName = playlist.name,
+                            isPlaylistAuto = playlist.isAuto,
+                        )
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -167,4 +193,7 @@ sealed class AppScreens {
         val playlistName: String,
         val isPlaylistAuto: Boolean,
     )
+
+    @Serializable
+    object PlaylistStashScreen
 }
