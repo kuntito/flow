@@ -41,6 +41,7 @@ fun PlaylistScreenRoot(
 
     val activePlaylist by flowViewModel.activePlaylist.collectAsState()
     val deactivatePlaylist: () -> Unit = flowViewModel::deactivatePlaylist
+    val activatePlaylist = flowViewModel::activatePlaylist
 
     PlaylistScreen(
         navBack = navBack,
@@ -51,6 +52,7 @@ fun PlaylistScreenRoot(
         onPlayPlaylist = onPlayPlaylist,
         activePlaylist = activePlaylist,
         deactivatePlaylist = deactivatePlaylist,
+        activatePlaylist = activatePlaylist,
     )
 }
 
@@ -65,6 +67,7 @@ fun PlaylistScreen(
     onPlayPlaylist: (PlaylistItem) -> Unit,
     activePlaylist: PlaylistItem?,
     deactivatePlaylist: () -> Unit,
+    activatePlaylist: (PlaylistItem) -> Unit,
 ) {
     BackHandler(enabled = true) {
         navBack()
@@ -117,6 +120,7 @@ fun PlaylistScreen(
                     playPlaylist = onPlayPlaylist,
                     activePlaylist = activePlaylist,
                     deactivatePlaylist = deactivatePlaylist,
+                    activatePlaylist = activatePlaylist,
                 )
             }
         }

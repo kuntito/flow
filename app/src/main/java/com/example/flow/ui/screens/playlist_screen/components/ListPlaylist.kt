@@ -19,6 +19,7 @@ fun ListPlaylist(
     playPlaylist: (PlaylistItem) -> Unit,
     activePlaylist: PlaylistItem?,
     deactivatePlaylist: () -> Unit,
+    activatePlaylist: (PlaylistItem) -> Unit,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -46,6 +47,9 @@ fun ListPlaylist(
                },
                isActive = activePlaylist == playlist,
                deactivate = deactivatePlaylist,
+               activate = {
+                   activatePlaylist(playlist)
+               },
            )
         }
     }

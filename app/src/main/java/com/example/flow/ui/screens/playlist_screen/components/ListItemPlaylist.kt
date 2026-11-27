@@ -46,6 +46,7 @@ fun ListItemPlaylist(
     onPlay: () -> Unit,
     isActive: Boolean,
     deactivate: () -> Unit,
+    activate: () -> Unit,
 ) {
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
@@ -60,6 +61,12 @@ fun ListItemPlaylist(
     )}
     val showDropdownMenu: () -> Unit = {
         dropDownOptions = buildList {
+            add(
+                DropdownMenuOption(
+                    label = "activate",
+                    onClick = activate,
+                )
+            )
             add(
                 DropdownMenuOption(
                     label = "delete playlist",
