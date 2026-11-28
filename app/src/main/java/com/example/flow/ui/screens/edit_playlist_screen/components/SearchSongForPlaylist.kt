@@ -134,7 +134,7 @@ fun SearchSongForPlaylist(
                                 }
                             },
                             onExcludeAbove = {
-                                val songIdsAbove = getSongIdsAbove(song)
+                                val songIdsAbove = getSongIdsAbove(song) + song.id
 
                                 removeFromList()
                                 excludeAbove(songIdsAbove)

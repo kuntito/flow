@@ -76,7 +76,6 @@ fun LiSongToAddPlaylist(
             AppIconButton(
                 iconRes = R.drawable.ic_add,
                 onClick = onAddToPlaylist,
-                onLongClick = onAddAndExcludeAbove,
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
