@@ -57,12 +57,14 @@ fun PlaylistExclusionsRoot(
     }
 
     val addSongToPlaylist = flowViewModel::addSongToPlaylist
+    val playSong = flowViewModel::onPlaySong
 
     PlaylistExclusionsScreen(
         navBack = navBack,
         playlist = playlistItem,
         excludedSongs = playlistSongSet.exclusions,
         addSongToPlaylist = addSongToPlaylist,
+        onPlaySong = playSong,
     )
 }
 
@@ -77,6 +79,7 @@ fun PlaylistExclusionsScreen(
         song: Song,
         sendEvent: Boolean,
     ) -> Unit,
+    onPlaySong: (Song) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -135,6 +138,9 @@ fun PlaylistExclusionsScreen(
                 ) { song, removeFromList ->
                     LiSongToAddPlaylist(
                         song = song,
+                        onPlaySong = {
+                            onPlaySong(song)
+                        },
                         onAddToPlaylist = {
                             removeFromList()
                             addSongToPlaylist(
@@ -143,7 +149,9 @@ fun PlaylistExclusionsScreen(
                                 false,
                             )
                         },
-                        onExcludeFromPlaylist = null
+                        onExcludeFromPlaylist = null,
+                        onAddAndExcludeAbove = null,
+                        onExcludeAbove = null,
                     )
                 }
             }

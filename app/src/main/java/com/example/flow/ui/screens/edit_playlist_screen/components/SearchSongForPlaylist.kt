@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ import com.example.flow.ui.theme.colorKDB
 import com.example.flow.ui.theme.colorRaze
 import com.example.flow.ui.theme.colorTelliAlpha
 import com.example.flow.ui.theme.tsHush
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchSongForPlaylist(
@@ -34,6 +37,9 @@ fun SearchSongForPlaylist(
     onSongSearch: (String) -> Unit,
     addToPlaylist: (Song) -> Unit,
     excludeSongFromPlaylist: (Int) -> Unit,
+    addAndExcludeAbove: (Song, List<Int>) -> Unit,
+    excludeAbove: (List<Int>) -> Unit,
+    onPlaySong: (Song) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -66,13 +72,24 @@ fun SearchSongForPlaylist(
                 }
                 is SongSearchState.FinishedWithResults -> {
                     val songsFound = songSearchState.songSearchResults
+
+                    val listState = rememberLazyListState()
+                    val scope = rememberCoroutineScope()
+
+                    val getSongIdsAbove: (Song) -> List<Int> = { song ->
+                        val songsAbove = songsFound.takeWhile { it.id != song.id }
+
+                        songsAbove.map { it.id }
+                    }
+
                     ShrinkableList(
                         items = songsFound,
+                        listState = listState,
                         getKey = { it.id },
                         stickyHeaderContent = {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = modifier
+                                modifier = Modifier
                                     .fillMaxWidth()
                                     .background(color = colorKDB)
                                     .padding(
@@ -105,6 +122,29 @@ fun SearchSongForPlaylist(
                             onExcludeFromPlaylist = {
                                 removeFromList()
                                 excludeSongFromPlaylist(song.id)
+                            },
+                            onAddAndExcludeAbove = {
+                                val songIdsAbove = getSongIdsAbove(song)
+
+                                removeFromList()
+                                addAndExcludeAbove(song, songIdsAbove)
+
+                                scope.launch {
+                                    listState.animateScrollToItem(0)
+                                }
+                            },
+                            onExcludeAbove = {
+                                val songIdsAbove = getSongIdsAbove(song)
+
+                                removeFromList()
+                                excludeAbove(songIdsAbove)
+
+                                scope.launch {
+                                    listState.animateScrollToItem(0)
+                                }
+                            },
+                            onPlaySong = {
+                                onPlaySong(song)
                             }
                         )
                     }

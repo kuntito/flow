@@ -1,7 +1,6 @@
 package com.example.flow.data.repo
 
 import android.util.Log
-import androidx.room.Transaction
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryDao
 import com.example.flow.data.local_db.entities.listen_history.ListenHistoryEntity
 import com.example.flow.data.local_db.entities.listen_history.toListenEventApi
@@ -451,23 +450,23 @@ class FlowRepository(
         return songsFlow
     }
 
-    suspend fun addSongToPlaylist(
+    suspend fun addManyToPlaylist(
         playlistId: Int,
-        songId: Int,
+        songIds: List<Int>,
     ) {
-        playlistDao.addSong(
+        playlistDao.addSongs(
             playlistId = playlistId,
-            songId = songId,
+            songIds = songIds,
         )
     }
 
-    suspend fun excludeSongFromPlaylist(
+    suspend fun excludeManyFromPlaylist(
         playlistId: Int,
-        songId: Int,
+        songIds: List<Int>,
     ) {
-        playlistDao.excludeSong(
+        playlistDao.excludeSongs(
             playlistId = playlistId,
-            songId = songId,
+            songIds = songIds,
         )
     }
 

@@ -635,6 +635,12 @@ class FlowViewModel(
         }
     }
 
+    fun onPlaySong(
+        song: Song,
+    ) {
+        handleNextSongPlay(song.id)
+    }
+
 
     /**
      * play song from play next queue.
@@ -727,13 +733,10 @@ class FlowViewModel(
         song: Song,
         sendEvent: Boolean,
     ) {
-        viewModelScope.launch {
-            flowRepo.addSongToPlaylist(
-                playlistId = playlist.id,
-                songId = song.id,
-            )
-            flowRepo.syncPlaylists()
-        }
+        addManyToPlaylist(
+            playlist = playlist,
+            songs = listOf(song),
+        )
 
         if (sendEvent) {
             viewModelScope.launch {
@@ -747,14 +750,64 @@ class FlowViewModel(
         }
     }
 
-    fun excludeSongFromPlaylist(
-        playlistId: Int,
-        songId: Int,
+
+    fun addManyToPlaylist(
+        playlist: PlaylistItem,
+        songs: List<Song>,
     ) {
         viewModelScope.launch {
-            flowRepo.excludeSongFromPlaylist(
-                playlistId = playlistId,
-                songId = songId,
+            flowRepo.addManyToPlaylist(
+                playlistId = playlist.id,
+                songIds = songs.map { it.id },
+            )
+            flowRepo.syncPlaylists()
+        }
+    }
+
+    fun excludeSongFromPlaylist(
+        playlist: PlaylistItem,
+        songId: Int,
+    ) {
+        excludeManyFromPlaylist(
+            playlist = playlist,
+            songIds = listOf(songId),
+        )
+    }
+
+    fun excludeManyFromPlaylist(
+        playlist: PlaylistItem,
+        songIds: List<Int>,
+    ) {
+        viewModelScope.launch {
+            flowRepo.excludeManyFromPlaylist(
+                playlistId = playlist.id,
+                songIds = songIds,
+            )
+        }
+    }
+
+    fun addAndExcludeAbove(
+        playlist: PlaylistItem,
+        song: Song,
+        songIdsAbove: List<Int>,
+    ) {
+        addSongToPlaylist(
+            playlist = playlist,
+            song = song,
+            sendEvent = false,
+        )
+
+        excludeManyFromPlaylist(
+            playlist = playlist,
+            songIds = songIdsAbove,
+        )
+
+        viewModelScope.launch {
+            eventChannel.send(
+                PlaylistEvent.OnAddAndExcludeAbove(
+                    song = song,
+                    noOfExcluded = songIdsAbove.size,
+                )
             )
         }
     }

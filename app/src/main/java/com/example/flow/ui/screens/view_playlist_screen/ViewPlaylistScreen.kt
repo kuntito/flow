@@ -107,7 +107,7 @@ fun ViewPlaylistScreen(
     activePlaylist: PlaylistItem?,
     onDeactivatePlaylist: () -> Unit,
     onAddSongToPlaylist: (Song) -> Unit,
-    onExcludeSongFromPlaylist: (playlistId: Int, songId: Int) -> Unit,
+    onExcludeSongFromPlaylist: (playlist: PlaylistItem, songId: Int) -> Unit,
 ) {
     val snackBarHostState = remember {
         SnackbarHostState()
@@ -195,7 +195,7 @@ fun ViewPlaylistScreen(
                 },
                 excludeSongFromPlaylist = { song ->
                     onExcludeSongFromPlaylist(
-                        playlist.id,
+                        playlist,
                         song.id,
                     )
                 }

@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +41,7 @@ fun <T> ShrinkableList(
     contentPadding: Int = 16,
     animationDurationMillis: Int = 300,
     stickyHeaderContent: (@Composable (LazyItemScope.(Int) -> Unit))? = null,
+    listState: LazyListState = rememberLazyListState(),
     itemContent: @Composable (
         item: T,
         removeFromList: () -> Unit
@@ -53,6 +56,7 @@ fun <T> ShrinkableList(
     LazyColumn(
         contentPadding = PaddingValues(vertical = contentPadding.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
+        state = listState,
         modifier = modifier
             .fillMaxSize()
         ,

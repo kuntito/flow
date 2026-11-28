@@ -16,4 +16,9 @@ sealed interface PlaylistEvent: AppEvent {
         val song: Song,
         val playlistName: String,
     ): PlaylistEvent
+
+    data class OnAddAndExcludeAbove(
+        val song: Song,
+        val noOfExcluded: Int,
+    ): PlaylistEvent
 }

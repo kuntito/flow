@@ -46,25 +46,35 @@ interface PlaylistDao {
     fun getPlaylistExclusions(playlistId: Int): Flow<List<Int>>
 
     @Upsert
-    suspend fun upsertPlaylistMatch(match: PlaylistMatchEntity)
+    suspend fun upsertPlaylistMatches(matches: List<PlaylistMatchEntity>)
 
-    suspend fun addSong(playlistId: Int, songId: Int) {
-        upsertPlaylistMatch(
-            PlaylistMatchEntity(
-                playlistId = playlistId,
-                songId = songId,
-                isMatch = true,
-            )
+    suspend fun addSongs(
+        playlistId: Int,
+        songIds: List<Int>
+    ) {
+        upsertPlaylistMatches(
+            songIds.map{ songId ->
+                PlaylistMatchEntity(
+                    playlistId = playlistId,
+                    songId = songId,
+                    isMatch = true,
+                )
+            }
         )
     }
 
-    suspend fun excludeSong(playlistId: Int, songId: Int) {
-        upsertPlaylistMatch(
-            PlaylistMatchEntity(
-                playlistId = playlistId,
-                songId = songId,
-                isMatch = false,
-            )
+    suspend fun excludeSongs(
+        playlistId: Int,
+        songIds: List<Int>
+    ) {
+        upsertPlaylistMatches(
+            songIds.map { songId ->
+                PlaylistMatchEntity(
+                    playlistId = playlistId,
+                    songId = songId,
+                    isMatch = false,
+                )
+            }
         )
     }
 
